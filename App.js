@@ -40,6 +40,7 @@ export default function App() {
     return (
       <HomeScreen
         userId={userId}
+        user={user}
         onLogout={() => {
           signOut(auth) // ✅ logs them out
             .then(() => {

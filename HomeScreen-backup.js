@@ -35,21 +35,37 @@ export default function HomeScreen({ userId, onLogout, user }) {
             />
         );
     }
+        setTimeout(() => {
+            setChatLogs([]); // placeholder: no logs yet
+            setLoading(false);
+        }, 1000);
+    }, []);
+
+    // If showing profile, render ProfileScreen
+    if (showProfile) {
+        return (
+            <ProfileScreen 
+                user={user} 
+                onBack={() => setShowProfile(false)}
+                onLogout={onLogout}
+            />
+        );
+    }
 
     return (
         <View style={styles.container}>
             {/* 🔵 Top Tab */}
             <View style={styles.topBar}>
                 <Text style={styles.topBarText}>Messages</Text>
-                
+
                 {/* Profile icon */}
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.profileIconContainer}
                     onPress={() => setShowProfile(true)}
                 >
                     <Image
                         source={
-                            user?.photoURL 
+                            user?.photoURL
                                 ? { uri: user.photoURL }
                                 : require('./assets/default-profile.png')
                         }
