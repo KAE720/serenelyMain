@@ -12,10 +12,24 @@ import MessagesScreen from './MessagesScreen';
 import CallsScreen from './CallsScreen';
 import ContactsScreen from './ContactsScreen';
 import AIShrinkScreen from './AIShrinkScreen';
+import ChatScreen from './ChatScreen';
 
 export default function HomeScreen({ userId, onLogout, user }) {
     const [showProfile, setShowProfile] = useState(false);
     const [activeTab, setActiveTab] = useState('Messages');
+    const [currentScreen, setCurrentScreen] = useState('main'); // 'main' or 'chat'
+    const [selectedChat, setSelectedChat] = useState(null);
+
+    // Navigation functions
+    const navigateToChat = (chatPartner) => {
+        setSelectedChat(chatPartner);
+        setCurrentScreen('chat');
+    };
+
+    const navigateBack = () => {
+        setCurrentScreen('main');
+        setSelectedChat(null);
+    };
 
     // If showing profile, render ProfileScreen
     if (showProfile) {
@@ -28,11 +42,22 @@ export default function HomeScreen({ userId, onLogout, user }) {
         );
     }
 
+    // If showing chat, render ChatScreen
+    if (currentScreen === 'chat' && selectedChat) {
+        return (
+            <ChatScreen
+                chatPartner={selectedChat}
+                currentUser={user}
+                onBack={navigateBack}
+            />
+        );
+    }
+
     // Render content based on active tab
     const renderTabContent = () => {
         switch (activeTab) {
             case 'Messages':
-                return <MessagesScreen />;
+                return <MessagesScreen onNavigateToChat={navigateToChat} currentUser={user} />;
             case 'Calls':
                 return <CallsScreen />;
             case 'Contacts':
@@ -40,7 +65,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
             case 'AI Shrink':
                 return <AIShrinkScreen />;
             default:
-                return <MessagesScreen />;
+                return <MessagesScreen onNavigateToChat={navigateToChat} currentUser={user} />;
         }
     };
 
@@ -102,7 +127,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
                     onPress={() => setActiveTab('AI Shrink')}
                 >
                     <Text style={[styles.tabText, activeTab === 'AI Shrink' && styles.activeTabText]}>
-                        AI Shrink
+                        Serene
                     </Text>
                 </TouchableOpacity>
             </View>

@@ -165,23 +165,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         zIndex: 2,
     },
-    head: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        borderWidth: 2,
-        borderColor: '#9C27B0',
-        backgroundColor: 'transparent',
-        marginBottom: 5,
-    },
-    body: {
-        width: 20,
-        height: 40,
-        borderWidth: 2,
-        borderColor: '#9C27B0',
-        backgroundColor: 'transparent',
-        borderRadius: 10,
-    },
+   
     soundwave: {
         position: 'absolute',
         borderWidth: 2,
