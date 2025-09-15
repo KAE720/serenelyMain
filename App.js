@@ -1,94 +1,37 @@
-import React, { useState } from 'react';
-import { View, Button, Text, Alert, StyleSheet } from 'react-native';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import React, { useEffect, useState } from 'react';
+import { View, Button, Text, Alert } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
 import { auth, GoogleAuthProvider, signInWithCredential } from './firebase';
 
-GoogleSignin.configure({
-  iosClientId: '1005139761525-h5e2i6369ijtv3q4srrqsocvb8vk7fo2.apps.googleusercontent.com',
-});
+// Required for iOS AuthSession
+WebBrowser.maybeCompleteAuthSession();
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  const signInWithGoogle = async () => {
-    try {
-      setLoading(true);
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    expoClientId: '635219552771-lirlguu5a8gmjl2m238lvvaukl6ka500.apps.googleusercontent.com',
+    iosClientId: "635219552771-dsn2oj9hi2vhr8oepkulgk7lq5gin27p.apps.googleusercontent.com"
+  });
 
-      // Check if device supports Google Play (Note: This is more relevant for Android)
-      await GoogleSignin.hasPlayServices();
-
-      // Get the users ID token from Google
-      const { idToken } = await GoogleSignin.signIn();
-
-      // Create a Google credential with the token
-      const googleCredential = GoogleAuthProvider.credential(idToken);
-
-      // Sign-in the user with the credential
-      const userCredential = await signInWithCredential(auth, googleCredential);
-      setUser(userCredential.user);
-
-      Alert.alert('Success!', `Welcome ${userCredential.user.displayName}`);
-    } catch (error) {
-      console.log('Google Sign-In Error:', error);
-      Alert.alert('Error', 'Google Sign-In failed: ' + error.message);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      const credential = GoogleAuthProvider.credential(id_token);
+      signInWithCredential(auth, credential)
+        .then(u => setUser(u.user))
+        .catch(err => Alert.aalert('Error', err.message));
     }
-  };
-
-  const signOut = async () => {
-    try {
-      await GoogleSignin.signOut();
-      await auth.signOut();
-      setUser(null);
-    } catch (error) {
-      console.log('Sign out error:', error);
-    }
-  };
+  }, [response]);
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       {user ? (
-        <View style={styles.userInfo}>
-          <Text style={styles.welcomeText}>Welcome!</Text>
-          <Text style={styles.nameText}>{user.displayName}</Text>
-          <Text style={styles.emailText}>{user.email}</Text>
-          <Button title="Sign Out" onPress={signOut} />
-        </View>
+        <Text>Welcome, {user.displayName}</Text>
       ) : (
-        <Button
-          title={loading ? "Signing in..." : "Sign in with Google"}
-          onPress={signInWithGoogle}
-          disabled={loading}
-        />
+        <Button title="Sign in with Google" disabled={!request} onPress={() => promptAsync()} />
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  userInfo: {
-    alignItems: 'center',
-  },
-  welcomeText: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  nameText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  emailText: {
-    fontSize: 14,
-    color: 'gray',
-    marginTop: 5,
-    marginBottom: 20,
-  },
-});

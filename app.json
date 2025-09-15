@@ -15,7 +15,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.serenely11.SimpleGoogleAuthExpo",
-      "scheme": "com.serenely11.simplegoogleauthexpo"
+      "scheme": "com.serenely11.simplegoogleauthexpo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,6 +29,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f648bda3-e509-4452-b716-558fda85fd15"
+      }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
-}
 }
