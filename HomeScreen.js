@@ -1,55 +1,63 @@
 // HomeScreen.js
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     View,
     Text,
-    FlatList,
     StyleSheet,
-    ActivityIndicator,
-    Button,
     TouchableOpacity,
     Image,
 } from "react-native";
 import ProfileScreen from './ProfileScreen';
+import MessagesScreen from './MessagesScreen';
+import CallsScreen from './CallsScreen';
+import ContactsScreen from './ContactsScreen';
+import AIShrinkScreen from './AIShrinkScreen';
 
 export default function HomeScreen({ userId, onLogout, user }) {
-    const [chatLogs, setChatLogs] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [showProfile, setShowProfile] = useState(false);
-
-    // Simulated fetch (replace with backend later)
-    useEffect(() => {
-        setTimeout(() => {
-            setChatLogs([]); // placeholder: no logs yet
-            setLoading(false);
-        }, 1000);
-    }, []);
+    const [activeTab, setActiveTab] = useState('Messages');
 
     // If showing profile, render ProfileScreen
     if (showProfile) {
         return (
-            <ProfileScreen 
-                user={user} 
+            <ProfileScreen
+                user={user}
                 onBack={() => setShowProfile(false)}
                 onLogout={onLogout}
             />
         );
     }
 
+    // Render content based on active tab
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'Messages':
+                return <MessagesScreen />;
+            case 'Calls':
+                return <CallsScreen />;
+            case 'Contacts':
+                return <ContactsScreen />;
+            case 'AI Shrink':
+                return <AIShrinkScreen />;
+            default:
+                return <MessagesScreen />;
+        }
+    };
+
     return (
         <View style={styles.container}>
             {/* 🔵 Top Tab */}
             <View style={styles.topBar}>
-                <Text style={styles.topBarText}>Messages</Text>
-                
+                <Text style={styles.topBarText}>{activeTab}</Text>
+
                 {/* Profile icon */}
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.profileIconContainer}
                     onPress={() => setShowProfile(true)}
                 >
                     <Image
                         source={
-                            user?.photoURL 
+                            user?.photoURL
                                 ? { uri: user.photoURL }
                                 : require('./assets/default-profile.png')
                         }
@@ -58,33 +66,45 @@ export default function HomeScreen({ userId, onLogout, user }) {
                 </TouchableOpacity>
             </View>
 
-            {/* Main content */}
+            {/* Tab Content */}
             <View style={styles.content}>
-                {loading ? (
-                    <ActivityIndicator size="large" color="#fff" style={{ marginTop: 20 }} />
-                ) : chatLogs.length === 0 ? (
-                    <View style={styles.emptyState}>
-                        <Text style={styles.emptyText}>No chat logs yet 📝</Text>
-                        <Text style={styles.emptySubText}>
-                            Start a conversation to see it here.
-                        </Text>
-                    </View>
-                ) : (
-                    <FlatList
-                        data={chatLogs}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={({ item }) => (
-                            <View style={styles.chatItem}>
-                                <Text style={styles.chatText}>{item.message}</Text>
-                            </View>
-                        )}
-                    />
-                )}
+                {renderTabContent()}
             </View>
 
-            {/* 🚪 Logout button */}
-            <View style={styles.logoutButton}>
-                <Button title="Logout" onPress={onLogout} color="red" />
+            {/* Bottom Tab Navigation */}
+            <View style={styles.bottomTabs}>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'Messages' && styles.activeTab]}
+                    onPress={() => setActiveTab('Messages')}
+                >
+                    <Text style={[styles.tabText, activeTab === 'Messages' && styles.activeTabText]}>
+                        Messages
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'Calls' && styles.activeTab]}
+                    onPress={() => setActiveTab('Calls')}
+                >
+                    <Text style={[styles.tabText, activeTab === 'Calls' && styles.activeTabText]}>
+                        Calls
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'Contacts' && styles.activeTab]}
+                    onPress={() => setActiveTab('Contacts')}
+                >
+                    <Text style={[styles.tabText, activeTab === 'Contacts' && styles.activeTabText]}>
+                        Contacts
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'AI Shrink' && styles.activeTab]}
+                    onPress={() => setActiveTab('AI Shrink')}
+                >
+                    <Text style={[styles.tabText, activeTab === 'AI Shrink' && styles.activeTabText]}>
+                        AI Shrink
+                    </Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -111,7 +131,7 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         backgroundColor: '#333',
     },
-    content: { flex: 1, padding: 20 },
+    content: { flex: 1 },
     emptyState: { flex: 1, justifyContent: "center", alignItems: "center" },
     emptyText: { fontSize: 18, fontWeight: "600", color: "#fff", marginBottom: 8 },
     emptySubText: { fontSize: 14, color: "#aaa" },
@@ -122,10 +142,29 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     chatText: { fontSize: 16, color: "#fff" },
-    logoutButton: {
-        padding: 15,
+    bottomTabs: {
+        flexDirection: 'row',
+        backgroundColor: '#1a1a1a',
         borderTopWidth: 1,
-        borderTopColor: "#333",
-        backgroundColor: "#1a1a1a",
+        borderTopColor: '#333',
+        paddingVertical: 10,
+    },
+    tab: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    activeTab: {
+        backgroundColor: '#333',
+        borderRadius: 8,
+        marginHorizontal: 4,
+    },
+    tabText: {
+        color: '#aaa',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    activeTabText: {
+        color: '#1976D2',
     },
 });
