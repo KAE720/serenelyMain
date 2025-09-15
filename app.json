@@ -13,7 +13,9 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.serenely11.SimpleGoogleAuthExpo",
+      "scheme": "com.serenely11.simplegoogleauthexpo"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,6 +26,6 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
   }
+}
 }
