@@ -355,10 +355,13 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         return total / personMessages.length;
     };
 
-    // Get dynamic color for each person's tracker dot - now both are black
+    // Get dynamic color for each person's tracker dot - magenta for partner, black for user
     const getPersonTrackerColor = (emotion, isPartner = false) => {
-        // Both markers are now black for better visibility and consistency
-        return '#000000';
+        if (isPartner) {
+            return '#FF00FF'; // Bright Magenta/Fuchsia for partner
+        } else {
+            return '#000000'; // Jet Black for user
+        }
     };
 
     // COPILOT HELPER: Color mapping function for message bubbles
@@ -504,7 +507,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
             <View style={styles.header}>
                 {/* Partner Profile */}
                 <View style={styles.profileSection}>
-                    <View style={styles.profilePicture}>
+                    <View style={[styles.profilePicture, styles.partnerProfilePicture]}>
                         <Text style={styles.profileInitial}>
                             {chatPartner.name.charAt(0).toUpperCase()}
                         </Text>
@@ -524,7 +527,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
                 {/* User Profile */}
                 <View style={styles.profileSection}>
-                    <View style={styles.profilePicture}>
+                    <View style={[styles.profilePicture, styles.userProfilePicture]}>
                         <Text style={styles.profileInitial}>
                             {(currentUser?.displayName || currentUser?.email || "You").charAt(0).toUpperCase()}
                         </Text>
@@ -535,11 +538,6 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
             {/* Single Emotion Tracker - Both Dots Meet in Middle */}
             <View style={styles.singleEmotionTracker}>
-                <View style={styles.trackerLabels}>
-                    <Text style={styles.leftLabel}>{chatPartner.name}</Text>
-                    <Text style={styles.rightLabel}>You</Text>
-                </View>
-
                 <View style={styles.emotionBar}>
                     {/* Single bar: Red → Orange → Green → Purple → Green → Orange → Red */}
                     <View style={styles.leftRedSection} />
@@ -671,7 +669,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         padding: 16,
         paddingTop: 50,
-        paddingBottom: 20,
+        paddingBottom: 12, // Reduced to bring emotion tracker closer
         backgroundColor: "#1E1E1E",
         borderBottomWidth: 1,
         borderBottomColor: "#333",
@@ -693,6 +691,13 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 4,
         elevation: 4,
+        borderWidth: 2,
+    },
+    partnerProfilePicture: {
+        borderColor: "#FF00FF", // Bright Magenta/Fuchsia border for partner
+    },
+    userProfilePicture: {
+        borderColor: "#000000", // Jet Black border for user
     },
     profileInitial: {
         color: "#fff",
@@ -722,7 +727,7 @@ const styles = StyleSheet.create({
     },
     singleEmotionTracker: {
         backgroundColor: "#1E1E1E",
-        paddingVertical: 16,
+        paddingVertical: 8, // Further reduced height
         paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#333",
@@ -730,7 +735,7 @@ const styles = StyleSheet.create({
     trackerLabels: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 8,
+        marginBottom: 6,
     },
     leftLabel: {
         color: "#E8E8E8",
@@ -746,9 +751,9 @@ const styles = StyleSheet.create({
     },
     emotionBar: {
         flexDirection: "row",
-        height: 4, // Made even thinner as requested
+        height: 6, // Made thicker for better visibility
         backgroundColor: "#333",
-        borderRadius: 2,
+        borderRadius: 3,
         overflow: "hidden",
         position: "relative",
         shadowColor: '#000',
@@ -761,8 +766,8 @@ const styles = StyleSheet.create({
     leftRedSection: {
         flex: 1,
         backgroundColor: "#A1232B", // � Crimson Rust - Most negative (left end)
-        borderTopLeftRadius: 2,
-        borderBottomLeftRadius: 2,
+        borderTopLeftRadius: 3,
+        borderBottomLeftRadius: 3,
     },
     leftOrangeSection: {
         flex: 1,
@@ -788,8 +793,8 @@ const styles = StyleSheet.create({
     rightRedSection: {
         flex: 1,
         backgroundColor: "#A1232B", // � Crimson Rust - Most negative (right end)
-        borderTopRightRadius: 2,
-        borderBottomRightRadius: 2,
+        borderTopRightRadius: 3,
+        borderBottomRightRadius: 3,
     },
     
     // Psychological Health Bar Styles (0-100 scale)
@@ -848,8 +853,8 @@ const styles = StyleSheet.create({
     // Score display styles for psychological health tracking
     scoreDisplayContainer: {
         alignItems: 'center',
-        marginTop: 8,
-        paddingVertical: 4,
+        marginTop: 4, // Further reduced spacing
+        paddingVertical: 2,
     },
     scoreDisplayText: {
         fontSize: 11,
@@ -859,44 +864,44 @@ const styles = StyleSheet.create({
     },
     emotionIndicator: {
         position: "absolute",
-        top: -1, // Adjusted for thinner bar
-        marginLeft: -4,
+        top: -2, // Adjusted for thicker bar
+        marginLeft: -6,
         zIndex: 10,
     },
     midpointLine: {
         position: "absolute",
         left: "50%",
-        top: -2,
+        top: -3,
         width: 1,
-        height: 8,
+        height: 12,
         backgroundColor: "rgba(255,255,255,0.4)",
         zIndex: 5,
         marginLeft: -0.5, // Center the line
     },
     emotionDot: {
-        width: 8, // Smaller for thinner bar
-        height: 8,
-        borderRadius: 4,
+        width: 12, // Made larger for thicker bar
+        height: 12,
+        borderRadius: 6,
         backgroundColor: '#000000', // Both dots are now black
         shadowColor: '#000000',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.8,
         shadowRadius: 2,
         elevation: 2,
-        borderWidth: 1.5,
+        borderWidth: 2,
         borderColor: "#fff",
     },
     leftPersonDot: {
         borderColor: "#fff",
         borderWidth: 2,
         // Add a subtle square shape to distinguish from right person
-        borderRadius: 3, // Slightly less rounded
+        borderRadius: 5, // Slightly less rounded for thicker dot
     },
     rightPersonDot: {
-        borderColor: "#fff",
+        borderColor: "#fff", 
         borderWidth: 2,
         // Keep fully round to distinguish from left person
-        borderRadius: 4, // Fully round
+        borderRadius: 6, // Fully round for thicker dot
     },
     messagesList: {
         flex: 1,
