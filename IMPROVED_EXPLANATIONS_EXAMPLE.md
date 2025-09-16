@@ -5,7 +5,7 @@ The explanations are too generic:
 - "i love you" → "The sender is giving you a brief response or acknowledgment"  ❌
 - "im stressed" → "The sender is sharing their thoughts or feelings" ❌
 
-## WHAT WE WANT  
+## WHAT WE WANT
 Specific explanations of what the message actually means:
 - "i love you" → "The person is expressing romantic love for you" ✅
 - "im stressed" → "The person is sharing that they feel overwhelmed" ✅
@@ -16,7 +16,7 @@ Specific explanations of what the message actually means:
 // IMPROVED generateMessageExplanationDemo() function
 generateMessageExplanationDemo(text) {
     const lowerText = text.toLowerCase();
-    
+
     // SPECIFIC MESSAGE MEANINGS (not emotions)
     if (lowerText.includes('i love you') || lowerText === 'love you') {
         return 'The person is expressing romantic love for you';
@@ -42,7 +42,7 @@ generateMessageExplanationDemo(text) {
     if (text.includes('?')) {
         return 'The person is asking you a question and wants a response';
     }
-    
+
     // Default: analyze the actual content
     return `The person is communicating: ${text.toLowerCase()}`;
 }

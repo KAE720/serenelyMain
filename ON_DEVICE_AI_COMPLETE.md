@@ -4,7 +4,7 @@
 
 I've successfully replaced the demo mode with a **sophisticated on-device AI system** that provides:
 
-### 1. **Advanced Emotion Classification** 
+### 1. **Advanced Emotion Classification**
 - **Pattern-based emotion detection** using regex patterns
 - **Handles complex cases** like "not happy with you" vs "not happy"
 - **Four emotion categories**: angry (red), stressed (orange), neutral (blue), excited (green)
@@ -35,12 +35,12 @@ I've successfully replaced the demo mode with a **sophisticated on-device AI sys
 - **Color**: Green (excited)
 - **Explanation**: "The person is expressing romantic love and deep affection for you"
 
-### **Message: "im not happy with you"**  
+### **Message: "im not happy with you"**
 - **Color**: Red (angry)
 - **Explanation**: "The person is directly expressing displeasure with your actions or behavior"
 
 ### **Message: "how are you doing?"**
-- **Color**: Blue (neutral)  
+- **Color**: Blue (neutral)
 - **Explanation**: "The person wants to know about your current wellbeing and state"
 
 ### **Message: "thank you so much"**

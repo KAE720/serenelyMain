@@ -31,7 +31,7 @@ await llmService.getExplainer(text);    // Returns human explanation
 - Full commercial use permitted
 - No external dependencies
 
-### ✅ **Fully On-Device** 
+### ✅ **Fully On-Device**
 - Zero network requirements
 - Complete privacy (no data sent anywhere)
 - No API costs or rate limits
@@ -53,7 +53,7 @@ await llmService.getExplainer(text);    // Returns human explanation
 
 ### Message Bubble Colors
 - **Red bubbles**: Angry/frustrated messages
-- **Orange bubbles**: Stressed/overwhelmed messages  
+- **Orange bubbles**: Stressed/overwhelmed messages
 - **Blue bubbles**: Neutral/informational messages
 - **Green bubbles**: Happy/excited messages
 
@@ -88,7 +88,7 @@ await llmService.getExplainer(text);    // Returns human explanation
 - **Explanation**: *"The person is expressing anger and frustration toward their supervisor at work"*
 
 ### Input: *"I love that you're always so supportive! 💕"*
-- **Color**: Green (excited)  
+- **Color**: Green (excited)
 - **Confidence**: 93%
 - **Explanation**: *"The person is appreciating your consistent emotional support and care"*
 
@@ -120,7 +120,7 @@ While the current system is production-ready, you could optionally:
 ## ✨ You Now Have:
 
 - **Free, commercializable on-device LLM** ✅
-- **Real-time emotion analysis** ✅  
+- **Real-time emotion analysis** ✅
 - **Intelligent message explanations** ✅
 - **Beautiful colored chat bubbles** ✅
 - **Complete privacy and offline functionality** ✅

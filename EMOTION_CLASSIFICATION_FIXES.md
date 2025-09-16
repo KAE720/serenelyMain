@@ -23,7 +23,7 @@ phrases: [
 
 contextualClues: [
     'why did you not', 'why didn\'t you', 'why did you', // ← ADDED 'why did you'
-    'you should have', 'you never', 'always forget', 'never listen', 'don\'t care', 
+    'you should have', 'you never', 'always forget', 'never listen', 'don\'t care',
     'with you', 'at you'  // ← NEW
 ],
 ```
@@ -43,7 +43,7 @@ if (normalizedText.includes('angry') || normalizedText.includes('mad')) {
 ### 3. **Smart Neutral Score Prevention**
 ```javascript
 // Don't give neutral score if there are clear emotional expressions
-if (text.includes('angry') || text.includes('mad') || text.includes('upset') || 
+if (text.includes('angry') || text.includes('mad') || text.includes('upset') ||
     text.includes('love') || text.includes('hate') || text.includes('frustrated')) {
     return 0; // No neutral points when emotions are clearly present
 }
@@ -75,7 +75,7 @@ if (text.includes('angry') || text.includes('mad') || text.includes('upset') ||
 ## 🚀 Key Improvements
 
 1. **Added missing anger patterns** like "angry with you", "why did you"
-2. **Boosted clear anger expressions** to prevent neutral misclassification  
+2. **Boosted clear anger expressions** to prevent neutral misclassification
 3. **Blocked neutral scoring** when clear emotions are present
 4. **More comprehensive contextual clues** for anger detection
 

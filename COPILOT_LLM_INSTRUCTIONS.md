@@ -41,12 +41,12 @@ cd ios && pod install && cd ..
 ```gradle
 android {
     // ... existing config
-    
+
     packagingOptions {
         pickFirst '**/libc++_shared.so'
         pickFirst '**/libjsc.so'
     }
-    
+
     // Ensure proper NDK configuration
     ndkVersion "23.1.7779620"
 }
@@ -155,7 +155,7 @@ The ChatScreen.js is already integrated. The key integration points are:
 // Helper function for Copilot clarity
 const colorToEmotionMap = {
   'red': 'angry',      // High energy negative
-  'orange': 'stressed', // Low energy negative  
+  'orange': 'stressed', // Low energy negative
   'blue': 'neutral',   // Balanced/calm
   'green': 'excited'   // High energy positive
 };
@@ -166,7 +166,7 @@ const colorToEmotionMap = {
 const analyzeToneForMessage = async (text) => {
   const copilotAnalysis = await llmService.analyzeTone(text);
   const mappedTone = colorToEmotionMap[copilotAnalysis.color] || 'neutral';
-  
+
   return {
     tone: mappedTone,
     confidence: copilotAnalysis.confidence,
@@ -189,7 +189,7 @@ useEffect(() => {
       llmService.initialize();
     }
   };
-  
+
   AppState.addEventListener('change', handleAppStateChange);
   return () => AppState.removeEventListener('change', handleAppStateChange);
 }, []);
@@ -276,7 +276,7 @@ The AI features integrate seamlessly with existing UI:
 ## 🔒 Privacy & Licensing
 
 - **Model**: Microsoft Phi-3 Mini (MIT License)
-- **Library**: llama.rn (MIT License)  
+- **Library**: llama.rn (MIT License)
 - **Data**: 100% on-device processing
 - **Commercial Use**: Fully permitted
 - **Distribution**: No restrictions

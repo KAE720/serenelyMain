@@ -2,12 +2,12 @@
 
 ## 🎯 Problem Solved
 
-**BEFORE**: "i am not happy with you? why did u go to the shops without me?" 
+**BEFORE**: "i am not happy with you? why did u go to the shops without me?"
 - **Wrong**: "Confronting you about hurting their feelings" ❌
 - **Why wrong**: This made it seem like Sarah was confronting you, when YOU are confronting Sarah
 
 **AFTER**: "i am not happy with you? why did u go to the shops without me?"
-- **Correct**: "Confronting them about hurt feelings" ✅ 
+- **Correct**: "Confronting them about hurt feelings" ✅
 - **Why correct**: This correctly shows that YOU are confronting THEM
 
 ## 🔧 Technical Fix
@@ -26,7 +26,7 @@ contextuallyExplainMessage(text, isFromCurrentUser = false) {
     // Direct confrontation patterns - perspective matters!
     if (lowerText.includes('why did u') || lowerText.includes('why did you')) {
         if (lowerText.includes('not happy') && lowerText.includes('me')) {
-            return isFromCurrentUser ? 
+            return isFromCurrentUser ?
                 'Confronting them about hurt feelings' :     // YOU → THEM
                 'Confronting you about hurting their feelings'; // THEM → YOU
         }
@@ -66,7 +66,7 @@ const freshExplanation = await llmService.getExplainer(item.text, isOwnMessage);
 
 ### Key Perspective Patterns Updated:
 - ✅ **Confrontation messages**: "Confronting them" vs "Confronting you"
-- ✅ **Appreciation messages**: "Appreciating their support" vs "Appreciating your support"  
+- ✅ **Appreciation messages**: "Appreciating their support" vs "Appreciating your support"
 - ✅ **Invitations**: "Inviting them" vs "Inviting you"
 - ✅ **Questions**: "Questioning their actions" vs "Questioning your actions"
 

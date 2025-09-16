@@ -19,7 +19,7 @@ async getExplainer(messageText) {
 
 **Color Mapping:**
 - 🔴 `red` = Angry emotions
-- 🟠 `orange` = Stressed emotions  
+- 🟠 `orange` = Stressed emotions
 - 🔵 `blue` = Neutral emotions
 - 🟢 `green` = Excited/positive emotions
 
@@ -60,7 +60,7 @@ Updated `analyzeToneForMessage()` to use new AI functions while preserving exist
 
 ### Integration Strategy ✓
 1. **Primary**: New llmService functions for AI analysis
-2. **Fallback**: Existing enhancedToneAnalysisService 
+2. **Fallback**: Existing enhancedToneAnalysisService
 3. **Mapping**: Copilot colors → existing emotion names
 4. **Compatibility**: All return structures maintained
 
@@ -84,7 +84,7 @@ Now Copilot can easily work with:
 const analysis = await llmService.analyzeTone("I'm feeling great!");
 console.log(analysis.color); // 'green'
 
-// Get explanation for any message  
+// Get explanation for any message
 const explanation = await llmService.getExplainer("I'm stressed");
 console.log(explanation); // "This message indicates work pressure."
 ```
@@ -92,7 +92,7 @@ console.log(explanation); // "This message indicates work pressure."
 ### Maintained Features ✓
 - All existing Google Auth functionality
 - Complete navigation system
-- Model management screens  
+- Model management screens
 - Testing interfaces
 - Original chat experience
 

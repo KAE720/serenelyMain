@@ -29,8 +29,8 @@
 
 ## AI Explanation Popup Now Shows
 
-✅ **Emotion Name** (colored): e.g., "Angry", "Happy", "Neutral"  
-✅ **AI Explanation**: e.g., "- Expressing frustration with them"  
+✅ **Emotion Name** (colored): e.g., "Angry", "Happy", "Neutral"
+✅ **AI Explanation**: e.g., "- Expressing frustration with them"
 ❌ ~~Enhanced Analysis badge~~ (removed)
 
 ## Benefits

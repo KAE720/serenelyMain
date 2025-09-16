@@ -1,4 +1,4 @@
-# ✅ CLEAN AI EXPLANATIONS - PERFECT FORMAT! 
+# ✅ CLEAN AI EXPLANATIONS - PERFECT FORMAT!
 
 ## 🎯 **Exactly What You Asked For**
 
@@ -10,7 +10,7 @@ You wanted: **Mood (colored) + concise LLM prompt "explain what was meant in thi
 
 **Examples:**
 - **Excited** - *Inviting you to watch sports*
-- **Angry** - *Expressing anger toward you*  
+- **Angry** - *Expressing anger toward you*
 - **Neutral** - *Asking why you excluded them*
 - **Stressed** - *Sharing work stress*
 
@@ -59,7 +59,7 @@ async getExplainer(text) {
 - ✅ After: *"Sharing work stress"*
 
 ### **Direct Meaning:**
-- ❌ Before: *"The person is expressing how much they appreciate..."*  
+- ❌ Before: *"The person is expressing how much they appreciate..."*
 - ✅ After: *"Appreciating your support"*
 
 ### **Action-Focused:**

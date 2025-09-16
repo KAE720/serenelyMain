@@ -62,7 +62,7 @@ class EmotionClassificationEngine {
     analyzeEmotion(text) {
         const normalizedText = text.toLowerCase().trim();
         const words = normalizedText.split(/\s+/);
-        
+
         let scores = {
             angry: 0,
             stressed: 0,
@@ -72,38 +72,38 @@ class EmotionClassificationEngine {
 
         // Check for negation patterns that flip sentiment
         const hasNegation = this.detectNegation(normalizedText);
-        
+
         // Analyze each emotion category
         for (const [emotion, patterns] of Object.entries(this.emotionPatterns)) {
             if (emotion === 'neutral') continue;
-            
+
             let score = 0;
-            
+
             // Direct keyword matching
             score += this.scoreKeywords(words, patterns.keywords || []);
-            
+
             // Phrase pattern matching
             score += this.scorePhrases(normalizedText, patterns.phrases || []);
-            
+
             // Contextual clue detection
             score += this.scoreContextualClues(normalizedText, patterns.contextualClues || []);
-            
+
             // Handle special cases for stressed emotion (include sadness)
             if (emotion === 'stressed' && patterns.sadnessIndicators) {
                 score += this.scoreKeywords(words, patterns.sadnessIndicators) * 1.2;
             }
-            
+
             // Emoticon analysis for excited
             if (emotion === 'excited' && patterns.emoticons) {
                 score += this.scoreEmoticons(text, patterns.emoticons);
             }
-            
+
             // Apply intensifiers
             if (patterns.intensifiers) {
                 const intensifierBoost = this.detectIntensifiers(normalizedText, patterns.intensifiers);
                 score *= (1 + intensifierBoost);
             }
-            
+
             scores[emotion] = score;
         }
 
@@ -131,12 +131,12 @@ class EmotionClassificationEngine {
         }
 
         // Find dominant emotion
-        const dominantEmotion = Object.entries(scores).reduce((a, b) => 
+        const dominantEmotion = Object.entries(scores).reduce((a, b) =>
             scores[a[0]] > scores[b[0]] ? a : b
         )[0];
 
         const confidence = this.calculateConfidence(scores, dominantEmotion);
-        
+
         return {
             emotion: dominantEmotion,
             confidence: Math.min(confidence, 0.95), // Cap at 95%
@@ -187,28 +187,28 @@ class EmotionClassificationEngine {
     calculateNeutralScore(text) {
         const patterns = this.emotionPatterns.neutral;
         let score = 0;
-        
+
         // Don't give neutral score if there are clear emotional expressions
-        if (text.includes('angry') || text.includes('mad') || text.includes('upset') || 
+        if (text.includes('angry') || text.includes('mad') || text.includes('upset') ||
             text.includes('love') || text.includes('hate') || text.includes('frustrated')) {
             return 0;
         }
-        
+
         // Questions tend to be neutral (but not emotional questions)
         if (patterns.questions.some(q => text.includes(q + ' '))) {
             score += 1;
         }
-        
+
         // Neutral statement patterns
         if (patterns.statements.some(s => text.includes(s))) {
             score += 0.8;
         }
-        
+
         // Direct neutral indicators
         if (patterns.indicators.some(i => text.includes(i))) {
             score += 0.6;
         }
-        
+
         return score;
     }
 
@@ -217,12 +217,12 @@ class EmotionClassificationEngine {
         const secondMaxScore = Object.values(scores)
             .filter(score => score !== maxScore)
             .reduce((max, score) => Math.max(max, score), 0);
-        
+
         if (maxScore === 0) return 0.5; // Default confidence for no matches
-        
+
         const difference = maxScore - secondMaxScore;
         const confidence = 0.6 + (difference / (maxScore + 1)) * 0.3;
-        
+
         return Math.min(confidence, 0.95);
     }
 }
@@ -239,47 +239,47 @@ class MessageExplanationEngine {
                 patterns: ['i am angry with you', 'angry with you', 'mad at you', 'not happy with you'],
                 explanation: 'They\'re upset about something you did or didn\'t do'
             },
-            
+
             shopping_plans: {
                 patterns: ['wanted to go to the shops', 'go to the shops', 'go shopping'],
                 explanation: 'They had shopping plans that got disrupted'
             },
-            
+
             supportive_appreciation: {
                 patterns: ['supportive! 💕', 'so supportive', 'always supportive'],
                 explanation: 'They\'re grateful for your emotional support'
             },
-            
+
             love_declaration: {
                 patterns: ['i love you', 'love you so much', 'love u'],
                 explanation: 'They\'re expressing romantic feelings'
             },
-            
+
             gratitude_simple: {
                 patterns: ['thank you', 'thanks so much', 'appreciate it'],
                 explanation: 'They\'re saying thanks for something specific'
             },
-            
+
             wellbeing_check: {
                 patterns: ['how are you', 'how\'s it going', 'how you doing'],
                 explanation: 'They want to know how you\'re feeling today'
             },
-            
+
             work_stress: {
                 patterns: ['stressed about work', 'work is stressing', 'boss is demanding'],
                 explanation: 'They\'re overwhelmed by work pressure'
             },
-            
+
             disappointment: {
                 patterns: ['why didn\'t you', 'expected you to', 'you should have'],
                 explanation: 'They\'re disappointed you didn\'t meet their expectations'
             },
-            
+
             offering_help: {
                 patterns: ['want to talk about it', 'here if you need', 'can help'],
                 explanation: 'They\'re offering to listen and support you'
             },
-            
+
             giving_advice: {
                 patterns: ['have you thought about', 'maybe try', 'you could'],
                 explanation: 'They\'re suggesting a solution to your problem'
@@ -292,14 +292,14 @@ class MessageExplanationEngine {
      */
     generateExplanation(text, emotionAnalysis) {
         const normalizedText = text.toLowerCase().trim();
-        
+
         // Look for specific message patterns first
         for (const [category, template] of Object.entries(this.specificExplanations)) {
             if (template.patterns.some(pattern => normalizedText.includes(pattern))) {
                 return template.explanation;
             }
         }
-        
+
         // Generate context-specific explanations based on message content
         return this.analyzeMessageContent(text, emotionAnalysis);
     }
@@ -307,9 +307,9 @@ class MessageExplanationEngine {
     analyzeMessageContent(text, emotionAnalysis) {
         const lowerText = text.toLowerCase();
         const emotion = emotionAnalysis.emotion;
-        
+
         // SPECIFIC MESSAGE ANALYSIS - What they actually mean
-        
+
         // Shopping-related messages
         if (lowerText.includes('shops') || lowerText.includes('shopping')) {
             if (lowerText.includes('why did you') || lowerText.includes('without me')) {
@@ -320,7 +320,7 @@ class MessageExplanationEngine {
             }
             return 'They\'re talking about shopping plans';
         }
-        
+
         // Football/sports invitations
         if (lowerText.includes('watch') && (lowerText.includes('football') || lowerText.includes('game'))) {
             if (lowerText.includes('happy now') || lowerText.includes('do u wanna')) {
@@ -328,7 +328,7 @@ class MessageExplanationEngine {
             }
             return 'They want to watch sports with you';
         }
-        
+
         // Questions about actions/decisions
         if (lowerText.includes('why did you')) {
             if (lowerText.includes('without me')) {
@@ -336,7 +336,7 @@ class MessageExplanationEngine {
             }
             return 'They want to understand your reasoning';
         }
-        
+
         // Mood changes and activities
         if (lowerText.includes('happy now') || lowerText.includes('feeling better')) {
             if (lowerText.includes('do u wanna') || lowerText.includes('want to')) {
@@ -344,17 +344,17 @@ class MessageExplanationEngine {
             }
             return 'They\'re telling you their mood has improved';
         }
-        
+
         // Direct anger expressions
         if (lowerText.includes('angry') && lowerText.includes('with you')) {
             return 'They\'re directly telling you they\'re mad at you';
         }
-        
+
         // Support and appreciation
         if (lowerText.includes('supportive') && (lowerText.includes('love') || lowerText.includes('💕'))) {
             return 'They\'re grateful for your emotional support';
         }
-        
+
         // Work stress expressions
         if (lowerText.includes('stressed') || lowerText.includes('overwhelmed')) {
             if (lowerText.includes('work') || lowerText.includes('boss')) {
@@ -362,7 +362,7 @@ class MessageExplanationEngine {
             }
             return 'They\'re feeling overwhelmed by something';
         }
-        
+
         // General contextual analysis based on emotion and patterns
         if (emotion === 'angry') {
             if (lowerText.includes('you')) {
@@ -370,7 +370,7 @@ class MessageExplanationEngine {
             }
             return 'They\'re venting about something that upset them';
         }
-        
+
         if (emotion === 'stressed') {
             // Don't default to stress explanation for happy messages
             if (lowerText.includes('happy') || lowerText.includes('good') || lowerText.includes('great')) {
@@ -378,7 +378,7 @@ class MessageExplanationEngine {
             }
             return 'They\'re communicating stress or anxiety';
         }
-        
+
         if (emotion === 'excited') {
             if (lowerText.includes('love') || lowerText.includes('💕') || lowerText.includes('❤️')) {
                 return 'They\'re expressing positive feelings toward you';
@@ -391,7 +391,7 @@ class MessageExplanationEngine {
             }
             return 'They\'re sharing something positive';
         }
-        
+
         if (emotion === 'neutral') {
             if (text.includes('?')) {
                 if (lowerText.includes('wanna') || lowerText.includes('want to')) {
@@ -401,20 +401,20 @@ class MessageExplanationEngine {
             }
             return 'They\'re sharing information neutrally';
         }
-        
+
         // Content-based fallbacks
         if (text.includes('?')) {
             return 'They\'re asking you something';
         }
-        
+
         if (lowerText.includes('sorry')) {
             return 'They\'re apologizing';
         }
-        
+
         if (text.length < 15) {
             return 'Quick response';
         }
-        
+
         return 'They\'re communicating with you';
     }
 }
@@ -440,14 +440,14 @@ class LLMService {
     async initialize() {
         try {
             console.log('Initializing On-Device AI System...');
-            
+
             // Simulate model loading (in real implementation, this would load actual model files)
             await this.loadModel();
-            
+
             this.initialized = true;
             this.modelStatus.loaded = true;
             this.modelStatus.ready = true;
-            
+
             console.log('On-Device AI System ready');
             return true;
         } catch (error) {
@@ -465,7 +465,7 @@ class LLMService {
         // 2. Download if necessary
         // 3. Load into memory
         // 4. Initialize inference engine
-        
+
         return new Promise((resolve) => {
             setTimeout(() => {
                 console.log('AI model loaded successfully');
@@ -490,11 +490,11 @@ class LLMService {
 
         try {
             const analysis = this.emotionEngine.analyzeEmotion(text);
-            
+
             // Map emotions to colors for UI
             const emotionColorMap = {
                 'angry': 'red',
-                'stressed': 'orange', 
+                'stressed': 'orange',
                 'neutral': 'blue',
                 'excited': 'green'
             };
@@ -541,10 +541,10 @@ class LLMService {
      */
     contextuallyExplainMessage(text, isFromCurrentUser = false) {
         const lowerText = text.toLowerCase().trim();
-        
+
         // ULTRA-PRECISE CONTEXTUAL ANALYSIS WITH PERSPECTIVE
         // Following prompt: "bearing in mind the text content and context of the message, give me a concise but precise explanation of the meaning of what was said"
-        
+
         // Direct confrontation patterns - perspective matters!
         if (lowerText.includes('why did u') || lowerText.includes('why did you')) {
             if (lowerText.includes('not happy') && lowerText.includes('me')) {
@@ -558,39 +558,39 @@ class LLMService {
             }
             return isFromCurrentUser ? 'Questioning their hurtful actions' : 'Questioning your hurtful actions';
         }
-        
+
         // Emotional confrontation - expanded patterns
-        if (lowerText.includes('not happy with you') || 
+        if (lowerText.includes('not happy with you') ||
             (lowerText.includes('not happy') && lowerText.includes('with you')) ||
             (lowerText.includes('angry with you')) ||
             (lowerText.includes('not happy') && lowerText.includes('angry') && lowerText.includes('you'))) {
             return isFromCurrentUser ? 'Expressing displeasure with them' : 'Directly expressing displeasure with you';
         }
-        
+
         // General anger expressions
         if (lowerText.includes('angry with you') || lowerText.includes('mad at you')) {
             return isFromCurrentUser ? 'Expressing anger toward them' : 'Expressing anger toward you';
         }
-        
+
         // Combined negative emotions
         if ((lowerText.includes('angry') && lowerText.includes('you')) ||
             (lowerText.includes('mad') && lowerText.includes('you')) ||
             (lowerText.includes('upset') && lowerText.includes('you'))) {
             return isFromCurrentUser ? 'Directing negative emotions at them' : 'Directing negative emotions at you';
         }
-        
+
         // Relationship affection
         if (lowerText.includes('love that you\'re') && lowerText.includes('supportive')) {
             return isFromCurrentUser ? 'Appreciating their emotional support' : 'Appreciating your emotional support';
         }
-        
+
         if (lowerText.includes('i love you')) {
             if (lowerText.includes('so much')) {
                 return 'Expressing intense romantic love';
             }
             return 'Declaring love';
         }
-        
+
         // Mood shifts and invitations
         if (lowerText.includes('happy now') && lowerText.includes('wanna')) {
             if (lowerText.includes('watch')) {
@@ -598,38 +598,38 @@ class LLMService {
             }
             return 'Mood improved, proposing activity';
         }
-        
+
         if (lowerText.includes('wanna watch') && lowerText.includes('football')) {
             return isFromCurrentUser ? 'Inviting them to watch football' : 'Inviting you to watch football';
         }
-        
+
         // Work stress communication
         if (lowerText.includes('stressed about work')) {
             return 'Sharing work-related stress';
         }
-        
+
         if (lowerText.includes('boss') && lowerText.includes('demanding')) {
             return 'Complaining about difficult boss';
         }
-        
+
         // Wellbeing and support
         if (lowerText.includes('how are you')) {
             return isFromCurrentUser ? 'Checking on their wellbeing' : 'Checking on your wellbeing';
         }
-        
+
         if (lowerText.includes('want to talk about it')) {
             return isFromCurrentUser ? 'Offering them support and listening' : 'Offering you support and listening';
         }
-        
+
         if (lowerText.includes('sorry to hear')) {
             return 'Expressing sympathy';
         }
-        
+
         // Professional advice
         if (lowerText.includes('thought about hr') || lowerText.includes('talking to hr')) {
             return 'Suggesting HR involvement';
         }
-        
+
         // Gratitude
         if (lowerText.includes('thank you') || lowerText.includes('thanks')) {
             if (lowerText.includes('so much')) {
@@ -637,7 +637,7 @@ class LLMService {
             }
             return 'Showing appreciation';
         }
-        
+
         // Questions and clarifications
         if (text.includes('?')) {
             if (lowerText.includes('upset') || lowerText.includes('hurt')) {
@@ -648,34 +648,34 @@ class LLMService {
             }
             return 'Seeking clarification';
         }
-        
+
         // More comprehensive emotional expressions
         if (lowerText.includes('frustrated') && lowerText.includes('you')) {
             return isFromCurrentUser ? 'Expressing frustration with them' : 'Expressing frustration with you';
         }
-        
+
         if (lowerText.includes('disappointed') && lowerText.includes('you')) {
             return isFromCurrentUser ? 'Expressing disappointment in them' : 'Expressing disappointment in you';
         }
-        
+
         // General negative emotions directed at someone
-        if ((lowerText.includes('angry') || lowerText.includes('mad') || lowerText.includes('upset')) && 
+        if ((lowerText.includes('angry') || lowerText.includes('mad') || lowerText.includes('upset')) &&
             (lowerText.includes('i am') || lowerText.includes('im'))) {
             if (lowerText.includes('you') || lowerText.includes('with you')) {
                 return isFromCurrentUser ? 'Expressing negative emotions toward them' : 'Expressing negative emotions toward you';
             }
             return 'Sharing emotional state';
         }
-        
+
         // Emotional expressions without direct target
         if (lowerText.includes('happy') && !lowerText.includes('not')) {
             return 'Expressing positive feelings';
         }
-        
+
         if (lowerText.includes('sorry') && !lowerText.includes('hear')) {
             return 'Apologizing';
         }
-        
+
         // Context-based fallbacks
         if (text.length < 15) {
             if (lowerText.includes('love') || lowerText.includes('💕')) {
@@ -686,11 +686,11 @@ class LLMService {
             }
             return 'Brief message';
         }
-        
+
         if (lowerText.includes('feel') || lowerText.includes('feeling')) {
             return 'Sharing current emotions';
         }
-        
+
         return 'Personal communication';
     }
 
@@ -713,7 +713,7 @@ class LLMService {
         const toneAnalysis = await this.analyzeTone(text);
         const explanation = await this.getExplainer(text);
         const emotionAnalysis = this.emotionEngine.analyzeEmotion(text);
-        
+
         return {
             ...toneAnalysis,
             explanation: explanation,

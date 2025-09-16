@@ -6,7 +6,7 @@ This React Native chat app now includes **on-device Large Language Model (LLM)**
 
 - **4-Color Emotion Classification**: Messages are automatically classified into colors:
   - 🔴 **Red**: Angry/Frustrated emotions
-  - 🟠 **Orange**: Stressed/Worried emotions  
+  - 🟠 **Orange**: Stressed/Worried emotions
   - 🔵 **Blue**: Neutral/Calm emotions
   - 🟢 **Green**: Excited/Happy emotions
 
@@ -57,7 +57,7 @@ The app will run in demo mode using intelligent keyword analysis.
 ### 3. Download Real LLM Model
 - Open the app
 - Go to Model Management screen
-- Tap "Download Model" 
+- Tap "Download Model"
 - Wait for Phi-3 Mini to download (~2.3GB)
 
 ### 4. Enjoy Real AI Analysis

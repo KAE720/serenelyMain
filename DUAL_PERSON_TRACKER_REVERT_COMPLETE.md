@@ -33,7 +33,7 @@ Successfully reverted the chat progress bar UI to the previous dual-person emoti
 const getPersonEmotion = (personId) => {
     const emotionValues = {
         angry: 0.0,     // Red (most negative)
-        stressed: 0.33, // Orange 
+        stressed: 0.33, // Orange
         neutral: 0.66,  // Green
         excited: 1.0,   // Blue (most positive)
         happy: 1.0,     // Blue (excited equivalent)

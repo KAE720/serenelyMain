@@ -36,11 +36,11 @@ The AI button was giving **generic mood explanations** instead of **explaining w
 ```javascript
 // NEW: Creates specific prompts for message meaning
 createExplanationPrompt(text) {
-  return `Explain what this message is saying or means in one clear, concise sentence. 
+  return `Explain what this message is saying or means in one clear, concise sentence.
   Focus on the actual content and intent, not the emotion.
 
   Message: "${text}"
-  
+
   Explanation:`;
 }
 ```
@@ -86,7 +86,7 @@ Added `generateFallbackExplanation()` for when LLM fails:
 3. User thinks: "I already knew it was excited..."
 
 **New Flow:**
-1. Tap "Excited" button  
+1. Tap "Excited" button
 2. See: "The sender is expressing appreciation for your support"
 3. User thinks: "Ah, that's what they really meant!"
 

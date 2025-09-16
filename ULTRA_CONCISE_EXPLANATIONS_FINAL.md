@@ -9,7 +9,7 @@ Following the prompt: "bearing in mind the text content and context of the messa
 - After: "Confronting you about hurting their feelings" → **"Questioning your hurtful actions"**
 
 ### 2. PRECISION - Direct interpretation of meaning
-- Before: "Mood lifted, enthusiastically inviting activity"  
+- Before: "Mood lifted, enthusiastically inviting activity"
 - After: **"Feeling better, suggesting watching something"**
 
 ### 3. CONTEXTUAL ACCURACY - Understanding what was actually said
@@ -68,7 +68,7 @@ async getExplainer(text) {
 
 ### Ultra-Concise Pattern Matching
 - **Direct confrontation**: "Confronting you about hurting their feelings"
-- **Mood shifts**: "Feeling better, suggesting watching something"  
+- **Mood shifts**: "Feeling better, suggesting watching something"
 - **Work issues**: "Sharing work-related stress"
 - **Questions**: "Questioning your hurtful actions"
 - **Brief messages**: "Brief affection", "Quick thanks"
@@ -77,7 +77,7 @@ async getExplainer(text) {
 
 For messages not caught by main system:
 - **Length < 15 chars**: "Brief message"
-- **Contains "?"**: "Asking question"  
+- **Contains "?"**: "Asking question"
 - **Generic**: "Personal communication"
 
 ## UI Display Format
@@ -93,7 +93,7 @@ Examples:
 ## Key Characteristics
 
 ✅ **Ultra-brief** (2-6 words typically)
-✅ **Contextually precise** (understands relationship dynamics)  
+✅ **Contextually precise** (understands relationship dynamics)
 ✅ **Action-focused** (what they're doing, not just feeling)
 ✅ **No redundancy** (avoids repeating the mood in explanation)
 ✅ **User-centric** (explains impact on "you" when relevant)

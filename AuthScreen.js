@@ -1,9 +1,8 @@
 // AuthScreen.js
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     View,
     Text,
-    TextInput,
     TouchableOpacity,
     StyleSheet,
     Alert,
@@ -11,6 +10,8 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Animated,
+    Easing,
 } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
@@ -18,9 +19,6 @@ import {
     auth,
     GoogleAuthProvider,
     signInWithCredential,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    updateProfile
 } from "./firebase";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -28,12 +26,14 @@ WebBrowser.maybeCompleteAuthSession();
 const googleLogo = { uri: "https://img.icons8.com/color/48/000000/google-logo.png" };
 
 export default function AuthScreen() {
-    const [isSignUp, setIsSignUp] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [fullName, setFullName] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // Animation values
+    const logoScale = useRef(new Animated.Value(0)).current;
+    const logoOpacity = useRef(new Animated.Value(0)).current;
+    const textTranslateY = useRef(new Animated.Value(50)).current;
+    const textOpacity = useRef(new Animated.Value(0)).current;
+    const containerOpacity = useRef(new Animated.Value(0)).current;
 
     // Google Auth Setup
     const [request, response, promptAsync] = Google.useAuthRequest({
@@ -41,71 +41,68 @@ export default function AuthScreen() {
         iosClientId: "635219552771-dsn2oj9hi2vhr8oepkulgk7lq5gin27p.apps.googleusercontent.com",
     });
 
+    // Entrance animations
+    useEffect(() => {
+        const logoAnimation = Animated.parallel([
+            Animated.timing(logoScale, {
+                toValue: 1,
+                duration: 600,
+                easing: Easing.bezier(0.25, 0.46, 0.45, 0.94),
+                useNativeDriver: true,
+            }),
+            Animated.timing(logoOpacity, {
+                toValue: 1,
+                duration: 500,
+                delay: 100,
+                useNativeDriver: true,
+            }),
+        ]);
+
+        const textAnimation = Animated.parallel([
+            Animated.timing(textTranslateY, {
+                toValue: 0,
+                duration: 600,
+                delay: 300,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+            }),
+            Animated.timing(textOpacity, {
+                toValue: 1,
+                duration: 400,
+                delay: 300,
+                useNativeDriver: true,
+            }),
+        ]);
+
+        const containerAnimation = Animated.timing(containerOpacity, {
+            toValue: 1,
+            duration: 500,
+            delay: 600,
+            useNativeDriver: true,
+        });
+
+        // Start animations in sequence
+        Animated.sequence([
+            logoAnimation,
+            Animated.parallel([textAnimation, containerAnimation]),
+        ]).start();
+    }, []);
+
     React.useEffect(() => {
         if (response?.type === "success") {
+            setLoading(true);
             const { id_token } = response.params;
             const credential = GoogleAuthProvider.credential(id_token);
             signInWithCredential(auth, credential)
                 .then(() => {
-                    // Clear form fields after successful Google sign-in
-                    setEmail("");
-                    setPassword("");
-                    setConfirmPassword("");
-                    setFullName("");
+                    setLoading(false);
                 })
-                .catch((err) => Alert.alert("Error", err.message));
+                .catch((err) => {
+                    setLoading(false);
+                    Alert.alert("Error", err.message);
+                });
         }
     }, [response]);
-
-    const handleEmailAuth = async () => {
-        if (!email || !password) {
-            Alert.alert("Error", "Please fill in all fields");
-            return;
-        }
-
-        if (isSignUp && password !== confirmPassword) {
-            Alert.alert("Error", "Passwords don't match");
-            return;
-        }
-
-        if (isSignUp && !fullName.trim()) {
-            Alert.alert("Error", "Please enter your full name");
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            if (isSignUp) {
-                // Create new account
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                // Update the user's display name
-                await updateProfile(userCredential.user, {
-                    displayName: fullName.trim()
-                });
-                Alert.alert("Success", "Account created successfully!");
-
-                // Clear form fields after successful sign-up
-                setEmail("");
-                setPassword("");
-                setConfirmPassword("");
-                setFullName("");
-            } else {
-                // Sign in existing user
-                await signInWithEmailAndPassword(auth, email, password);
-
-                // Clear form fields after successful sign-in
-                setEmail("");
-                setPassword("");
-                setConfirmPassword("");
-                setFullName("");
-            }
-        } catch (error) {
-            Alert.alert("Error", error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleGoogleSignIn = () => {
         promptAsync();
@@ -117,102 +114,74 @@ export default function AuthScreen() {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
             <ScrollView contentContainerStyle={styles.scrollContainer}>
+                {/* Logo and Branding */}
                 <View style={styles.headerContainer}>
-                    <Text style={styles.appTitle}>Serene</Text>
-                    <Text style={styles.subtitle}>
-                        Better communication for couples & friends 💙
-                    </Text>
+                    <Animated.Image
+                        source={require('./assets/logo1.png')}
+                        style={[
+                            styles.logo,
+                            {
+                                opacity: logoOpacity,
+                                transform: [{ scale: logoScale }]
+                            }
+                        ]}
+                        resizeMode="contain"
+                    />
+                    <Animated.View 
+                        style={[
+                            styles.brandNameContainer,
+                            {
+                                opacity: textOpacity,
+                                transform: [{ translateY: textTranslateY }]
+                            }
+                        ]}
+                    >
+                        {/* Main text with purple styling */}
+                        <Text style={styles.brandNameMain}>Serenely</Text>
+                    </Animated.View>
+                    <Animated.Text 
+                        style={[
+                            styles.tagline,
+                            {
+                                opacity: textOpacity,
+                                transform: [{ translateY: textTranslateY }]
+                            }
+                        ]}
+                    >
+                        Your words, understood.
+                    </Animated.Text>
                 </View>
 
-                <View style={styles.authContainer}>
-                    <Text style={styles.authTitle}>
-                        {isSignUp ? "Create Account" : "Welcome Back"}
+                {/* Authentication Container */}
+                <Animated.View 
+                    style={[
+                        styles.authContainer,
+                        {
+                            opacity: containerOpacity,
+                        }
+                    ]}
+                >
+                    <Text style={styles.welcomeText}>Welcome</Text>
+                    <Text style={styles.subText}>
+                        Sign in to start your journey towards better communication
                     </Text>
 
-                    {/* Email/Password Form */}
-                    <View style={styles.formContainer}>
-                        {isSignUp && (
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Full Name"
-                                placeholderTextColor="#666"
-                                value={fullName}
-                                onChangeText={setFullName}
-                                autoCapitalize="words"
-                            />
-                        )}
-
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Email"
-                            placeholderTextColor="#666"
-                            value={email}
-                            onChangeText={setEmail}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                        />
-
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Password"
-                            placeholderTextColor="#666"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                        />
-
-                        {isSignUp && (
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Confirm Password"
-                                placeholderTextColor="#666"
-                                value={confirmPassword}
-                                onChangeText={setConfirmPassword}
-                                secureTextEntry
-                            />
-                        )}
-
-                        <TouchableOpacity
-                            style={[styles.authButton, loading && styles.disabledButton]}
-                            onPress={handleEmailAuth}
-                            disabled={loading}
-                        >
-                            <Text style={styles.authButtonText}>
-                                {loading ? "Loading..." : (isSignUp ? "Sign Up" : "Sign In")}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Divider */}
-                    <View style={styles.dividerContainer}>
-                        <View style={styles.dividerLine} />
-                        <Text style={styles.dividerText}>or</Text>
-                        <View style={styles.dividerLine} />
-                    </View>
-
-                    {/* Google Sign In */}
+                    {/* Google Sign In Button */}
                     <TouchableOpacity
-                        style={styles.googleButton}
-                        disabled={!request}
+                        style={[styles.googleButton, loading && styles.disabledButton]}
+                        disabled={!request || loading}
                         onPress={handleGoogleSignIn}
                     >
                         <Image source={googleLogo} style={styles.googleIcon} />
-                        <Text style={styles.googleButtonText}>Continue with Google</Text>
-                    </TouchableOpacity>
-
-                    {/* Toggle Sign Up/Sign In */}
-                    <TouchableOpacity
-                        style={styles.toggleContainer}
-                        onPress={() => setIsSignUp(!isSignUp)}
-                    >
-                        <Text style={styles.toggleText}>
-                            {isSignUp
-                                ? "Already have an account? Sign In"
-                                : "Don't have an account? Sign Up"
-                            }
+                        <Text style={styles.googleButtonText}>
+                            {loading ? "Signing in..." : "Continue with Google"}
                         </Text>
                     </TouchableOpacity>
-                </View>
+
+                    <Text style={styles.privacyText}>
+                        By continuing, you agree to our terms of service and privacy policy
+                    </Text>
+                </Animated.View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
@@ -221,7 +190,7 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#000",
+        backgroundColor: "#0A0A0A", // Deep black for premium feel
     },
     scrollContainer: {
         flexGrow: 1,
@@ -230,86 +199,93 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         alignItems: "center",
-        marginBottom: 40,
+        marginBottom: 15, // Reduced further to bring closer
+        paddingTop: 5, // Reduced top padding
     },
-    appTitle: {
-        fontSize: 48,
-        fontWeight: "bold",
-        color: "#4A90E2",
-        marginBottom: 10,
-        fontFamily: 'SF Pro Text',
+    logo: {
+        width: 300,
+        height: 300,
+        marginBottom: -8, // Negative margin to bring text even closer
+        shadowColor: '#8B5CF6',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
     },
-    subtitle: {
+    brandNameContainer: {
+        marginBottom: 6, // Reduced margin to bring closer to logo
+        height: 65,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+    },
+    brandNameMain: {
+        fontSize: 54,
+        fontWeight: "900",
+        fontFamily: 'SF Pro Display',
+        letterSpacing: -2,
+        textAlign: 'center',
+        color: '#C77DFF', // Single bright purple color for better legibility
+        textShadowColor: 'rgba(123, 44, 191, 0.3)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 2,
+    },
+    tagline: {
         fontSize: 16,
-        color: "#aaa",
+        color: "#A888D1", // Updated to match new purple theme
         textAlign: "center",
         fontFamily: 'SF Pro Text',
+        lineHeight: 22,
+        opacity: 0.9,
     },
     authContainer: {
-        backgroundColor: "#1E1E1E",
-        borderRadius: 20,
-        padding: 30,
-        marginHorizontal: 10,
-    },
-    authTitle: {
-        fontSize: 24,
-        fontWeight: "600",
-        color: "#fff",
-        textAlign: "center",
-        marginBottom: 30,
-        fontFamily: 'SF Pro Text',
-    },
-    formContainer: {
-        marginBottom: 20,
-    },
-    input: {
-        backgroundColor: "#333",
-        borderRadius: 12,
-        padding: 15,
-        fontSize: 16,
-        color: "#fff",
-        marginBottom: 15,
+        backgroundColor: "rgba(30, 30, 30, 0.95)", // Semi-transparent dark
+        borderRadius: 24,
+        padding: 32,
+        marginHorizontal: 8,
         borderWidth: 1,
-        borderColor: "#444",
+        borderColor: "rgba(78, 42, 132, 0.15)",
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 16,
+        elevation: 10,
     },
-    authButton: {
-        backgroundColor: "#4A90E2",
-        borderRadius: 12,
-        padding: 16,
-        alignItems: "center",
-        marginTop: 10,
+    welcomeText: {
+        fontSize: 28,
+        fontWeight: "700",
+        color: "#E8F4FD",
+        textAlign: "center",
+        marginBottom: 8,
+        fontFamily: 'SF Pro Display',
     },
-    disabledButton: {
-        backgroundColor: "#666",
-    },
-    authButtonText: {
-        color: "#fff",
-        fontSize: 18,
-        fontWeight: "600",
+    subText: {
+        fontSize: 15,
+        color: "#A888D1",
+        textAlign: "center",
+        marginBottom: 40,
         fontFamily: 'SF Pro Text',
-    },
-    dividerContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginVertical: 20,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: "#444",
-    },
-    dividerText: {
-        color: "#666",
-        marginHorizontal: 15,
+        lineHeight: 20,
+        opacity: 0.85,
     },
     googleButton: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 20,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 16,
+        padding: 18,
+        marginBottom: 24,
+        shadowColor: '#7B2CBF',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 6,
+        borderWidth: 1,
+        borderColor: "rgba(78, 42, 132, 0.1)",
+    },
+    disabledButton: {
+        backgroundColor: "#666",
+        opacity: 0.7,
     },
     googleIcon: {
         width: 24,
@@ -319,16 +295,15 @@ const styles = StyleSheet.create({
     googleButtonText: {
         fontSize: 16,
         fontWeight: "600",
-        color: "#000",
+        color: "#1A1A1A",
         fontFamily: 'SF Pro Text',
     },
-    toggleContainer: {
-        alignItems: "center",
-        paddingTop: 10,
-    },
-    toggleText: {
-        color: "#4A90E2",
-        fontSize: 14,
+    privacyText: {
+        fontSize: 12,
+        color: "#9A7BB8", // Updated to match new purple theme
+        textAlign: "center",
         fontFamily: 'SF Pro Text',
+        lineHeight: 16,
+        opacity: 0.8,
     },
 });

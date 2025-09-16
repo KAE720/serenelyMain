@@ -35,7 +35,7 @@ When sending angry messages like "i hate you", the user's marker was moving towa
 
 // Examples:
 // Score 0 (angry) → 100 - 0/2 = 100% (far right) ✅
-// Score 50 (neutral) → 100 - 50/2 = 75% (closer to center) ✅  
+// Score 50 (neutral) → 100 - 50/2 = 75% (closer to center) ✅
 // Score 100 (excited) → 100 - 100/2 = 50% (center) ✅
 ```
 
@@ -47,7 +47,7 @@ When sending angry messages like "i hate you", the user's marker was moving towa
 - **Expected behavior**: Marker moves right (away from center) ✅
 - **Bug fixed**: No longer moves toward center ✅
 
-### When You Send "i love you" (Excited Message)  
+### When You Send "i love you" (Excited Message)
 - **Your score**: 100 (excited emotion detected)
 - **Your position**: 50% (center - meeting point) ✅
 - **Expected behavior**: Marker moves toward center ✅
@@ -58,7 +58,7 @@ When sending angry messages like "i hate you", the user's marker was moving towa
 - **Expected behavior**: Marker moves left (away from center) ✅
 
 ### When Partner Sends Excited Message (Future Feature)
-- **Partner score**: 100 (excited emotion detected)  
+- **Partner score**: 100 (excited emotion detected)
 - **Partner position**: 50% (center - meeting point) ✅
 - **Expected behavior**: Marker moves toward center ✅
 
@@ -74,7 +74,7 @@ const getRelativeRelationshipHealth = () => {
 
 ### Examples with Fixed Positioning:
 - **Both angry (0 each)**: Positions 0% and 100% → Health = 0% ✅
-- **Both excited (100 each)**: Positions 50% and 50% → Health = 100% ✅  
+- **Both excited (100 each)**: Positions 50% and 50% → Health = 100% ✅
 - **One angry (0), one excited (100)**: Positions 0%/100% and 50% → Health = 50% ✅
 
 ## Testing the Fix
@@ -84,7 +84,7 @@ const getRelativeRelationshipHealth = () => {
 - **Expected**: Relationship health decreases
 - **Expected**: No movement toward center
 
-### Test Case 2: Send "i love you"  
+### Test Case 2: Send "i love you"
 - **Expected**: Your black marker moves toward center (50%)
 - **Expected**: Relationship health increases
 - **Expected**: Movement toward meeting point
@@ -100,7 +100,7 @@ const getRelativeRelationshipHealth = () => {
 // Changed from:
 { left: `${50 + (getPersonScore(currentUser.id) / 2)}%` }
 
-// Changed to:  
+// Changed to:
 { left: `${100 - (getPersonScore(currentUser.id) / 2)}%` }
 ```
 

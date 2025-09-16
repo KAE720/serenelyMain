@@ -15,7 +15,7 @@ A **psychologically-based mood tracking system** that follows **John Gottman's 5
 ### **100-Point Relationship Health Scale**
 - **50 = Neutral Starting Point** (balanced communication)
 - **0-35 = Poor/Concerning** (needs attention)
-- **35-65 = Balanced** (healthy neutral range) 
+- **35-65 = Balanced** (healthy neutral range)
 - **65-80 = Good** (positive relationship health)
 - **80-100 = Excellent** (thriving communication)
 
@@ -39,7 +39,7 @@ A **psychologically-based mood tracking system** that follows **John Gottman's 5
 
 ### **Positioning Logic**
 - **Worst for partner**: Far left (0%)
-- **Best for both**: Center-right (50-100%)  
+- **Best for both**: Center-right (50-100%)
 - **Worst for user**: Far right (but system prevents this with positive bias)
 - **Score indicator**: Moves along the bar based on current relationship health
 
@@ -85,7 +85,7 @@ getHealthStatus(score) {
 ```
 Starting: 50/100 (Neutral)
 + "I love you so much!" (+10) → 60/100 (Good)
-+ "How was your day?" (+2) → 62/100 (Good)  
++ "How was your day?" (+2) → 62/100 (Good)
 - "I'm angry with you" (-15) → 47/100 (Neutral)
 + "Sorry, I didn't mean that" (+8) → 55/100 (Neutral)
 + "You're amazing" (+10) → 65/100 (Good)
@@ -108,7 +108,7 @@ Starting: 50/100 (Neutral)
 ## 🚀 Key Features
 
 ✅ **Scientifically-based**: Founded on Gottman's relationship research
-✅ **Positive bias**: Easy to gain points, harder to lose dramatically  
+✅ **Positive bias**: Easy to gain points, harder to lose dramatically
 ✅ **Real-time feedback**: Immediate response to communication quality
 ✅ **Visual clarity**: Color-coded health system (Red = bad, Green = good)
 ✅ **Trend analysis**: Shows relationship health over time

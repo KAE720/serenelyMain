@@ -173,7 +173,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#121212" },
     topBar: {
-        backgroundColor: "#1976D2",
+        backgroundColor: "#7B2CBF",
         paddingTop: 50, // offset for notch / status bar
         paddingBottom: 15,
         flexDirection: 'row',
@@ -227,6 +227,6 @@ const styles = StyleSheet.create({
         fontFamily: 'SF Pro Text',
     },
     activeTabText: {
-        color: '#1976D2',
+        color: '#7B2CBF',
     },
 });

@@ -14,7 +14,7 @@ export const MessageIcon = ({ active, size = 24 }) => (
             width: size * 0.8,
             height: size * 0.6,
             borderWidth: 2,
-            borderColor: active ? '#1976D2' : '#aaa',
+            borderColor: active ? '#7B2CBF' : '#aaa',
             borderRadius: size * 0.15,
             backgroundColor: 'transparent',
             position: 'relative',
@@ -26,7 +26,7 @@ export const MessageIcon = ({ active, size = 24 }) => (
                 left: size * 0.08,
                 right: size * 0.08,
                 height: 1,
-                backgroundColor: active ? '#1976D2' : '#aaa',
+                backgroundColor: active ? '#7B2CBF' : '#aaa',
             }} />
             <View style={{
                 position: 'absolute',
@@ -34,7 +34,7 @@ export const MessageIcon = ({ active, size = 24 }) => (
                 left: size * 0.08,
                 width: size * 0.4,
                 height: 1,
-                backgroundColor: active ? '#1976D2' : '#aaa',
+                backgroundColor: active ? '#7B2CBF' : '#aaa',
             }} />
             {/* Chat bubble tail */}
             <View style={{
@@ -48,7 +48,7 @@ export const MessageIcon = ({ active, size = 24 }) => (
                 borderTopWidth: 4,
                 borderLeftColor: 'transparent',
                 borderRightColor: 'transparent',
-                borderTopColor: active ? '#1976D2' : '#aaa',
+                borderTopColor: active ? '#7B2CBF' : '#aaa',
             }} />
         </View>
     </View>
@@ -66,7 +66,7 @@ export const CallsIcon = ({ active, size = 24 }) => (
             width: size * 0.45,
             height: size * 0.7,
             borderWidth: 2,
-            borderColor: active ? '#1976D2' : '#aaa',
+            borderColor: active ? '#7B2CBF' : '#aaa',
             borderRadius: size * 0.08,
             backgroundColor: 'transparent',
             position: 'relative',
@@ -91,7 +91,7 @@ export const CallsIcon = ({ active, size = 24 }) => (
                 width: size * 0.06,
                 height: size * 0.03,
                 borderRadius: size * 0.015,
-                backgroundColor: active ? '#1976D2' : '#aaa',
+                backgroundColor: active ? '#7B2CBF' : '#aaa',
             }} />
         </View>
 
@@ -107,7 +107,7 @@ export const CallsIcon = ({ active, size = 24 }) => (
                 width: size * 0.08,
                 height: size * 0.08,
                 borderWidth: 1.5,
-                borderColor: active ? '#1976D2' : '#aaa',
+                borderColor: active ? '#7B2CBF' : '#aaa',
                 borderRadius: size * 0.04,
                 backgroundColor: 'transparent',
                 borderBottomColor: 'transparent',
@@ -123,7 +123,7 @@ export const CallsIcon = ({ active, size = 24 }) => (
                 width: size * 0.16,
                 height: size * 0.16,
                 borderWidth: 1.5,
-                borderColor: active ? '#1976D2' : '#aaa',
+                borderColor: active ? '#7B2CBF' : '#aaa',
                 borderRadius: size * 0.08,
                 backgroundColor: 'transparent',
                 borderBottomColor: 'transparent',
@@ -139,7 +139,7 @@ export const CallsIcon = ({ active, size = 24 }) => (
                 width: size * 0.24,
                 height: size * 0.24,
                 borderWidth: 1.5,
-                borderColor: active ? '#1976D2' : '#aaa',
+                borderColor: active ? '#7B2CBF' : '#aaa',
                 borderRadius: size * 0.12,
                 backgroundColor: 'transparent',
                 borderBottomColor: 'transparent',
@@ -168,7 +168,7 @@ export const ContactsIcon = ({ active, size = 24 }) => (
                 height: size * 0.35,
                 borderRadius: size * 0.175,
                 borderWidth: 2,
-                borderColor: active ? '#1976D2' : '#aaa',
+                borderColor: active ? '#7B2CBF' : '#aaa',
                 backgroundColor: 'transparent',
             }} />
             <View style={{
@@ -177,7 +177,7 @@ export const ContactsIcon = ({ active, size = 24 }) => (
                 borderTopLeftRadius: size * 0.25,
                 borderTopRightRadius: size * 0.25,
                 borderWidth: 2,
-                borderColor: active ? '#1976D2' : '#aaa',
+                borderColor: active ? '#7B2CBF' : '#aaa',
                 backgroundColor: 'transparent',
                 marginTop: -2,
                 marginLeft: -size * 0.075,
@@ -195,7 +195,7 @@ export const ContactsIcon = ({ active, size = 24 }) => (
                 height: size * 0.3,
                 borderRadius: size * 0.15,
                 borderWidth: 2,
-                borderColor: active ? '#1976D2' : '#aaa',
+                borderColor: active ? '#7B2CBF' : '#aaa',
                 backgroundColor: 'transparent',
             }} />
             <View style={{
@@ -204,7 +204,7 @@ export const ContactsIcon = ({ active, size = 24 }) => (
                 borderTopLeftRadius: size * 0.225,
                 borderTopRightRadius: size * 0.225,
                 borderWidth: 2,
-                borderColor: active ? '#1976D2' : '#aaa',
+                borderColor: active ? '#7B2CBF' : '#aaa',
                 backgroundColor: 'transparent',
                 marginTop: -2,
                 marginLeft: -size * 0.075,
@@ -226,7 +226,7 @@ export const SereneIcon = ({ active, size = 24 }) => (
             height: size * 0.4,
             borderRadius: size * 0.2,
             borderWidth: 2,
-            borderColor: active ? '#1976D2' : '#aaa',
+            borderColor: active ? '#7B2CBF' : '#aaa',
             backgroundColor: 'transparent',
             marginBottom: 2,
         }} />
@@ -238,7 +238,7 @@ export const SereneIcon = ({ active, size = 24 }) => (
             borderTopLeftRadius: size * 0.3,
             borderTopRightRadius: size * 0.3,
             borderWidth: 2,
-            borderColor: active ? '#1976D2' : '#aaa',
+            borderColor: active ? '#7B2CBF' : '#aaa',
             backgroundColor: 'transparent',
             position: 'relative',
         }}>
@@ -251,7 +251,7 @@ export const SereneIcon = ({ active, size = 24 }) => (
                 height: size * 0.15,
                 borderRadius: size * 0.075,
                 borderWidth: 1,
-                borderColor: active ? '#1976D2' : '#aaa',
+                borderColor: active ? '#7B2CBF' : '#aaa',
                 backgroundColor: 'transparent',
             }} />
             <View style={{
@@ -262,7 +262,7 @@ export const SereneIcon = ({ active, size = 24 }) => (
                 height: size * 0.15,
                 borderRadius: size * 0.075,
                 borderWidth: 1,
-                borderColor: active ? '#1976D2' : '#aaa',
+                borderColor: active ? '#7B2CBF' : '#aaa',
                 backgroundColor: 'transparent',
             }} />
         </View>
@@ -278,19 +278,19 @@ export const SereneIcon = ({ active, size = 24 }) => (
                 width: 2,
                 height: 2,
                 borderRadius: 1,
-                backgroundColor: active ? '#1976D2' : '#aaa',
+                backgroundColor: active ? '#7B2CBF' : '#aaa',
             }} />
             <View style={{
                 width: 2,
                 height: 2,
                 borderRadius: 1,
-                backgroundColor: active ? '#1976D2' : '#aaa',
+                backgroundColor: active ? '#7B2CBF' : '#aaa',
             }} />
             <View style={{
                 width: 2,
                 height: 2,
                 borderRadius: 1,
-                backgroundColor: active ? '#1976D2' : '#aaa',
+                backgroundColor: active ? '#7B2CBF' : '#aaa',
             }} />
         </View>
     </View>

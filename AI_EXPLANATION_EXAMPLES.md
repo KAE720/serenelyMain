@@ -11,7 +11,7 @@ The AI button now gives **exactly what the sender meant** instead of generic moo
 - **Explanation**: "The sender wants to know how you're feeling and what's going on in your life today"
 
 ### **Message: "I'm feeling a bit stressed about work lately."**
-- **Button**: "Stressed" (in orange) 
+- **Button**: "Stressed" (in orange)
 - **Explanation**: "The sender is telling you they're struggling with work pressure and feeling overwhelmed recently"
 
 ### **Message: "I'm sorry to hear that. Want to talk about it?"**

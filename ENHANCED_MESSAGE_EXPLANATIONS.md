@@ -43,7 +43,7 @@
 - **Explanation**: "The sender is expressing their deep affection and romantic feelings for you."
 
 ### For "im not happy with you":
-- **Emotion**: Angry (red) 
+- **Emotion**: Angry (red)
 - **Explanation**: "The sender is directly expressing their displeasure or disappointment with your actions or behavior."
 
 ### For "thank you so much":

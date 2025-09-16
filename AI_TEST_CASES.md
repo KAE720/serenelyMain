@@ -57,7 +57,7 @@ await llmService.getExplainer("I love that you're always so supportive when I'm 
 1. **Start the app**: `npx expo start`
 2. **Open ChatScreen**: Navigate to any chat conversation
 3. **Send messages**: Type the test messages above
-4. **Observe results**: 
+4. **Observe results**:
    - Message bubbles should be colored according to emotion
    - Tap the AI explainer button to see explanations
    - Check console logs for analysis details

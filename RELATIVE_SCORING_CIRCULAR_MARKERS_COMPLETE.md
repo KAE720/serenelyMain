@@ -19,7 +19,7 @@
 - **Partner (Left Side)**: 0% to 50% based on their individual score
   - 0 points = 0% position (far left)
   - 100 points = 50% position (center)
-- **User (Right Side)**: 50% to 100% based on your individual score  
+- **User (Right Side)**: 50% to 100% based on your individual score
   - 0 points = 100% position (far right)
   - 100 points = 50% position (center)
 
@@ -28,7 +28,7 @@
 // Partner position: score/2 (0-50%)
 left: `${getPersonScore(chatPartner.id) / 2}%`
 
-// User position: 50% + score/2 (50-100%)  
+// User position: 50% + score/2 (50-100%)
 left: `${50 + (getPersonScore(currentUser.id) / 2)}%`
 ```
 
@@ -64,7 +64,7 @@ const getPersonScore = (personId) => {
 const getRelativeRelationshipHealth = () => {
     const partnerScore = getPersonScore(chatPartner.id);
     const userScore = getPersonScore(currentUser.id);
-    
+
     // Average of both scores for true relationship health
     const averageScore = (partnerScore + userScore) / 2;
     return Math.round(averageScore);
@@ -84,7 +84,7 @@ const getRelativeRelationshipHealth = () => {
 
 ### Example 1: Both People Happy
 - **Partner Score**: 100 (excited) → Position: 50% (center)
-- **User Score**: 100 (excited) → Position: 50% (center)  
+- **User Score**: 100 (excited) → Position: 50% (center)
 - **Relationship Health**: (100 + 100) / 2 = **100%** ✅
 
 ### Example 2: One Happy, One Neutral

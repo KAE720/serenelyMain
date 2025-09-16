@@ -26,19 +26,19 @@ class MoodTrackingService {
                 base: 8,    // High positive impact
                 range: [5, 10] // +5 to +10 points
             },
-            
+
             // NEUTRAL - Stable, respectful communication
             'neutral': {
                 base: 1,    // Slight positive for respectful communication
                 range: [0, 2] // 0 to +2 points
             },
-            
+
             // NEGATIVE EMOTIONS - Discourage but not devastate
             'stressed': {
                 base: -3,   // Minor negative impact
                 range: [-2, -5] // -2 to -5 points (opportunity for support)
             },
-            
+
             'angry': {
                 base: -15,  // Significant negative impact
                 range: [-10, -20] // -10 to -20 points (most damaging)
@@ -47,10 +47,10 @@ class MoodTrackingService {
 
         const emotionData = pointSystem[emotion] || pointSystem['neutral'];
         const [min, max] = emotionData.range;
-        
+
         // Scale points based on confidence
         const scaledPoints = emotionData.base * confidence;
-        
+
         // Ensure within range
         return Math.max(min, Math.min(max, Math.round(scaledPoints)));
     }
@@ -73,7 +73,7 @@ class MoodTrackingService {
                 dailyScores: [], // For trend analysis
                 emotionCounts: {
                     excited: 0,
-                    neutral: 0, 
+                    neutral: 0,
                     stressed: 0,
                     angry: 0
                 }
@@ -82,13 +82,13 @@ class MoodTrackingService {
 
         const scoreData = this.conversationScores.get(conversationId);
         scoreData.participants.add(senderId);
-        
+
         // Calculate points for this message
         const points = this.calculateMessagePoints(emotion, confidence);
-        
+
         // Update score (keep within 0-100 range)
         const newScore = Math.max(0, Math.min(100, scoreData.currentScore + points));
-        
+
         // Record the change
         const messageEntry = {
             timestamp: Date.now(),
@@ -111,7 +111,7 @@ class MoodTrackingService {
         }
 
         this.conversationScores.set(conversationId, scoreData);
-        
+
         return {
             currentScore: newScore,
             pointsAdded: points,
@@ -203,9 +203,9 @@ class MoodTrackingService {
         // 50 (neutral) = 0.5 (center)
         // 100 (best) = 1.0 (far end)
         // 0 (worst) = 0.0 (near end)
-        
+
         const position = score / 100;
-        
+
         // For partner perspective, we might want to invert this
         // so their worst is on their side (left) and best is center/right
         if (perspective === 'partner') {

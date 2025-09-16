@@ -10,12 +10,12 @@ You were absolutely right! The explanations were too repetitive and generic. I'v
 - **Before**: ❌ "The person is expressing how much they appreciate your consistent emotional support and care"
 - **After**: ✅ "They appreciate how you support them emotionally"
 
-### Message: *"i am angry with you"*  
+### Message: *"i am angry with you"*
 - **Before**: ❌ "The person is directing frustration or anger toward you about something specific"
 - **After**: ✅ "They're upset about something you did"
 
 ### Message: *"i wanted to go to the shops today, but now i am angry with you"*
-- **Before**: ❌ "The person is expressing anger or frustration about their current situation"  
+- **Before**: ❌ "The person is expressing anger or frustration about their current situation"
 - **After**: ✅ "Their shopping plans got ruined and they blame you"
 
 ### Message: *"Hey, how are you doing today?"*
@@ -31,7 +31,7 @@ You were absolutely right! The explanations were too repetitive and generic. I'v
 
 ### **2. Message-Specific Analysis**
 - ✅ **Shopping context**: "Their shopping plans got ruined and they blame you"
-- ✅ **Work stress**: "They're overwhelmed by work pressure"  
+- ✅ **Work stress**: "They're overwhelmed by work pressure"
 - ✅ **Support appreciation**: "They appreciate how you support them emotionally"
 - ✅ **Simple questions**: "They want to know how you're feeling today"
 
@@ -44,7 +44,7 @@ You were absolutely right! The explanations were too repetitive and generic. I'v
 
 ### **Example Chat Flow:**
 1. **"supportive! 💕"** → Green bubble → *"They appreciate how you support them emotionally"*
-2. **"i am angry with you"** → Red bubble → *"They're upset about something you did"*  
+2. **"i am angry with you"** → Red bubble → *"They're upset about something you did"*
 3. **"i wanted to go to the shops"** → Red bubble → *"Their shopping plans got ruined and they blame you"*
 
 ## 🔧 **Technical Improvements**
@@ -83,7 +83,7 @@ if (lowerText.includes('shops') && emotion === 'angry') {
 
 Your AI chat system now provides **truly helpful explanations** that:
 - **Help users understand** what messages actually mean
-- **Are concise and clear** - No more repetitive long sentences  
+- **Are concise and clear** - No more repetitive long sentences
 - **Show real context** - "Shopping plans ruined" vs generic anger
 - **Feel natural** - Like a friend explaining what someone meant
 

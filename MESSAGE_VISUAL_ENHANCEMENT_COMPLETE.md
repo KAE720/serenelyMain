@@ -9,7 +9,7 @@
 
 ### 2. Message Bubble Height Reduction
 - **Reduced padding**: From 16px to 12px for more compact appearance
-- **Reduced font size**: From 16px to 15px 
+- **Reduced font size**: From 16px to 15px
 - **Reduced line height**: From 22px to 20px
 - **Reduced margin**: From 6px to 4px between messages
 - **Result**: More messages visible on screen, less whitespace
@@ -23,7 +23,7 @@
 - **Added depth**: Added translateZ: 2 for enhanced perspective
 - **Higher elevation**: Increased from 8 to 10
 
-#### Other Messages (Left Side)  
+#### Other Messages (Left Side)
 - **Enhanced shadows**: Improved shadow offset (-3px, 5px) and radius
 - **Stronger borders**: Increased border width to 1.5px
 - **More pronounced rotation**: Increased rotateY to -2deg and rotateX to 1deg
@@ -42,7 +42,7 @@ shadowOffset: { width: 3, height: 5 },
 rotateY: '1deg'
 ```
 
-#### After  
+#### After
 ```javascript
 padding: 12,
 borderRadius: 18,

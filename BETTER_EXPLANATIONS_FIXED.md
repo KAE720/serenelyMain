@@ -65,7 +65,7 @@ if (lowerText.includes('why did you') && lowerText.includes('without me')) {
 ## 🔧 **Technical Fixes Applied**
 
 1. **Enhanced Emotion Keywords**: Added "happy", "good", "nice" to excited patterns
-2. **Activity Recognition**: Detects sports invitations and activity suggestions  
+2. **Activity Recognition**: Detects sports invitations and activity suggestions
 3. **Mood Change Detection**: Recognizes "happy now" as positive mood shift
 4. **Contextual Combinations**: Analyzes emotion + content together
 5. **Question Intent Analysis**: Better understands what questions really mean

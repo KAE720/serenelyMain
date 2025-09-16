@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     backText: {
-        color: '#1976D2',
+        color: '#7B2CBF',
         fontSize: 16,
         fontWeight: '600',
         fontFamily: 'SF Pro Text',

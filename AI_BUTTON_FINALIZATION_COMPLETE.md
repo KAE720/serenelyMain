@@ -53,7 +53,7 @@ if (lowerText.includes('how are you')) {
 ## Testing Scenarios
 
 ### Perspective Accuracy
-- **Current User Message**: "How are you?" → "Checking on their wellbeing"  
+- **Current User Message**: "How are you?" → "Checking on their wellbeing"
 - **Partner Message**: "How are you?" → "Checking on your wellbeing"
 - **Current User Message**: "Why did you hurt me?" → "Questioning if you hurt them"
 - **Partner Message**: "Why did you hurt me?" → "Questioning if they hurt you"

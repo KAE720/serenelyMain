@@ -6,207 +6,207 @@ import modelManager from '../modelManager';
 import { analyzeTone as fallbackAnalyzeTone, getToneSuggestions } from './toneAnalysisService';
 
 class EnhancedToneAnalysisService {
-  constructor() {
-    this.isLLMReady = false;
-    this.isInitializing = false;
-    this.initializationPromise = null;
-  }
-
-  // Initialize the LLM service (should be called on app start)
-  async initializeLLM() {
-    if (this.isLLMReady) {
-      return true;
-    }
-
-    if (this.isInitializing && this.initializationPromise) {
-      return this.initializationPromise;
-    }
-
-    this.isInitializing = true;
-    this.initializationPromise = this._performInitialization();
-    
-    try {
-      const result = await this.initializationPromise;
-      return result;
-    } finally {
-      this.isInitializing = false;
-      this.initializationPromise = null;
-    }
-  }
-
-  async _performInitialization() {
-    try {
-      // Always try to initialize, even if model isn't downloaded
-      // The LLM service will handle fallbacks gracefully
-      await llmService.initialize();
-      
-      // Check if we're in demo mode or real LLM mode
-      const status = llmService.getStatus();
-      this.isLLMReady = status.initialized;
-      
-      if (status.initialized) {
-        console.log('Enhanced tone analysis ready:', llmService.demoMode ? 'Demo mode' : 'LLM mode');
-      } else {
-        console.log('Enhanced tone analysis using fallback mode');
-      }
-      
-      return true;
-
-    } catch (error) {
-      console.error('Failed to initialize LLM for tone analysis:', error);
-      this.isLLMReady = false;
-      return false;
-    }
-  }
-
-  // Main analyze tone method - uses LLM if available, falls back to keywords
-  async analyzeTone(text) {
-    try {
-      // Try LLM analysis first if available
-      if (this.isLLMReady) {
-        console.log('Using advanced on-device AI for emotion analysis');
-        const toneResult = await llmService.analyzeTone(text);
-        
-        // Map colors back to emotion names
-        const colorToEmotionMap = {
-          'red': 'angry',
-          'orange': 'stressed', 
-          'blue': 'neutral',
-          'green': 'excited'
-        };
-        
-        return {
-          tone: colorToEmotionMap[toneResult.color] || 'neutral',
-          confidence: toneResult.confidence,
-          method: 'llm',
-          enhanced: toneResult.isLLMEnhanced,
-          timestamp: new Date().toISOString()
-        };
-      }
-    } catch (error) {
-      console.error('LLM analysis failed, falling back to keyword analysis:', error);
-    }
-
-    // Fallback to simple keyword-based analysis
-    console.log('Using fallback keyword analysis');
-    return this.simpleKeywordAnalysis(text);
-  }
-
-  // Simple keyword-based fallback analysis
-  simpleKeywordAnalysis(text) {
-    const lowerText = text.toLowerCase();
-    
-    // Simple emotion detection patterns
-    if (lowerText.includes('angry') || lowerText.includes('mad') || lowerText.includes('furious')) {
-      return { tone: 'angry', confidence: 0.7, method: 'keyword', enhanced: false };
-    }
-    if (lowerText.includes('stressed') || lowerText.includes('overwhelmed') || lowerText.includes('anxious')) {
-      return { tone: 'stressed', confidence: 0.7, method: 'keyword', enhanced: false };
-    }
-    if (lowerText.includes('happy') || lowerText.includes('excited') || lowerText.includes('love') || lowerText.includes('great')) {
-      return { tone: 'excited', confidence: 0.7, method: 'keyword', enhanced: false };
-    }
-    
-    return { tone: 'neutral', confidence: 0.5, method: 'keyword', enhanced: false };
-  }
-
-  // Check if model is downloaded and ready
-  async isModelReady() {
-    return await modelManager.isModelDownloaded();
-  }
-
-  // Get model download status
-  async getModelStatus() {
-    const isDownloaded = await modelManager.isModelDownloaded();
-    const modelInfo = await modelManager.getModelInfo();
-    const storageInfo = await modelManager.checkStorageSpace();
-    
-    return {
-      downloaded: isDownloaded,
-      modelInfo,
-      storageInfo,
-      llmReady: this.isLLMReady,
-      downloadProgress: modelManager.getDownloadProgress(),
-      isDownloading: modelManager.isDownloadInProgress()
-    };
-  }
-
-  // Download model with progress tracking
-  async downloadModel(onProgress = null) {
-    try {
-      // Check storage space first
-      const storageInfo = await modelManager.checkStorageSpace();
-      if (!storageInfo.sufficient) {
-        throw new Error(`Insufficient storage space. Need ${storageInfo.requiredMB}MB, have ${storageInfo.availableMB}MB`);
-      }
-
-      const modelPath = await modelManager.downloadModel(onProgress);
-      
-      // Try to initialize LLM after download
-      await this.initializeLLM();
-      
-      return modelPath;
-    } catch (error) {
-      console.error('Model download failed:', error);
-      throw error;
-    }
-  }
-
-  // Delete model and cleanup
-  async deleteModel() {
-    try {
-      // Cleanup LLM service first
-      if (this.isLLMReady) {
-        await llmService.cleanup();
+    constructor() {
         this.isLLMReady = false;
-      }
-
-      // Delete model file
-      await modelManager.deleteModel();
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to delete model:', error);
-      throw error;
+        this.isInitializing = false;
+        this.initializationPromise = null;
     }
-  }
 
-  // Get storage information
-  async getStorageInfo() {
-    return await modelManager.checkStorageSpace();
-  }
+    // Initialize the LLM service (should be called on app start)
+    async initializeLLM() {
+        if (this.isLLMReady) {
+            return true;
+        }
 
-  // Add download progress callback
-  addProgressCallback(callback) {
-    modelManager.addProgressCallback(callback);
-  }
+        if (this.isInitializing && this.initializationPromise) {
+            return this.initializationPromise;
+        }
 
-  // Remove download progress callback
-  removeProgressCallback(callback) {
-    modelManager.removeProgressCallback(callback);
-  }
+        this.isInitializing = true;
+        this.initializationPromise = this._performInitialization();
 
-  // Get tone suggestions (unchanged from original service)
-  async getToneSuggestions(tone, message) {
-    return await getToneSuggestions(tone, message);
-  }
+        try {
+            const result = await this.initializationPromise;
+            return result;
+        } finally {
+            this.isInitializing = false;
+            this.initializationPromise = null;
+        }
+    }
 
-  // Get service status for debugging
-  getServiceStatus() {
-    return {
-      llmReady: this.isLLMReady,
-      isInitializing: this.isInitializing,
-      llmStatus: llmService.getStatus(),
-      modelDownloadProgress: modelManager.getDownloadProgress(),
-      isDownloading: modelManager.isDownloadInProgress()
-    };
-  }
+    async _performInitialization() {
+        try {
+            // Always try to initialize, even if model isn't downloaded
+            // The LLM service will handle fallbacks gracefully
+            await llmService.initialize();
 
-  // Reinitialize the service
-  async reinitialize() {
-    this.isLLMReady = false;
-    return await this.initializeLLM();
-  }
+            // Check if we're in demo mode or real LLM mode
+            const status = llmService.getStatus();
+            this.isLLMReady = status.initialized;
+
+            if (status.initialized) {
+                console.log('Enhanced tone analysis ready:', llmService.demoMode ? 'Demo mode' : 'LLM mode');
+            } else {
+                console.log('Enhanced tone analysis using fallback mode');
+            }
+
+            return true;
+
+        } catch (error) {
+            console.error('Failed to initialize LLM for tone analysis:', error);
+            this.isLLMReady = false;
+            return false;
+        }
+    }
+
+    // Main analyze tone method - uses LLM if available, falls back to keywords
+    async analyzeTone(text) {
+        try {
+            // Try LLM analysis first if available
+            if (this.isLLMReady) {
+                console.log('Using advanced on-device AI for emotion analysis');
+                const toneResult = await llmService.analyzeTone(text);
+
+                // Map colors back to emotion names
+                const colorToEmotionMap = {
+                    'red': 'angry',
+                    'orange': 'stressed',
+                    'blue': 'neutral',
+                    'green': 'excited'
+                };
+
+                return {
+                    tone: colorToEmotionMap[toneResult.color] || 'neutral',
+                    confidence: toneResult.confidence,
+                    method: 'llm',
+                    enhanced: toneResult.isLLMEnhanced,
+                    timestamp: new Date().toISOString()
+                };
+            }
+        } catch (error) {
+            console.error('LLM analysis failed, falling back to keyword analysis:', error);
+        }
+
+        // Fallback to simple keyword-based analysis
+        console.log('Using fallback keyword analysis');
+        return this.simpleKeywordAnalysis(text);
+    }
+
+    // Simple keyword-based fallback analysis
+    simpleKeywordAnalysis(text) {
+        const lowerText = text.toLowerCase();
+
+        // Simple emotion detection patterns
+        if (lowerText.includes('angry') || lowerText.includes('mad') || lowerText.includes('furious')) {
+            return { tone: 'angry', confidence: 0.7, method: 'keyword', enhanced: false };
+        }
+        if (lowerText.includes('stressed') || lowerText.includes('overwhelmed') || lowerText.includes('anxious')) {
+            return { tone: 'stressed', confidence: 0.7, method: 'keyword', enhanced: false };
+        }
+        if (lowerText.includes('happy') || lowerText.includes('excited') || lowerText.includes('love') || lowerText.includes('great')) {
+            return { tone: 'excited', confidence: 0.7, method: 'keyword', enhanced: false };
+        }
+
+        return { tone: 'neutral', confidence: 0.5, method: 'keyword', enhanced: false };
+    }
+
+    // Check if model is downloaded and ready
+    async isModelReady() {
+        return await modelManager.isModelDownloaded();
+    }
+
+    // Get model download status
+    async getModelStatus() {
+        const isDownloaded = await modelManager.isModelDownloaded();
+        const modelInfo = await modelManager.getModelInfo();
+        const storageInfo = await modelManager.checkStorageSpace();
+
+        return {
+            downloaded: isDownloaded,
+            modelInfo,
+            storageInfo,
+            llmReady: this.isLLMReady,
+            downloadProgress: modelManager.getDownloadProgress(),
+            isDownloading: modelManager.isDownloadInProgress()
+        };
+    }
+
+    // Download model with progress tracking
+    async downloadModel(onProgress = null) {
+        try {
+            // Check storage space first
+            const storageInfo = await modelManager.checkStorageSpace();
+            if (!storageInfo.sufficient) {
+                throw new Error(`Insufficient storage space. Need ${storageInfo.requiredMB}MB, have ${storageInfo.availableMB}MB`);
+            }
+
+            const modelPath = await modelManager.downloadModel(onProgress);
+
+            // Try to initialize LLM after download
+            await this.initializeLLM();
+
+            return modelPath;
+        } catch (error) {
+            console.error('Model download failed:', error);
+            throw error;
+        }
+    }
+
+    // Delete model and cleanup
+    async deleteModel() {
+        try {
+            // Cleanup LLM service first
+            if (this.isLLMReady) {
+                await llmService.cleanup();
+                this.isLLMReady = false;
+            }
+
+            // Delete model file
+            await modelManager.deleteModel();
+
+            return true;
+        } catch (error) {
+            console.error('Failed to delete model:', error);
+            throw error;
+        }
+    }
+
+    // Get storage information
+    async getStorageInfo() {
+        return await modelManager.checkStorageSpace();
+    }
+
+    // Add download progress callback
+    addProgressCallback(callback) {
+        modelManager.addProgressCallback(callback);
+    }
+
+    // Remove download progress callback
+    removeProgressCallback(callback) {
+        modelManager.removeProgressCallback(callback);
+    }
+
+    // Get tone suggestions (unchanged from original service)
+    async getToneSuggestions(tone, message) {
+        return await getToneSuggestions(tone, message);
+    }
+
+    // Get service status for debugging
+    getServiceStatus() {
+        return {
+            llmReady: this.isLLMReady,
+            isInitializing: this.isInitializing,
+            llmStatus: llmService.getStatus(),
+            modelDownloadProgress: modelManager.getDownloadProgress(),
+            isDownloading: modelManager.isDownloadInProgress()
+        };
+    }
+
+    // Reinitialize the service
+    async reinitialize() {
+        this.isLLMReady = false;
+        return await this.initializeLLM();
+    }
 }
 
 // Export singleton instance

@@ -40,7 +40,7 @@
 height: 6px (was 4px)
 borderRadius: 3px (was 2px)
 
-// Emotion Dots  
+// Emotion Dots
 width: 12px (was 8px)
 height: 12px (was 8px)
 borderRadius: 6px (was 4px)

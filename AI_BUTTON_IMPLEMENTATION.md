@@ -29,7 +29,7 @@ const freshExplanation = await llmService.getExplainer(item.text);
 
 #### Visual Examples:
 - **Happy message**: Button shows "Happy" in green
-- **Stressed message**: Button shows "Stressed" in orange  
+- **Stressed message**: Button shows "Stressed" in orange
 - **Angry message**: Button shows "Angry" in red
 - **Neutral message**: Button shows "Neutral" in blue
 

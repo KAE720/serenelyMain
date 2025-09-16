@@ -33,7 +33,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                 // COPILOT INTEGRATION: Initialize the new LLM service
                 await llmService.initialize();
                 const llmStatus = llmService.getStatus();
-                
+
                 // Fallback to enhanced tone analysis service
                 const isReady = await enhancedToneAnalysisService.initializeLLM();
                 setIsLLMReady(llmStatus.initialized || isReady);
@@ -111,13 +111,13 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     isEnhanced: true,
                 },
             ];
-            
+
             setMessages(mockMessages);
-            
+
             // Initialize mood tracking with existing messages
             const conversationId = `${userId}_${chatPartner.id}`;
             let currentScore = 50; // Start at neutral
-            
+
             mockMessages.forEach(message => {
                 const moodUpdate = moodTrackingService.updateConversationScore(
                     conversationId,
@@ -127,7 +127,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                 );
                 currentScore = moodUpdate.currentScore;
             });
-            
+
             // Set final mood state
             setMoodScore(currentScore);
             const finalHealth = moodTrackingService.getConversationScore(conversationId);
@@ -141,20 +141,20 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         try {
             // COPILOT INTEGRATION: Use the new analyzeTone function
             const copilotAnalysis = await llmService.analyzeTone(text);
-            
+
             // Map Copilot colors back to existing emotion names for UI compatibility
             const colorToEmotionMap = {
                 'red': 'angry',
-                'orange': 'stressed', 
+                'orange': 'stressed',
                 'blue': 'neutral',
                 'green': 'excited'
             };
-            
+
             const mappedTone = colorToEmotionMap[copilotAnalysis.color] || 'neutral';
-            
+
             // Get proper message explanation (what the message is saying)
             const messageExplanation = await llmService.getExplainer(text, true); // true = message is from current user
-            
+
             return {
                 tone: mappedTone,
                 confidence: copilotAnalysis.confidence,
@@ -166,7 +166,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
             console.error("Enhanced tone analysis failed:", error);
             // Fallback to existing logic with improved explanations
             const analysis = await enhancedToneAnalysisService.analyzeTone(text);
-            
+
             // Map to 4 core emotions for dual tracker design
             const coreEmotions = ['angry', 'stressed', 'neutral', 'excited'];
             let mappedTone = analysis.tone;
@@ -200,7 +200,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     // Fallback explanation generator - concise message meaning
     const generateFallbackExplanation = (text) => {
         const lowerText = text.toLowerCase();
-        
+
         // Ultra-concise explanations of what was actually said
         if (lowerText.includes('why did you') && lowerText.includes('without me')) {
             return 'Questioning exclusion';
@@ -235,7 +235,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         if (text.length < 15) {
             return 'Brief message';
         }
-        
+
         return 'Personal communication';
     };
 
@@ -271,7 +271,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                 toneAnalysis.tone,
                 toneAnalysis.confidence
             );
-            
+
             // Update mood state
             setMoodScore(moodUpdate.currentScore);
             setMoodHealth(moodUpdate.healthStatus);
@@ -332,9 +332,9 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
         // Calculate total points based on your specified scoring system
         let totalPoints = 50; // Start at neutral (50/100)
-        
+
         personMessages.forEach(msg => {
-            switch(msg.tone) {
+            switch (msg.tone) {
                 case 'excited':
                 case 'happy':
                     // Happy: +5 to +10 points (using +7.5 average)
@@ -361,7 +361,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
         // Clamp between 0 and 100
         totalPoints = Math.max(0, Math.min(100, totalPoints));
-        
+
         // Convert to 0.0-1.0 scale for positioning
         return totalPoints / 100;
     };
@@ -377,21 +377,21 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const getRelativeRelationshipHealth = () => {
         const partnerScore = getPersonScore(chatPartner.id);
         const userScore = getPersonScore(currentUser?.uid || currentUser?.id || "current_user");
-        
+
         // Calculate how close each person is to the optimal center (50)
         const partnerDistanceFromCenter = Math.abs(50 - partnerScore);
         const userDistanceFromCenter = Math.abs(50 - userScore);
-        
+
         // Convert distance to closeness score (0-50 becomes 50-0)
         const partnerCloseness = 50 - partnerDistanceFromCenter;
         const userCloseness = 50 - userDistanceFromCenter;
-        
+
         // Relationship health is based on how close both are to meeting in the middle
         // When both are at 50 (center), closeness = 50 each, total = 100
         // When one is at 0 and other at 100, average closeness = 25, total = 50
         // When both are at 0 or both at 100, closeness = 0 each, total = 0
         const relationshipHealth = Math.round((partnerCloseness + userCloseness));
-        
+
         // Ensure it's between 0-100
         return Math.max(0, Math.min(100, relationshipHealth));
     };
@@ -612,7 +612,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                         />
                     </View>
                 </View>
-                
+
                 {/* Psychological Score Display (relative to both people's positions) */}
                 <View style={styles.scoreDisplayContainer}>
                     <Text style={[styles.scoreDisplayText, { color: moodHealth?.color || '#4CAF50' }]}>
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: "#4A90E2",
+        backgroundColor: "#9C27B0",
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 6,
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     backButtonText: {
-        color: "#4A90E2",
+        color: "#9C27B0",
         fontSize: 14,
         fontWeight: "600",
         fontFamily: 'SF Pro Text',
@@ -797,7 +797,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 4,
         borderBottomRightRadius: 4,
     },
-    
+
     // Psychological Health Bar Styles (0-100 scale)
     healthRedSection: {
         flex: 2, // 0-20: Poor communication
@@ -810,7 +810,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#FF9800", // Orange - Some tension
     },
     healthYellowSection: {
-        flex: 3, // 35-65: Neutral/Balanced  
+        flex: 3, // 35-65: Neutral/Balanced
         backgroundColor: "#FFC107", // Yellow - Balanced communication
     },
     healthGreenSection: {
@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 2,
         borderBottomRightRadius: 2,
     },
-    
+
     // Mood tracker specific styles
     centerScoreContainer: {
         alignItems: 'center',
@@ -850,7 +850,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: "#fff",
     },
-    
+
     // Score display styles for psychological health tracking
     scoreDisplayContainer: {
         alignItems: 'center',
@@ -898,7 +898,7 @@ const styles = StyleSheet.create({
         borderRadius: 7, // Perfect circle for partner
     },
     rightPersonDot: {
-        borderColor: "#fff", 
+        borderColor: "#fff",
         borderWidth: 2,
         borderRadius: 7, // Perfect circle for user
     },
@@ -1155,7 +1155,7 @@ const styles = StyleSheet.create({
         fontFamily: 'SF Pro Text',
     },
     sendButton: {
-        backgroundColor: "#4A90E2",
+        backgroundColor: "#9C27B0",
         borderRadius: 20,
         paddingHorizontal: 20,
         paddingVertical: 12,
@@ -1225,7 +1225,7 @@ const styles = StyleSheet.create({
         borderBottomColor: "#333",
     },
     searchResultsText: {
-        color: "#4A90E2",
+        color: "#9C27B0",
         fontSize: 12,
         fontWeight: "500",
         textAlign: "center",

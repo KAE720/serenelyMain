@@ -15,7 +15,7 @@
 - **Shadow radius**: Increased to 12px for softer edge
 - **Elevation**: Increased to 15 for Android depth
 
-#### Partner Messages (Left Side)  
+#### Partner Messages (Left Side)
 - **Shadow offset**: Enhanced to (-4px, 7px) for left-side depth
 - **Shadow opacity**: Increased to 0.4 for visible depth
 - **Shadow radius**: Increased to 10px for smooth shadows
@@ -50,7 +50,7 @@ shadowRadius: 8,
 elevation: 10,
 rotateY: '2deg'
 
-// After  
+// After
 borderRadius: 24,
 shadowOffset: { width: 5, height: 8 },
 shadowOpacity: 0.5,
@@ -78,7 +78,7 @@ rotateY: '3deg'
 
 Messages now have a significantly more rounded and 3D appearance with:
 - Larger border radius for softer, more organic shapes
-- Deeper shadows for realistic depth perception  
+- Deeper shadows for realistic depth perception
 - Stronger 3D transforms for enhanced perspective
 - Enhanced border highlights for light reflection effects
 - Consistent 3D styling across all interactive elements

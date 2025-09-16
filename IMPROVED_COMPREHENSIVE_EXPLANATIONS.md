@@ -2,7 +2,7 @@
 
 ## 🎯 Problem Fixed
 
-**BEFORE**: "i am not happy and i am angry with you" 
+**BEFORE**: "i am not happy and i am angry with you"
 - ❌ **"Personal communication"** (Generic, unhelpful)
 
 **AFTER**: "i am not happy and i am angry with you"
@@ -13,7 +13,7 @@
 ### 1. **Expanded Emotional Confrontation**
 ```javascript
 // Now catches multiple variations:
-- "not happy with you" 
+- "not happy with you"
 - "not happy and angry with you" ✅ NEW
 - "angry with you"
 - "not happy ... with you" (words in between)
@@ -22,7 +22,7 @@
 ### 2. **General Anger Expressions**
 ```javascript
 - "angry with you" → "Expressing anger toward them/you"
-- "mad at you" → "Expressing anger toward them/you"  
+- "mad at you" → "Expressing anger toward them/you"
 - "upset with you" → "Directing negative emotions at them/you"
 ```
 
@@ -63,7 +63,7 @@ if ((angry || mad || upset) && (i am || im) && you) {
    - "why did you..." with emotional context
    - "not happy with you" variations
 
-2. **Direct emotional expressions** 
+2. **Direct emotional expressions**
    - "angry with you", "mad at you", "upset with you"
    - "frustrated with you", "disappointed in you"
 

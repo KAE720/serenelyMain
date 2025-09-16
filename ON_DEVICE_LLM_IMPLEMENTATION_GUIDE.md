@@ -30,7 +30,7 @@ npm install react-native-pytorch-core
 ## STEP 2: Download Small Emotion Classification Model
 **Recommended Models (Free & Commercial-friendly):**
 - **TinyLlama-1.1B-Chat** (Apache 2.0 license)
-- **Phi-3-mini-4k** (MIT license)  
+- **Phi-3-mini-4k** (MIT license)
 - **Qwen2-0.5B** (Apache 2.0 license)
 
 **Download Command:**
@@ -46,18 +46,18 @@ curl -L "https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0/resolve/main/
 
 **PROMPT FOR COPILOT:**
 ```
-Replace the demo mode in llmService.js with real on-device LLM using llama.rn. 
+Replace the demo mode in llmService.js with real on-device LLM using llama.rn.
 
 Requirements:
 1. Load TinyLlama model from assets/models/tinyllama.bin
-2. For analyzeTone(): Prompt LLM to classify emotion as "angry", "stressed", "neutral", or "excited" 
+2. For analyzeTone(): Prompt LLM to classify emotion as "angry", "stressed", "neutral", or "excited"
 3. For getExplainer(): Prompt LLM to concisely explain what the message means in 1 sentence
 4. Return same format as current demo mode
 5. Keep fallback to demo mode if model fails to load
 
 Key functions to implement:
 - initializeRealLLM() - load model
-- runEmotionClassification(text) - classify emotion  
+- runEmotionClassification(text) - classify emotion
 - runMessageExplanation(text) - explain message meaning
 - Use minimal prompts for mobile performance
 ```
@@ -70,7 +70,7 @@ Key functions to implement:
 ```
 
 **MESSAGE EXPLANATION PROMPT:**
-```  
+```
 "Explain in 1 sentence what this means: [MESSAGE]"
 ```
 
@@ -91,7 +91,7 @@ Update the initialize() function in llmService.js to:
 5. Make it work on both iOS and Android
 ```
 
-## STEP 6: Optimize Message Explanation 
+## STEP 6: Optimize Message Explanation
 
 **CURRENT ISSUE:** Explanations are too generic
 **SOLUTION:** Replace with direct LLM prompting
@@ -104,7 +104,7 @@ Instead of generic patterns, use this approach:
 1. For real LLM: Prompt "Concisely explain what this message means: [MESSAGE]"
 2. For demo fallback: Create very specific message interpretations like:
    - "i love you" → "The person is expressing romantic affection"
-   - "im stressed" → "The person is sharing that they feel overwhelmed"  
+   - "im stressed" → "The person is sharing that they feel overwhelmed"
    - "how are you" → "The person wants to know about your current state"
    - "thank you" → "The person is showing gratitude for something you did"
 
@@ -139,7 +139,7 @@ Create a test function in llmService.js to verify the LLM works:
 
 Test messages:
 - "i love you" → should return green (excited) + "The person is expressing love"
-- "im angry at you" → should return red (angry) + "The person is expressing anger toward you"  
+- "im angry at you" → should return red (angry) + "The person is expressing anger toward you"
 - "feeling stressed about work" → should return orange (stressed) + "The person is sharing work-related stress"
 - "how was your day" → should return blue (neutral) + "The person wants to know about your day"
 
@@ -153,7 +153,7 @@ Add console logs to verify both emotion classification and explanations work.
 Make llmService.js work on both platforms:
 
 1. Add platform-specific model loading paths
-2. Handle React Native bridge differences  
+2. Handle React Native bridge differences
 3. Add memory management for mobile devices
 4. Implement graceful degradation if model is too large
 5. Add loading indicators for first-time model initialization
@@ -187,13 +187,13 @@ Make llmService.js work on both platforms:
 
 ## EXPECTED RESULTS:
 - **"i love you"** → Green bubble + "The person is expressing romantic love for you"
-- **"im stressed about work"** → Orange bubble + "The person is sharing work-related anxiety and pressure"  
+- **"im stressed about work"** → Orange bubble + "The person is sharing work-related anxiety and pressure"
 - **"why didn't you tell me"** → Red bubble + "The person is upset about lack of communication"
 - **"how are you doing"** → Blue bubble + "The person wants to know about your current wellbeing"
 
 ## COMMERCIAL LICENSE COMPLIANCE:
 - TinyLlama: Apache 2.0 (✅ Commercial use allowed)
-- llama.rn: MIT (✅ Commercial use allowed)  
+- llama.rn: MIT (✅ Commercial use allowed)
 - Your implementation: Fully commercializable
 
 This gives you a complete on-device AI system that's free, open-source, and commercially viable!

@@ -10,7 +10,7 @@
 - **Happy/Excited** 🟢: **+7.5 points** (average of +5 to +10)
   - Positive reinforcement, connection, affection
   - Foundation of healthy relationship
-- **Stressed** 🟠: **-3.5 points** (average of -2 to -5)  
+- **Stressed** 🟠: **-3.5 points** (average of -2 to -5)
   - Minor negative state, anxiety, worry
   - Opportunity for support and empathy
 - **Angry** 🔴: **-15 points** (average of -10 to -20)
@@ -28,7 +28,7 @@
 - Score 100 (happy) → Position 50% (center meeting point)
 
 **User (Right Side)**:
-- Score 0 (angry) → Position 100% (far right)  
+- Score 0 (angry) → Position 100% (far right)
 - Score 50 (neutral) → Position 75% (three quarters)
 - Score 100 (happy) → Position 50% (center meeting point)
 
@@ -39,15 +39,15 @@
 const getRelativeRelationshipHealth = () => {
     const partnerScore = getPersonScore(chatPartner.id);
     const userScore = getPersonScore(currentUser.id);
-    
+
     // How close each person is to optimal center (50)
     const partnerDistanceFromCenter = Math.abs(50 - partnerScore);
     const userDistanceFromCenter = Math.abs(50 - userScore);
-    
+
     // Convert distance to closeness (closer to center = higher score)
     const partnerCloseness = 50 - partnerDistanceFromCenter;
     const userCloseness = 50 - userDistanceFromCenter;
-    
+
     // Total relationship health (0-100)
     return partnerCloseness + userCloseness;
 };
@@ -60,7 +60,7 @@ const getRelativeRelationshipHealth = () => {
 - **Individual Scores**: Partner 65, User 72 (+15-22 points from neutral)
 - **Positions**: Partner at 32.5%, User at 64% (both closer to center)
 - **Partner closeness**: 50 - |50-65| = 35
-- **User closeness**: 50 - |50-72| = 28  
+- **User closeness**: 50 - |50-72| = 28
 - **Relationship Health**: 35 + 28 = **63/100** ✅
 
 ### Example 2: Perfect Harmony
@@ -71,7 +71,7 @@ const getRelativeRelationshipHealth = () => {
 - **User closeness**: 50 - |50-50| = 50
 - **Relationship Health**: 50 + 50 = **100/100** ✅
 
-### Example 3: One Angry, One Happy  
+### Example 3: One Angry, One Happy
 - **Messages**: Partner sends "I hate you", User sends "I love you"
 - **Individual Scores**: Partner 35 (-15 points), User 65 (+15 points)
 - **Positions**: Partner at 17.5%, User at 67.5%
@@ -101,7 +101,7 @@ const getRelativeRelationshipHealth = () => {
 ```javascript
 const getPersonEmotion = (personId) => {
     let totalPoints = 50; // Start at neutral
-    
+
     personMessages.forEach(msg => {
         switch(msg.tone) {
             case 'excited':
@@ -119,7 +119,7 @@ const getPersonEmotion = (personId) => {
                 break;
         }
     });
-    
+
     // Clamp between 0-100, convert to 0.0-1.0
     return Math.max(0, Math.min(100, totalPoints)) / 100;
 };

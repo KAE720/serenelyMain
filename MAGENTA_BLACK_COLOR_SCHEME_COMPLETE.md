@@ -9,7 +9,7 @@
 
 ### ✅ 2. Profile Picture Border Colors
 - **Partner Profile**: Bright magenta border (`#FF00FF`) matching their emotion tracker dot
-- **User Profile**: Jet black border (`#000000`) matching your emotion tracker dot  
+- **User Profile**: Jet black border (`#000000`) matching your emotion tracker dot
 - **Border Width**: 2px for clear visibility
 - **Visual Consistency**: Profile borders now match tracker dot colors for intuitive user identification
 
@@ -60,7 +60,7 @@ paddingBottom: 12px (was 20px)
 // Emotion Tracker
 paddingVertical: 8px (was 12px)
 
-// Score Display  
+// Score Display
 marginTop: 4px (was 6px)
 paddingVertical: 2px (was 3px)
 ```
