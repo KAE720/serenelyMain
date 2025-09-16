@@ -614,11 +614,11 @@ class LLMService {
         
         // Wellbeing and support
         if (lowerText.includes('how are you')) {
-            return 'Checking on your wellbeing';
+            return isFromCurrentUser ? 'Checking on their wellbeing' : 'Checking on your wellbeing';
         }
         
         if (lowerText.includes('want to talk about it')) {
-            return 'Offering to listen and support';
+            return isFromCurrentUser ? 'Offering them support and listening' : 'Offering you support and listening';
         }
         
         if (lowerText.includes('sorry to hear')) {
@@ -641,7 +641,7 @@ class LLMService {
         // Questions and clarifications
         if (text.includes('?')) {
             if (lowerText.includes('upset') || lowerText.includes('hurt')) {
-                return isFromCurrentUser ? 'Questioning why they hurt you' : 'Questioning why you hurt them';
+                return isFromCurrentUser ? 'Questioning if you hurt them' : 'Questioning if they hurt you';
             }
             if (lowerText.includes('why') && lowerText.includes('you')) {
                 return isFromCurrentUser ? 'Demanding explanation from them' : 'Demanding explanation for your actions';

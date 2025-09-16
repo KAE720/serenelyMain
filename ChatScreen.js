@@ -467,7 +467,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                         {/* LLM Enhancement Indicator */}
                         {item.isEnhanced && (
                             <View style={styles.enhancementIndicator}>
-                                <Text style={styles.enhancementText}>🧠</Text>
+                                <Text style={styles.enhancementText}>✓</Text>
                             </View>
                         )}
                         
@@ -501,10 +501,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                                 }
                             }}
                         >
-                            {/* Emotion Label with Color */}
-                            <Text style={[styles.aiEmotionText, { color: toneColor }]}>
-                                {item.tone.charAt(0).toUpperCase() + item.tone.slice(1)}
-                            </Text>
+                            {/* AI Label */}
+                            <Text style={styles.aiIconText}>AI</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -523,7 +521,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                         </Text>
                         {item.isEnhanced && (
                             <Text style={styles.enhancementBadge}>
-                                🧠 Enhanced AI Analysis
+                                Enhanced Analysis
                             </Text>
                         )}
                         <View style={[
