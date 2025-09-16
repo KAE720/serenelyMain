@@ -334,46 +334,75 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         return message.explanation || detailedExplanations[message.tone] || `This message has a ${message.tone} tone with ${Math.round(message.toneConfidence * 100)}% confidence`;
     };
 
-    // Calculate conversation emotion for each person separately - SYMMETRIC MEETING DESIGN
+    // Calculate conversation emotion for each person separately - NEW SCORING SYSTEM
     const getPersonEmotion = (personId) => {
         const personMessages = messages.filter(msg => msg.sender === personId);
-        if (personMessages.length === 0) return 0.67; // neutral starting point (green section)
+        if (personMessages.length === 0) return 0.5; // neutral starting point (50/100)
 
-        // 4-emotion progression: 0.0=angry, 0.33=stressed, 0.67=neutral, 1.0=excited (blue center)
-        const emotionValues = {
-            angry: 0.0,     // Far from center (most negative) - Red
-            stressed: 0.33, // Moving toward center - Orange
-            neutral: 0.67,  // Getting closer to center - Green
-            excited: 1.0,   // Center (meeting point) - Blue
+        // Calculate total points based on your specified scoring system
+        let totalPoints = 50; // Start at neutral (50/100)
+        
+        personMessages.forEach(msg => {
+            switch(msg.tone) {
+                case 'excited':
+                case 'happy':
+                    // Happy: +5 to +10 points (using +7.5 average)
+                    totalPoints += 7.5;
+                    break;
+                case 'stressed':
+                    // Stressed: -2 to -5 points (using -3.5 average)
+                    totalPoints -= 3.5;
+                    break;
+                case 'angry':
+                    // Angry: -10 to -20 points (using -15 average)
+                    totalPoints -= 15;
+                    break;
+                case 'neutral':
+                    // Calm/Neutral: +1 to +2 points (using +1.5 average)
+                    totalPoints += 1.5;
+                    break;
+                default:
+                    // Unknown tone, treat as neutral
+                    totalPoints += 1.5;
+                    break;
+            }
+        });
 
-            // Legacy mappings
-            happy: 1.0,     // Map to excited (blue)
-            sad: 0.33,      // Map to stressed (orange)
-        };
-
-        const total = personMessages.reduce((sum, msg) => sum + (emotionValues[msg.tone] || 0.5), 0);
-        return total / personMessages.length;
+        // Clamp between 0 and 100
+        totalPoints = Math.max(0, Math.min(100, totalPoints));
+        
+        // Convert to 0.0-1.0 scale for positioning
+        return totalPoints / 100;
     };
 
-    // Calculate individual person's score (0-100)
+    // Calculate individual person's score (0-100) - now uses the new scoring system
     const getPersonScore = (personId) => {
         const emotion = getPersonEmotion(personId);
-        // Convert emotion (0.0-1.0) to score (0-100)
-        // 0.0 (angry) = 0 points, 1.0 (excited) = 100 points
+        // emotion is already 0.0-1.0 from the new scoring system
         return Math.round(emotion * 100);
     };
 
-    // Calculate relative relationship health based on both people's positions
+    // Calculate relative relationship health based on both people's positions and proximity to center
     const getRelativeRelationshipHealth = () => {
         const partnerScore = getPersonScore(chatPartner.id);
         const userScore = getPersonScore(currentUser?.uid || currentUser?.id || "current_user");
         
-        // Calculate average of both scores for relationship health
-        const averageScore = (partnerScore + userScore) / 2;
+        // Calculate how close each person is to the optimal center (50)
+        const partnerDistanceFromCenter = Math.abs(50 - partnerScore);
+        const userDistanceFromCenter = Math.abs(50 - userScore);
         
-        // Only when both are at center (50%+ each) do we get high relationship health
-        // This ensures that if one person is at 50% but other is at 25%, it's not 100% health
-        return Math.round(averageScore);
+        // Convert distance to closeness score (0-50 becomes 50-0)
+        const partnerCloseness = 50 - partnerDistanceFromCenter;
+        const userCloseness = 50 - userDistanceFromCenter;
+        
+        // Relationship health is based on how close both are to meeting in the middle
+        // When both are at 50 (center), closeness = 50 each, total = 100
+        // When one is at 0 and other at 100, average closeness = 25, total = 50
+        // When both are at 0 or both at 100, closeness = 0 each, total = 0
+        const relationshipHealth = Math.round((partnerCloseness + userCloseness));
+        
+        // Ensure it's between 0-100
+        return Math.max(0, Math.min(100, relationshipHealth));
     };
 
     // Get dynamic color for each person's tracker dot - magenta for partner, black for user
@@ -608,13 +637,11 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                 </View>
                 
                 {/* Psychological Score Display (relative to both people's positions) */}
-                {moodHealth && (
-                    <View style={styles.scoreDisplayContainer}>
-                        <Text style={[styles.scoreDisplayText, { color: moodHealth.color }]}>
-                            Relationship Health: {getRelativeRelationshipHealth()}/100
-                        </Text>
-                    </View>
-                )}
+                <View style={styles.scoreDisplayContainer}>
+                    <Text style={[styles.scoreDisplayText, { color: moodHealth?.color || '#4CAF50' }]}>
+                        Relationship Health: {getRelativeRelationshipHealth()}/100
+                    </Text>
+                </View>
             </View>
 
             {/* Messages */}
