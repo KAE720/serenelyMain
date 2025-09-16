@@ -18,7 +18,9 @@
       "bundleIdentifier": "com.serenely11.SimpleGoogleAuthExpo",
       "scheme": "com.serenely11.simplegoogleauthexpo",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSDocumentsFolderUsageDescription": "This app needs access to store AI models for emotion analysis",
+        "NSDownloadsUsageDescription": "This app downloads AI models for offline emotion analysis"
       }
     },
     "android": {
@@ -37,7 +39,19 @@
       }
     },
     "plugins": [
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-file-system",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": true
+          },
+          "android": {
+            "newArchEnabled": true
+          }
+        }
+      ]
     ]
   }
 }

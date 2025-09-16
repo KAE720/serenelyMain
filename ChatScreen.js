@@ -11,7 +11,7 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from "react-native";
-import { analyzeTone, getToneSuggestions } from "./services/toneAnalysisService";
+import enhancedToneAnalysisService from "./services/enhancedToneAnalysisService";
 
 export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const [messages, setMessages] = useState([]);
@@ -20,10 +20,25 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [aiExplanation, setAiExplanation] = useState(null); // For AI popup
+    const [isLLMReady, setIsLLMReady] = useState(false); // Track LLM status
     const flatListRef = useRef(null);
 
-    // Mock initial messages
+    // Initialize enhanced tone analysis and mock messages
     useEffect(() => {
+        // Initialize the enhanced tone analysis service
+        const initializeEnhancedAnalysis = async () => {
+            try {
+                const isReady = await enhancedToneAnalysisService.initializeLLM();
+                setIsLLMReady(isReady);
+                console.log('Enhanced tone analysis initialized:', isReady ? 'LLM ready' : 'Using fallback');
+            } catch (error) {
+                console.error('Failed to initialize enhanced tone analysis:', error);
+                setIsLLMReady(false);
+            }
+        };
+
+        initializeEnhancedAnalysis();
+
         // Simulate loading messages from backend
         setTimeout(() => {
             const userId = currentUser?.uid || currentUser?.id || "current_user";
@@ -36,6 +51,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     tone: "happy",
                     toneConfidence: 0.85,
                     explanation: "This message has a warm, caring tone that shows genuine interest in the other person's wellbeing",
+                    isEnhanced: false, // Keyword analysis
                 },
                 {
                     id: "2",
@@ -45,6 +61,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     tone: "stressed",
                     toneConfidence: 0.78,
                     explanation: "This message expresses anxiety and worry, indicating the sender is dealing with workplace pressure",
+                    isEnhanced: true, // Enhanced LLM analysis
                 },
                 {
                     id: "3",
@@ -54,6 +71,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     tone: "happy",
                     toneConfidence: 0.92,
                     explanation: "This message shows empathy and offers emotional support, creating a safe space for further discussion",
+                    isEnhanced: false,
                 },
                 {
                     id: "4",
@@ -63,6 +81,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     tone: "stressed",
                     toneConfidence: 0.76,
                     explanation: "This message conveys stress and feeling overwhelmed by work pressures",
+                    isEnhanced: true, // Enhanced LLM analysis
                 },
                 {
                     id: "5",
@@ -72,6 +91,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     tone: "neutral",
                     toneConfidence: 0.65,
                     explanation: "This message offers practical advice in a calm, balanced way",
+                    isEnhanced: false,
                 },
                 {
                     id: "6",
@@ -81,6 +101,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     tone: "excited",
                     toneConfidence: 0.91,
                     explanation: "This message demonstrates high positive energy, love, and appreciation",
+                    isEnhanced: true, // Enhanced LLM analysis
                 },
             ]);
         }, 500);
@@ -88,35 +109,42 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
     const analyzeToneForMessage = async (text) => {
         try {
-            const analysis = await analyzeTone(text);
+            const analysis = await enhancedToneAnalysisService.analyzeTone(text);
+            
             // Map to 4 core emotions for dual tracker design
             const coreEmotions = ['angry', 'stressed', 'neutral', 'excited'];
             let mappedTone = analysis.tone;
 
-            // Map common variations to our 4 core emotions
-            if (['positive', 'supportive', 'cheerful', 'content', 'calm', 'joyful', 'loving', 'happy'].includes(analysis.tone)) {
-                mappedTone = 'excited'; // All positive emotions -> excited (purple)
-            } else if (['negative', 'frustrated', 'irritated', 'furious'].includes(analysis.tone)) {
-                mappedTone = 'angry';
-            } else if (['anxious', 'worried', 'overwhelmed', 'tense', 'sad', 'down', 'melancholy', 'disappointed'].includes(analysis.tone)) {
-                mappedTone = 'stressed'; // Map anxiety and sadness to stressed (orange)
-            } else if (!coreEmotions.includes(analysis.tone)) {
-                mappedTone = 'neutral';
+            // Ensure we only use core emotions
+            if (!coreEmotions.includes(analysis.tone)) {
+                // Map common variations to our 4 core emotions
+                if (['positive', 'supportive', 'cheerful', 'content', 'calm', 'joyful', 'loving', 'happy'].includes(analysis.tone)) {
+                    mappedTone = 'excited'; // All positive emotions -> excited (purple)
+                } else if (['negative', 'frustrated', 'irritated', 'furious'].includes(analysis.tone)) {
+                    mappedTone = 'angry';
+                } else if (['anxious', 'worried', 'overwhelmed', 'tense', 'sad', 'down', 'melancholy', 'disappointed'].includes(analysis.tone)) {
+                    mappedTone = 'stressed'; // Map anxiety and sadness to stressed (orange)
+                } else {
+                    mappedTone = 'neutral';
+                }
             }
 
             return {
                 ...analysis,
-                tone: mappedTone
+                tone: mappedTone,
+                isEnhanced: analysis.method === 'llm' // Track if LLM was used
             };
         } catch (error) {
-            console.error("Tone analysis failed:", error);
+            console.error("Enhanced tone analysis failed:", error);
             // Randomly assign a core emotion for demo purposes
             const coreEmotions = ['angry', 'stressed', 'neutral', 'excited'];
             const randomTone = coreEmotions[Math.floor(Math.random() * coreEmotions.length)];
             return {
                 tone: randomTone,
-                confidence: 0.7,
-                explanation: `Demo: Detected ${randomTone} emotion`
+                confidence: 0.6,
+                explanation: `Fallback: Detected ${randomTone} emotion`,
+                method: 'fallback',
+                isEnhanced: false
             };
         }
     };
@@ -140,13 +168,14 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                 tone: toneAnalysis.tone,
                 toneConfidence: toneAnalysis.confidence,
                 explanation: toneAnalysis.explanation,
+                isEnhanced: toneAnalysis.isEnhanced || false, // Include enhancement status
             };
 
             setMessages(prev => [...prev, newMessage]);
 
             // Get suggestions for the partner based on the tone
             if (toneAnalysis.tone !== 'neutral') {
-                const toneSuggestions = await getToneSuggestions(toneAnalysis.tone, messageText);
+                const toneSuggestions = await enhancedToneAnalysisService.getToneSuggestions(toneAnalysis.tone, messageText);
                 setSuggestions(toneSuggestions);
                 setShowSuggestions(true);
             }
@@ -281,8 +310,15 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                         {item.text}
                     </Text>
 
-                    {/* AI button only */}
+                    {/* AI button and enhancement indicator */}
                     <View style={styles.aiButtonContainer}>
+                        {/* LLM Enhancement Indicator */}
+                        {item.isEnhanced && (
+                            <View style={styles.enhancementIndicator}>
+                                <Text style={styles.enhancementText}>🧠</Text>
+                            </View>
+                        )}
+                        
                         <TouchableOpacity
                             style={[styles.aiButton, showingExplanation && styles.aiButtonActive]}
                             onPress={() => {
@@ -293,7 +329,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                                         messageId: item.id,
                                         tone: item.tone,
                                         explanation: getToneExplanation(item),
-                                        color: toneColor
+                                        color: toneColor,
+                                        isEnhanced: item.isEnhanced
                                     });
                                 }
                             }}
@@ -316,6 +353,11 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                             </Text>
                             {" - " + getToneExplanation(item)}
                         </Text>
+                        {item.isEnhanced && (
+                            <Text style={styles.enhancementBadge}>
+                                🧠 Enhanced AI Analysis
+                            </Text>
+                        )}
                         <View style={[
                             styles.aiPopupArrow,
                             isOwnMessage ? styles.aiArrowRight : styles.aiArrowLeft
@@ -956,6 +998,28 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
         fontWeight: '600',
         fontFamily: 'SF Pro Text',
+    },
+    enhancementIndicator: {
+        position: 'absolute',
+        top: -8,
+        right: -8,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 10,
+        width: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1,
+    },
+    enhancementText: {
+        fontSize: 10,
+    },
+    enhancementBadge: {
+        fontSize: 11,
+        color: '#4A90A4',
+        fontWeight: '600',
+        marginTop: 4,
+        textAlign: 'center',
     },
     searchContainer: {
         backgroundColor: "#1E1E1E",

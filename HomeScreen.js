@@ -13,10 +13,14 @@ import CallsScreen from './CallsScreen';
 import ContactsScreen from './ContactsScreen';
 import AIShrinkScreen from './AIShrinkScreen';
 import ChatScreen from './ChatScreen';
+import ModelManagementScreen from './ModelManagementScreen';
+import TestLLMScreen from './TestLLMScreen';
 import { MessageIcon, CallsIcon, ContactsIcon, SereneIcon } from './components/TabIcons';
 
 export default function HomeScreen({ userId, onLogout, user }) {
     const [showProfile, setShowProfile] = useState(false);
+    const [showModelManagement, setShowModelManagement] = useState(false);
+    const [showLLMTest, setShowLLMTest] = useState(false);
     const [activeTab, setActiveTab] = useState('Messages');
     const [currentScreen, setCurrentScreen] = useState('main'); // 'main' or 'chat'
     const [selectedChat, setSelectedChat] = useState(null);
@@ -39,6 +43,32 @@ export default function HomeScreen({ userId, onLogout, user }) {
                 user={user}
                 onBack={() => setShowProfile(false)}
                 onLogout={onLogout}
+                onOpenModelManagement={() => {
+                    setShowProfile(false);
+                    setShowModelManagement(true);
+                }}
+                onOpenLLMTest={() => {
+                    setShowProfile(false);
+                    setShowLLMTest(true);
+                }}
+            />
+        );
+    }
+
+    // If showing model management, render ModelManagementScreen
+    if (showModelManagement) {
+        return (
+            <ModelManagementScreen
+                onBack={() => setShowModelManagement(false)}
+            />
+        );
+    }
+
+    // If showing LLM test, render TestLLMScreen
+    if (showLLMTest) {
+        return (
+            <TestLLMScreen
+                onBack={() => setShowLLMTest(false)}
             />
         );
     }

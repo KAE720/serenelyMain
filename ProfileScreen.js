@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Alert, Scro
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { auth } from './firebase';
 
-export default function ProfileScreen({ user, onBack, onLogout }) {
+export default function ProfileScreen({ user, onBack, onLogout, onOpenModelManagement, onOpenLLMTest }) {
     const [showPasswordChange, setShowPasswordChange] = useState(false);
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -146,6 +146,16 @@ export default function ProfileScreen({ user, onBack, onLogout }) {
                 </View>
             )}
 
+            {/* AI Model Management button */}
+            <TouchableOpacity style={styles.modelManagementButton} onPress={onOpenModelManagement}>
+                <Text style={styles.modelManagementText}>🧠 AI Model Management</Text>
+            </TouchableOpacity>
+
+            {/* LLM Test button */}
+            <TouchableOpacity style={styles.testButton} onPress={onOpenLLMTest}>
+                <Text style={styles.testButtonText}>🧪 Test LLM Architecture</Text>
+            </TouchableOpacity>
+
             {/* Logout button */}
             <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
                 <Text style={styles.logoutText}>Logout</Text>
@@ -278,6 +288,34 @@ const styles = StyleSheet.create({
     },
     disabledButton: {
         backgroundColor: '#666',
+    },
+    modelManagementButton: {
+        backgroundColor: '#4A90A4',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 8,
+        marginTop: 20,
+        alignItems: 'center',
+    },
+    modelManagementText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+        fontFamily: 'SF Pro Text',
+    },
+    testButton: {
+        backgroundColor: '#28a745',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 8,
+        marginTop: 10,
+        alignItems: 'center',
+    },
+    testButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+        fontFamily: 'SF Pro Text',
     },
     logoutButton: {
         backgroundColor: '#dc3545',
