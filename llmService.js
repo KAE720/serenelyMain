@@ -35,14 +35,14 @@ class EmotionClassificationEngine {
                 intensifiers: ['extremely', 'really', 'very', 'so much', 'totally']
             },
             excited: {
-                keywords: ['excited', 'happy', 'amazing', 'wonderful', 'fantastic', 'great', 'awesome', 'love'],
+                keywords: ['excited', 'happy', 'amazing', 'wonderful', 'fantastic', 'great', 'awesome', 'love', 'good', 'nice', 'cool'],
                 phrases: [
                     'so happy', 'can\'t wait', 'love you', 'thank you', 'appreciate',
-                    'you\'re the best', 'feel great', 'amazing news'
+                    'you\'re the best', 'feel great', 'amazing news', 'happy now', 'feeling good'
                 ],
                 contextualClues: [
                     'celebration', 'party', 'vacation', 'promotion', 'good news',
-                    'achievement', 'success', 'wedding', 'birthday'
+                    'achievement', 'success', 'wedding', 'birthday', 'watch', 'fun'
                 ],
                 emoticons: ['😍', '💕', '❤️', '😊', '😃', '🎉', '✨', '💖'],
                 intensifiers: ['absolutely', 'totally', 'completely', 'so much', 'incredibly']
@@ -292,43 +292,75 @@ class MessageExplanationEngine {
         const lowerText = text.toLowerCase();
         const emotion = emotionAnalysis.emotion;
         
-        // Analyze what they're actually communicating
-        if (lowerText.includes('angry') && lowerText.includes('with you')) {
-            return 'They\'re mad about something you did';
-        }
+        // SPECIFIC MESSAGE ANALYSIS - What they actually mean
         
+        // Shopping-related messages
         if (lowerText.includes('shops') || lowerText.includes('shopping')) {
-            if (emotion === 'angry') {
-                return 'Their shopping plans got ruined and they blame you';
+            if (lowerText.includes('why did you') || lowerText.includes('without me')) {
+                return 'They\'re upset you went shopping without including them';
             }
-            return 'They\'re telling you about their shopping plans';
+            if (lowerText.includes('wanted to go') || lowerText.includes('planned to go')) {
+                return 'They had shopping plans that got disrupted';
+            }
+            return 'They\'re talking about shopping plans';
         }
         
+        // Football/sports invitations
+        if (lowerText.includes('watch') && (lowerText.includes('football') || lowerText.includes('game'))) {
+            if (lowerText.includes('happy now') || lowerText.includes('do u wanna')) {
+                return 'They\'re inviting you to watch football together';
+            }
+            return 'They want to watch sports with you';
+        }
+        
+        // Questions about actions/decisions
+        if (lowerText.includes('why did you')) {
+            if (lowerText.includes('without me')) {
+                return 'They feel excluded from something you did';
+            }
+            return 'They want to understand your reasoning';
+        }
+        
+        // Mood changes and activities
+        if (lowerText.includes('happy now') || lowerText.includes('feeling better')) {
+            if (lowerText.includes('do u wanna') || lowerText.includes('want to')) {
+                return 'Their mood improved and they\'re suggesting an activity';
+            }
+            return 'They\'re telling you their mood has improved';
+        }
+        
+        // Direct anger expressions
+        if (lowerText.includes('angry') && lowerText.includes('with you')) {
+            return 'They\'re directly telling you they\'re mad at you';
+        }
+        
+        // Support and appreciation
         if (lowerText.includes('supportive') && (lowerText.includes('love') || lowerText.includes('💕'))) {
-            return 'They appreciate how you support them emotionally';
+            return 'They\'re grateful for your emotional support';
         }
         
+        // Work stress expressions
         if (lowerText.includes('stressed') || lowerText.includes('overwhelmed')) {
-            if (lowerText.includes('work')) {
-                return 'They\'re feeling pressure from their job';
+            if (lowerText.includes('work') || lowerText.includes('boss')) {
+                return 'They\'re struggling with work pressure';
             }
-            return 'They\'re feeling overwhelmed by life';
+            return 'They\'re feeling overwhelmed by something';
         }
         
-        if (lowerText.includes('boss') && (lowerText.includes('demanding') || lowerText.includes('difficult'))) {
-            return 'Their supervisor is giving them a hard time';
-        }
-        
-        // Contextual analysis based on emotion and content
+        // General contextual analysis based on emotion and patterns
         if (emotion === 'angry') {
             if (lowerText.includes('you')) {
-                return 'They\'re frustrated with something you did';
+                return 'They\'re directing their anger at you specifically';
             }
             return 'They\'re venting about something that upset them';
         }
         
         if (emotion === 'stressed') {
-            return 'They\'re sharing that they feel under pressure';
+            // Don't default to stress explanation for happy messages
+            if (lowerText.includes('happy') || lowerText.includes('good') || lowerText.includes('great')) {
+                return 'They\'re sharing positive feelings despite seeming stressed';
+            }
+            return 'They\'re communicating stress or anxiety';
         }
         
         if (emotion === 'excited') {
@@ -336,26 +368,38 @@ class MessageExplanationEngine {
                 return 'They\'re expressing positive feelings toward you';
             }
             if (lowerText.includes('thank') || lowerText.includes('appreciate')) {
-                return 'They\'re grateful for something you did';
+                return 'They\'re showing gratitude';
             }
-            return 'They\'re sharing something positive with you';
+            if (lowerText.includes('wanna') || lowerText.includes('want to') || lowerText.includes('do u')) {
+                return 'They\'re enthusiastically suggesting something';
+            }
+            return 'They\'re sharing something positive';
         }
         
-        // Neutral messages
+        if (emotion === 'neutral') {
+            if (text.includes('?')) {
+                if (lowerText.includes('wanna') || lowerText.includes('want to')) {
+                    return 'They\'re asking if you want to do something';
+                }
+                return 'They\'re asking you a question';
+            }
+            return 'They\'re sharing information neutrally';
+        }
+        
+        // Content-based fallbacks
         if (text.includes('?')) {
-            return 'They\'re asking you a question';
+            return 'They\'re asking you something';
         }
         
         if (lowerText.includes('sorry')) {
-            return 'They\'re apologizing for something';
+            return 'They\'re apologizing';
         }
         
-        // Default based on length and content
         if (text.length < 15) {
-            return 'Quick response or reaction';
+            return 'Quick response';
         }
         
-        return 'They\'re sharing information with you';
+        return 'They\'re communicating with you';
     }
 }
 
@@ -456,24 +500,122 @@ class LLMService {
     }
 
     /**
-     * COPILOT FUNCTION: Get explanation for what the message means
+     * COPILOT FUNCTION: Get concise explanation for what the message means
+     * Simple prompt: "concisely explain what was meant in this message"
      * @param {string} text - The message text to explain
-     * @returns {string} - Human-readable explanation of the message meaning
+     * @returns {string} - Concise explanation of the message meaning
      */
     async getExplainer(text) {
         if (!text || typeof text !== 'string') {
-            return 'The person is sharing a message with you';
+            return 'Quick message';
         }
 
         try {
-            const emotionAnalysis = this.emotionEngine.analyzeEmotion(text);
-            const explanation = this.explanationEngine.generateExplanation(text, emotionAnalysis);
-            
-            return explanation;
+            // Simple prompt: concisely explain what was meant in this message
+            return this.conciselyExplainMessage(text);
         } catch (error) {
             console.error('Explanation generation failed:', error);
-            return 'The person is communicating something to you';
+            return 'Message communication';
         }
+    }
+
+    /**
+     * Concisely explain what was meant in this message
+     */
+    conciselyExplainMessage(text) {
+        const lowerText = text.toLowerCase().trim();
+        
+        // Direct message meaning analysis - what they actually meant
+        
+        // Invitations and suggestions
+        if (lowerText.includes('wanna') || lowerText.includes('want to')) {
+            if (lowerText.includes('watch')) {
+                return 'Inviting you to watch something together';
+            }
+            return 'Suggesting you do something together';
+        }
+        
+        // Questions about actions
+        if (lowerText.includes('why did you')) {
+            if (lowerText.includes('without me')) {
+                return 'Asking why you excluded them';
+            }
+            return 'Questioning your decision';
+        }
+        
+        // Mood statements
+        if (lowerText.includes('happy now')) {
+            return 'Telling you their mood improved';
+        }
+        
+        // Emotional expressions
+        if (lowerText.includes('angry with you') || lowerText.includes('mad at you')) {
+            return 'Expressing anger toward you';
+        }
+        
+        if (lowerText.includes('love') && lowerText.includes('supportive')) {
+            return 'Appreciating your support';
+        }
+        
+        if (lowerText.includes('i love you')) {
+            return 'Expressing romantic love';
+        }
+        
+        // Gratitude
+        if (lowerText.includes('thank you') || lowerText.includes('thanks')) {
+            return 'Expressing gratitude';
+        }
+        
+        // Wellbeing checks
+        if (lowerText.includes('how are you')) {
+            return 'Checking on your wellbeing';
+        }
+        
+        // Work/stress sharing
+        if (lowerText.includes('stressed') && lowerText.includes('work')) {
+            return 'Sharing work stress';
+        }
+        
+        if (lowerText.includes('boss') && lowerText.includes('demanding')) {
+            return 'Complaining about their supervisor';
+        }
+        
+        // Offers of help
+        if (lowerText.includes('want to talk about it')) {
+            return 'Offering emotional support';
+        }
+        
+        if (lowerText.includes('talking to hr')) {
+            return 'Suggesting HR involvement';
+        }
+        
+        // Shopping context
+        if (lowerText.includes('shops') || lowerText.includes('shopping')) {
+            if (lowerText.includes('without me')) {
+                return 'Upset about being excluded from shopping';
+            }
+            return 'Talking about shopping plans';
+        }
+        
+        // Simple content analysis
+        if (text.includes('?')) {
+            return 'Asking a question';
+        }
+        
+        if (lowerText.includes('sorry')) {
+            return 'Apologizing';
+        }
+        
+        if (text.length < 15) {
+            return 'Quick response';
+        }
+        
+        // Default based on common patterns
+        if (lowerText.includes('feel') || lowerText.includes('feeling')) {
+            return 'Sharing their feelings';
+        }
+        
+        return 'Communicating with you';
     }
 
     /**

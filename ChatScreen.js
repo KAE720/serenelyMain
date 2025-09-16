@@ -56,7 +56,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 3600000).toISOString(),
                     tone: "happy",
                     toneConfidence: 0.85,
-                    explanation: "They want to know how you're feeling today",
+                    explanation: "Checking on your wellbeing",
                     isEnhanced: false,
                 },
                 {
@@ -66,7 +66,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 3000000).toISOString(),
                     tone: "stressed",
                     toneConfidence: 0.78,
-                    explanation: "They're overwhelmed by work pressure",
+                    explanation: "Sharing work stress",
                     isEnhanced: true,
                 },
                 {
@@ -76,7 +76,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 2700000).toISOString(),
                     tone: "happy",
                     toneConfidence: 0.92,
-                    explanation: "They're offering to listen and support you",
+                    explanation: "Offering emotional support",
                     isEnhanced: false,
                 },
                 {
@@ -86,7 +86,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 2400000).toISOString(),
                     tone: "stressed",
                     toneConfidence: 0.76,
-                    explanation: "Their supervisor is giving them a hard time",
+                    explanation: "Complaining about supervisor",
                     isEnhanced: true,
                 },
                 {
@@ -96,7 +96,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 2100000).toISOString(),
                     tone: "neutral",
                     toneConfidence: 0.65,
-                    explanation: "They're suggesting you get HR involved",
+                    explanation: "Suggesting HR involvement",
                     isEnhanced: false,
                 },
                 {
@@ -106,7 +106,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 1800000).toISOString(),
                     tone: "excited",
                     toneConfidence: 0.91,
-                    explanation: "They appreciate how you support them emotionally",
+                    explanation: "Appreciating your support",
                     isEnhanced: true,
                 },
             ]);
@@ -173,54 +173,60 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         }
     };
 
-    // Fallback explanation generator for when LLM service fails
+    // Fallback explanation generator - concise message meaning
     const generateFallbackExplanation = (text) => {
         const lowerText = text.toLowerCase();
         
-        // Concise, specific explanations of what they actually mean
-        if (lowerText.includes('i love you') || lowerText === 'love you') {
-            return 'They\'re expressing romantic feelings';
+        // Concise explanations of what was meant in this message
+        if (lowerText.includes('why did you') && lowerText.includes('without me')) {
+            return 'Asking why you excluded them';
+        }
+        if (lowerText.includes('happy now') && lowerText.includes('wanna')) {
+            return 'Mood improved, suggesting activity';
+        }
+        if (lowerText.includes('watch') && (lowerText.includes('football') || lowerText.includes('game'))) {
+            return 'Inviting you to watch sports';
+        }
+        if (lowerText.includes('i love you')) {
+            return 'Expressing romantic love';
         }
         if (lowerText.includes('thank you') || lowerText.includes('thanks')) {
-            return 'They\'re saying thanks for something specific';
+            return 'Expressing gratitude';
         }
-        if (lowerText.includes('how are you') || lowerText.includes('how\'s it going')) {
-            return 'They want to know how you\'re feeling today';
+        if (lowerText.includes('how are you')) {
+            return 'Checking on your wellbeing';
         }
-        if (lowerText.includes('stressed about work') || lowerText.includes('work is stressing')) {
-            return 'They\'re overwhelmed by work pressure';
+        if (lowerText.includes('stressed about work')) {
+            return 'Sharing work stress';
         }
-        if (lowerText.includes('not happy with you') || lowerText.includes('angry with you')) {
-            return 'They\'re upset about something you did';
+        if (lowerText.includes('angry with you')) {
+            return 'Expressing anger toward you';
         }
-        if (lowerText.includes('why didn\'t you') || lowerText.includes('expected you to')) {
-            return 'They\'re disappointed you didn\'t meet their expectations';
+        if (lowerText.includes('supportive') && lowerText.includes('💕')) {
+            return 'Appreciating your support';
         }
-        if (lowerText.includes('supportive') && (lowerText.includes('love') || lowerText.includes('💕'))) {
-            return 'They appreciate how you support them emotionally';
-        }
-        if (lowerText.includes('shops') || lowerText.includes('shopping')) {
-            return 'They\'re telling you about shopping plans';
+        if (lowerText.includes('shops') && lowerText.includes('without me')) {
+            return 'Upset about shopping exclusion';
         }
         if (lowerText.includes('boss') && lowerText.includes('demanding')) {
-            return 'Their supervisor is giving them a hard time';
+            return 'Complaining about supervisor';
         }
-        if (lowerText.includes('sorry to hear') && lowerText.includes('talk about')) {
-            return 'They\'re offering to listen and support you';
-        }
-        if (lowerText.includes('talking to hr') || lowerText.includes('thought about hr')) {
-            return 'They\'re suggesting you get HR involved';
+        if (lowerText.includes('talk about it')) {
+            return 'Offering emotional support';
         }
         if (text.includes('?')) {
-            return 'They\'re asking you a question';
+            if (lowerText.includes('wanna')) {
+                return 'Asking if you want to do something';
+            }
+            return 'Asking a question';
         }
-        if (lowerText.includes('thank') || lowerText.includes('appreciate')) {
-            return 'They\'re grateful for something you did';
+        if (lowerText.includes('sorry')) {
+            return 'Apologizing';
         }
-        if (text.length < 20) {
-            return 'Quick response or reaction';
+        if (text.length < 15) {
+            return 'Quick response';
         }
-        return 'They\'re sharing information with you';
+        return 'Communicating with you';
     };
 
     const sendMessage = async () => {
