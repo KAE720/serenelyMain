@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import enhancedToneAnalysisService from "./services/enhancedToneAnalysisService";
 import llmService from "./llmService";
+import moodTrackingService from "./moodTrackingService";
 
 export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const [messages, setMessages] = useState([]);
@@ -22,6 +23,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [aiExplanation, setAiExplanation] = useState(null); // For AI popup
     const [isLLMReady, setIsLLMReady] = useState(false); // Track LLM status
+    const [moodScore, setMoodScore] = useState(50); // Mood tracking score (0-100)
+    const [moodHealth, setMoodHealth] = useState(null); // Health status object
     const flatListRef = useRef(null);
 
     // Initialize enhanced tone analysis and mock messages
@@ -48,13 +51,13 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         // Simulate loading messages from backend
         setTimeout(() => {
             const userId = currentUser?.uid || currentUser?.id || "current_user";
-            setMessages([
+            const mockMessages = [
                 {
                     id: "1",
                     text: "Hey, how are you doing today?",
                     sender: chatPartner.id,
                     timestamp: new Date(Date.now() - 3600000).toISOString(),
-                    tone: "happy",
+                    tone: "excited",
                     toneConfidence: 0.85,
                     explanation: "Checking on your wellbeing",
                     isEnhanced: false,
@@ -74,7 +77,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     text: "I'm sorry to hear that. Want to talk about it?",
                     sender: chatPartner.id,
                     timestamp: new Date(Date.now() - 2700000).toISOString(),
-                    tone: "happy",
+                    tone: "excited",
                     toneConfidence: 0.92,
                     explanation: "Offering emotional support",
                     isEnhanced: false,
@@ -109,7 +112,30 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     explanation: "Appreciating your support",
                     isEnhanced: true,
                 },
-            ]);
+            ];
+            
+            setMessages(mockMessages);
+            
+            // Initialize mood tracking with existing messages
+            const conversationId = `${userId}_${chatPartner.id}`;
+            let currentScore = 50; // Start at neutral
+            
+            mockMessages.forEach(message => {
+                const moodUpdate = moodTrackingService.updateConversationScore(
+                    conversationId,
+                    message.sender,
+                    message.tone,
+                    message.toneConfidence
+                );
+                currentScore = moodUpdate.currentScore;
+            });
+            
+            // Set final mood state
+            setMoodScore(currentScore);
+            const finalHealth = moodTrackingService.getConversationScore(conversationId);
+            if (finalHealth) {
+                setMoodHealth(moodTrackingService.getHealthStatus(currentScore));
+            }
         }, 500);
     }, []);
 
@@ -239,6 +265,19 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
             setMessages(prev => [...prev, newMessage]);
 
+            // Update mood tracking based on message emotion
+            const conversationId = `${currentUser?.uid || currentUser?.id}_${chatPartner.id}`;
+            const moodUpdate = moodTrackingService.updateConversationScore(
+                conversationId,
+                currentUser?.uid || currentUser?.id || "current_user",
+                toneAnalysis.tone,
+                toneAnalysis.confidence
+            );
+            
+            // Update mood state
+            setMoodScore(moodUpdate.currentScore);
+            setMoodHealth(moodUpdate.healthStatus);
+
             // Get suggestions for the partner based on the tone
             if (toneAnalysis.tone !== 'neutral') {
                 const toneSuggestions = await enhancedToneAnalysisService.getToneSuggestions(toneAnalysis.tone, messageText);
@@ -316,22 +355,10 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         return total / personMessages.length;
     };
 
-    // Get dynamic color for each person's tracker dot
+    // Get dynamic color for each person's tracker dot - now both are black
     const getPersonTrackerColor = (emotion, isPartner = false) => {
-        // Different color schemes for each person to distinguish them
-        if (isPartner) {
-            // Partner's color scheme (cooler tones)
-            if (emotion <= 0.25) return '#A1232B';    // � Crimson Rust (angry)
-            if (emotion <= 0.5) return '#D9772B';     // � Burnt Amber (stressed)
-            if (emotion <= 0.75) return '#4A90A4';    // � Slate Blue (neutral) - partner's distinctive color
-            return '#4CAF50';                         // � Verdant Spring (excited - center meeting point)
-        } else {
-            // User's color scheme (warmer tones)
-            if (emotion <= 0.25) return '#A1232B';    // 😞 Crimson Rust (angry) - same base red
-            if (emotion <= 0.5) return '#D9772B';     // 😐 Burnt Amber (stressed) - same amber
-            if (emotion <= 0.75) return '#4CAF50';    // 😄 Verdant Spring (neutral) - user's distinctive color
-            return '#4A90A4';                         // 🙂 Slate Blue (excited) - user's blue when excited
-        }
+        // Both markers are now black for better visibility and consistency
+        return '#000000';
     };
 
     // COPILOT HELPER: Color mapping function for message bubbles
@@ -523,6 +550,9 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     <View style={styles.rightOrangeSection} />
                     <View style={styles.rightRedSection} />
 
+                    {/* Subtle midpoint line */}
+                    <View style={styles.midpointLine} />
+
                     {/* Partner's emotion indicator (left side, starts from 0% and can go up to 50% max) */}
                     <View style={[
                         styles.emotionIndicator,
@@ -557,6 +587,15 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                         />
                     </View>
                 </View>
+                
+                {/* Psychological Score Display (subtle, below the tracker) */}
+                {moodHealth && (
+                    <View style={styles.scoreDisplayContainer}>
+                        <Text style={[styles.scoreDisplayText, { color: moodHealth.color }]}>
+                            Relationship Health: {moodScore}/100
+                        </Text>
+                    </View>
+                )}
             </View>
 
             {/* Messages */}
@@ -752,16 +791,94 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 2,
         borderBottomRightRadius: 2,
     },
+    
+    // Psychological Health Bar Styles (0-100 scale)
+    healthRedSection: {
+        flex: 2, // 0-20: Poor communication
+        backgroundColor: "#F44336", // Red - Poor relationship health
+        borderTopLeftRadius: 2,
+        borderBottomLeftRadius: 2,
+    },
+    healthOrangeSection: {
+        flex: 1.5, // 20-35: Concerning
+        backgroundColor: "#FF9800", // Orange - Some tension
+    },
+    healthYellowSection: {
+        flex: 3, // 35-65: Neutral/Balanced  
+        backgroundColor: "#FFC107", // Yellow - Balanced communication
+    },
+    healthGreenSection: {
+        flex: 2, // 65-80: Good
+        backgroundColor: "#8BC34A", // Light Green - Good relationship health
+    },
+    healthExcellentSection: {
+        flex: 1.5, // 80-100: Excellent
+        backgroundColor: "#4CAF50", // Bright Green - Excellent communication
+        borderTopRightRadius: 2,
+        borderBottomRightRadius: 2,
+    },
+    
+    // Mood tracker specific styles
+    centerScoreContainer: {
+        alignItems: 'center',
+        minWidth: 80,
+    },
+    scoreText: {
+        color: "#FFFFFF",
+        fontSize: 14,
+        fontWeight: "700",
+        fontFamily: 'SF Pro Text',
+        textAlign: 'center',
+    },
+    healthText: {
+        fontSize: 10,
+        fontWeight: "500",
+        fontFamily: 'SF Pro Text',
+        textAlign: 'center',
+        marginTop: 2,
+    },
+    moodScoreDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        borderWidth: 2,
+        borderColor: "#fff",
+    },
+    
+    // Score display styles for psychological health tracking
+    scoreDisplayContainer: {
+        alignItems: 'center',
+        marginTop: 8,
+        paddingVertical: 4,
+    },
+    scoreDisplayText: {
+        fontSize: 11,
+        fontWeight: '500',
+        fontFamily: 'SF Pro Text',
+        opacity: 0.8,
+    },
     emotionIndicator: {
         position: "absolute",
         top: -1, // Adjusted for thinner bar
         marginLeft: -4,
         zIndex: 10,
     },
+    midpointLine: {
+        position: "absolute",
+        left: "50%",
+        top: -2,
+        width: 1,
+        height: 8,
+        backgroundColor: "rgba(255,255,255,0.4)",
+        zIndex: 5,
+        marginLeft: -0.5, // Center the line
+    },
     emotionDot: {
         width: 8, // Smaller for thinner bar
         height: 8,
         borderRadius: 4,
+        backgroundColor: '#000000', // Both dots are now black
+        shadowColor: '#000000',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.8,
         shadowRadius: 2,
