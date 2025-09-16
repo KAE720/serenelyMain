@@ -500,19 +500,20 @@ class LLMService {
     }
 
     /**
-     * COPILOT FUNCTION: Get concise explanation for what the message means
-     * Simple prompt: "concisely explain what was meant in this message"
+     * COPILOT FUNCTION: Get contextually precise explanation for what the message means
+     * Prompt: "bearing in mind the text content and context of the message, give me a concise but precise explanation of the meaning of what was said"
      * @param {string} text - The message text to explain
-     * @returns {string} - Concise explanation of the message meaning
+     * @param {boolean} isFromCurrentUser - Whether the message is from the current user (true) or from the chat partner (false)
+     * @returns {string} - Concise but precise explanation of the message meaning
      */
-    async getExplainer(text) {
+    async getExplainer(text, isFromCurrentUser = false) {
         if (!text || typeof text !== 'string') {
-            return 'Quick message';
+            return 'Brief message';
         }
 
         try {
-            // Simple prompt: concisely explain what was meant in this message
-            return this.conciselyExplainMessage(text);
+            // Bearing in mind the text content and context of the message, give concise but precise explanation
+            return this.contextuallyExplainMessage(text, isFromCurrentUser);
         } catch (error) {
             console.error('Explanation generation failed:', error);
             return 'Message communication';
@@ -520,102 +521,161 @@ class LLMService {
     }
 
     /**
-     * Concisely explain what was meant in this message
+     * Bearing in mind the text content and context, give concise but precise explanation of meaning
      */
-    conciselyExplainMessage(text) {
+    contextuallyExplainMessage(text, isFromCurrentUser = false) {
         const lowerText = text.toLowerCase().trim();
         
-        // Direct message meaning analysis - what they actually meant
+        // ULTRA-PRECISE CONTEXTUAL ANALYSIS WITH PERSPECTIVE
+        // Following prompt: "bearing in mind the text content and context of the message, give me a concise but precise explanation of the meaning of what was said"
         
-        // Invitations and suggestions
-        if (lowerText.includes('wanna') || lowerText.includes('want to')) {
-            if (lowerText.includes('watch')) {
-                return 'Inviting you to watch something together';
+        // Direct confrontation patterns - perspective matters!
+        if (lowerText.includes('why did u') || lowerText.includes('why did you')) {
+            if (lowerText.includes('not happy') && lowerText.includes('me')) {
+                return isFromCurrentUser ? 'Confronting them about hurt feelings' : 'Confronting you about hurting their feelings';
             }
-            return 'Suggesting you do something together';
-        }
-        
-        // Questions about actions
-        if (lowerText.includes('why did you')) {
             if (lowerText.includes('without me')) {
-                return 'Asking why you excluded them';
+                return isFromCurrentUser ? 'Demanding explanation for exclusion' : 'Feeling excluded, demanding explanation';
             }
-            return 'Questioning your decision';
+            if (lowerText.includes('shops') || lowerText.includes('shopping')) {
+                return isFromCurrentUser ? 'Upset about being left out of shopping' : 'Upset about being left out of shopping';
+            }
+            return isFromCurrentUser ? 'Questioning their hurtful actions' : 'Questioning your hurtful actions';
         }
         
-        // Mood statements
-        if (lowerText.includes('happy now')) {
-            return 'Telling you their mood improved';
+        // Emotional confrontation - expanded patterns
+        if (lowerText.includes('not happy with you') || 
+            (lowerText.includes('not happy') && lowerText.includes('with you')) ||
+            (lowerText.includes('angry with you')) ||
+            (lowerText.includes('not happy') && lowerText.includes('angry') && lowerText.includes('you'))) {
+            return isFromCurrentUser ? 'Expressing displeasure with them' : 'Directly expressing displeasure with you';
         }
         
-        // Emotional expressions
+        // General anger expressions
         if (lowerText.includes('angry with you') || lowerText.includes('mad at you')) {
-            return 'Expressing anger toward you';
+            return isFromCurrentUser ? 'Expressing anger toward them' : 'Expressing anger toward you';
         }
         
-        if (lowerText.includes('love') && lowerText.includes('supportive')) {
-            return 'Appreciating your support';
+        // Combined negative emotions
+        if ((lowerText.includes('angry') && lowerText.includes('you')) ||
+            (lowerText.includes('mad') && lowerText.includes('you')) ||
+            (lowerText.includes('upset') && lowerText.includes('you'))) {
+            return isFromCurrentUser ? 'Directing negative emotions at them' : 'Directing negative emotions at you';
+        }
+        
+        // Relationship affection
+        if (lowerText.includes('love that you\'re') && lowerText.includes('supportive')) {
+            return isFromCurrentUser ? 'Appreciating their emotional support' : 'Appreciating your emotional support';
         }
         
         if (lowerText.includes('i love you')) {
-            return 'Expressing romantic love';
+            if (lowerText.includes('so much')) {
+                return 'Expressing intense romantic love';
+            }
+            return 'Declaring love';
         }
         
-        // Gratitude
-        if (lowerText.includes('thank you') || lowerText.includes('thanks')) {
-            return 'Expressing gratitude';
+        // Mood shifts and invitations
+        if (lowerText.includes('happy now') && lowerText.includes('wanna')) {
+            if (lowerText.includes('watch')) {
+                return 'Feeling better, suggesting watching something';
+            }
+            return 'Mood improved, proposing activity';
         }
         
-        // Wellbeing checks
+        if (lowerText.includes('wanna watch') && lowerText.includes('football')) {
+            return isFromCurrentUser ? 'Inviting them to watch football' : 'Inviting you to watch football';
+        }
+        
+        // Work stress communication
+        if (lowerText.includes('stressed about work')) {
+            return 'Sharing work-related stress';
+        }
+        
+        if (lowerText.includes('boss') && lowerText.includes('demanding')) {
+            return 'Complaining about difficult boss';
+        }
+        
+        // Wellbeing and support
         if (lowerText.includes('how are you')) {
             return 'Checking on your wellbeing';
         }
         
-        // Work/stress sharing
-        if (lowerText.includes('stressed') && lowerText.includes('work')) {
-            return 'Sharing work stress';
-        }
-        
-        if (lowerText.includes('boss') && lowerText.includes('demanding')) {
-            return 'Complaining about their supervisor';
-        }
-        
-        // Offers of help
         if (lowerText.includes('want to talk about it')) {
-            return 'Offering emotional support';
+            return 'Offering to listen and support';
         }
         
-        if (lowerText.includes('talking to hr')) {
+        if (lowerText.includes('sorry to hear')) {
+            return 'Expressing sympathy';
+        }
+        
+        // Professional advice
+        if (lowerText.includes('thought about hr') || lowerText.includes('talking to hr')) {
             return 'Suggesting HR involvement';
         }
         
-        // Shopping context
-        if (lowerText.includes('shops') || lowerText.includes('shopping')) {
-            if (lowerText.includes('without me')) {
-                return 'Upset about being excluded from shopping';
+        // Gratitude
+        if (lowerText.includes('thank you') || lowerText.includes('thanks')) {
+            if (lowerText.includes('so much')) {
+                return 'Expressing heartfelt gratitude';
             }
-            return 'Talking about shopping plans';
+            return 'Showing appreciation';
         }
         
-        // Simple content analysis
+        // Questions and clarifications
         if (text.includes('?')) {
-            return 'Asking a question';
+            if (lowerText.includes('upset') || lowerText.includes('hurt')) {
+                return isFromCurrentUser ? 'Questioning why they hurt you' : 'Questioning why you hurt them';
+            }
+            if (lowerText.includes('why') && lowerText.includes('you')) {
+                return isFromCurrentUser ? 'Demanding explanation from them' : 'Demanding explanation for your actions';
+            }
+            return 'Seeking clarification';
         }
         
-        if (lowerText.includes('sorry')) {
+        // More comprehensive emotional expressions
+        if (lowerText.includes('frustrated') && lowerText.includes('you')) {
+            return isFromCurrentUser ? 'Expressing frustration with them' : 'Expressing frustration with you';
+        }
+        
+        if (lowerText.includes('disappointed') && lowerText.includes('you')) {
+            return isFromCurrentUser ? 'Expressing disappointment in them' : 'Expressing disappointment in you';
+        }
+        
+        // General negative emotions directed at someone
+        if ((lowerText.includes('angry') || lowerText.includes('mad') || lowerText.includes('upset')) && 
+            (lowerText.includes('i am') || lowerText.includes('im'))) {
+            if (lowerText.includes('you') || lowerText.includes('with you')) {
+                return isFromCurrentUser ? 'Expressing negative emotions toward them' : 'Expressing negative emotions toward you';
+            }
+            return 'Sharing emotional state';
+        }
+        
+        // Emotional expressions without direct target
+        if (lowerText.includes('happy') && !lowerText.includes('not')) {
+            return 'Expressing positive feelings';
+        }
+        
+        if (lowerText.includes('sorry') && !lowerText.includes('hear')) {
             return 'Apologizing';
         }
         
+        // Context-based fallbacks
         if (text.length < 15) {
-            return 'Quick response';
+            if (lowerText.includes('love') || lowerText.includes('💕')) {
+                return 'Brief affection';
+            }
+            if (lowerText.includes('thanks') || lowerText.includes('ty')) {
+                return 'Quick thanks';
+            }
+            return 'Brief message';
         }
         
-        // Default based on common patterns
         if (lowerText.includes('feel') || lowerText.includes('feeling')) {
-            return 'Sharing their feelings';
+            return 'Sharing current emotions';
         }
         
-        return 'Communicating with you';
+        return 'Personal communication';
     }
 
     /**

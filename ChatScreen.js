@@ -129,7 +129,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
             const mappedTone = colorToEmotionMap[copilotAnalysis.color] || 'neutral';
             
             // Get proper message explanation (what the message is saying)
-            const messageExplanation = await llmService.getExplainer(text);
+            const messageExplanation = await llmService.getExplainer(text, true); // true = message is from current user
             
             return {
                 tone: mappedTone,
@@ -177,56 +177,42 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const generateFallbackExplanation = (text) => {
         const lowerText = text.toLowerCase();
         
-        // Concise explanations of what was meant in this message
+        // Ultra-concise explanations of what was actually said
         if (lowerText.includes('why did you') && lowerText.includes('without me')) {
-            return 'Asking why you excluded them';
+            return 'Questioning exclusion';
         }
         if (lowerText.includes('happy now') && lowerText.includes('wanna')) {
             return 'Mood improved, suggesting activity';
         }
         if (lowerText.includes('watch') && (lowerText.includes('football') || lowerText.includes('game'))) {
-            return 'Inviting you to watch sports';
+            return 'Inviting to watch sports';
         }
         if (lowerText.includes('i love you')) {
-            return 'Expressing romantic love';
+            return 'Declaring love';
         }
         if (lowerText.includes('thank you') || lowerText.includes('thanks')) {
             return 'Expressing gratitude';
         }
         if (lowerText.includes('how are you')) {
-            return 'Checking on your wellbeing';
+            return 'Checking wellbeing';
         }
         if (lowerText.includes('stressed about work')) {
             return 'Sharing work stress';
         }
-        if (lowerText.includes('angry with you')) {
-            return 'Expressing anger toward you';
+        if (lowerText.includes('not happy with you')) {
+            return 'Expressing displeasure';
         }
-        if (lowerText.includes('supportive') && lowerText.includes('💕')) {
-            return 'Appreciating your support';
-        }
-        if (lowerText.includes('shops') && lowerText.includes('without me')) {
-            return 'Upset about shopping exclusion';
-        }
-        if (lowerText.includes('boss') && lowerText.includes('demanding')) {
-            return 'Complaining about supervisor';
-        }
-        if (lowerText.includes('talk about it')) {
-            return 'Offering emotional support';
+        if (lowerText.includes('sorry to hear')) {
+            return 'Offering sympathy';
         }
         if (text.includes('?')) {
-            if (lowerText.includes('wanna')) {
-                return 'Asking if you want to do something';
-            }
-            return 'Asking a question';
-        }
-        if (lowerText.includes('sorry')) {
-            return 'Apologizing';
+            return 'Asking question';
         }
         if (text.length < 15) {
-            return 'Quick response';
+            return 'Brief message';
         }
-        return 'Communicating with you';
+        
+        return 'Personal communication';
     };
 
     const sendMessage = async () => {
@@ -413,7 +399,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                                 } else {
                                     // Generate fresh AI explanation using LLM
                                     try {
-                                        const freshExplanation = await llmService.getExplainer(item.text);
+                                        const freshExplanation = await llmService.getExplainer(item.text, isOwnMessage);
                                         setAiExplanation({
                                             messageId: item.id,
                                             tone: item.tone,
