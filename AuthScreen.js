@@ -127,7 +127,7 @@ export default function AuthScreen() {
                         ]}
                         resizeMode="contain"
                     />
-                    <Animated.View 
+                    <Animated.View
                         style={[
                             styles.brandNameContainer,
                             {
@@ -139,7 +139,7 @@ export default function AuthScreen() {
                         {/* Main text with purple styling */}
                         <Text style={styles.brandNameMain}>Serenely</Text>
                     </Animated.View>
-                    <Animated.Text 
+                    <Animated.Text
                         style={[
                             styles.tagline,
                             {
@@ -153,7 +153,7 @@ export default function AuthScreen() {
                 </View>
 
                 {/* Authentication Container */}
-                <Animated.View 
+                <Animated.View
                     style={[
                         styles.authContainer,
                         {
