@@ -355,6 +355,27 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         return total / personMessages.length;
     };
 
+    // Calculate individual person's score (0-100)
+    const getPersonScore = (personId) => {
+        const emotion = getPersonEmotion(personId);
+        // Convert emotion (0.0-1.0) to score (0-100)
+        // 0.0 (angry) = 0 points, 1.0 (excited) = 100 points
+        return Math.round(emotion * 100);
+    };
+
+    // Calculate relative relationship health based on both people's positions
+    const getRelativeRelationshipHealth = () => {
+        const partnerScore = getPersonScore(chatPartner.id);
+        const userScore = getPersonScore(currentUser?.uid || currentUser?.id || "current_user");
+        
+        // Calculate average of both scores for relationship health
+        const averageScore = (partnerScore + userScore) / 2;
+        
+        // Only when both are at center (50%+ each) do we get high relationship health
+        // This ensures that if one person is at 50% but other is at 25%, it's not 100% health
+        return Math.round(averageScore);
+    };
+
     // Get dynamic color for each person's tracker dot - magenta for partner, black for user
     const getPersonTrackerColor = (emotion, isPartner = false) => {
         if (isPartner) {
@@ -551,10 +572,10 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     {/* Subtle midpoint line */}
                     <View style={styles.midpointLine} />
 
-                    {/* Partner's emotion indicator (left side, starts from 0% and can go up to 50% max) */}
+                    {/* Partner's emotion indicator (left side, 0% to 50% based on their individual score) */}
                     <View style={[
                         styles.emotionIndicator,
-                        { left: `${Math.min(getPersonEmotion(chatPartner.id) * 50, 50)}%` }
+                        { left: `${getPersonScore(chatPartner.id) / 2}%` }
                     ]}>
                         <View
                             style={[
@@ -568,10 +589,10 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                         />
                     </View>
 
-                    {/* Your emotion indicator (right side, starts from 100% and can go down to 50% min) */}
+                    {/* Your emotion indicator (right side, 100% to 50% based on your individual score) */}
                     <View style={[
                         styles.emotionIndicator,
-                        { left: `${Math.max(100 - (getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user") * 50), 50)}%` }
+                        { left: `${100 - (getPersonScore(currentUser?.uid || currentUser?.id || "current_user") / 2)}%` }
                     ]}>
                         <View
                             style={[
@@ -586,11 +607,11 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     </View>
                 </View>
                 
-                {/* Psychological Score Display (subtle, below the tracker) */}
+                {/* Psychological Score Display (relative to both people's positions) */}
                 {moodHealth && (
                     <View style={styles.scoreDisplayContainer}>
                         <Text style={[styles.scoreDisplayText, { color: moodHealth.color }]}>
-                            Relationship Health: {moodScore}/100
+                            Relationship Health: {getRelativeRelationshipHealth()}/100
                         </Text>
                     </View>
                 )}
@@ -751,9 +772,9 @@ const styles = StyleSheet.create({
     },
     emotionBar: {
         flexDirection: "row",
-        height: 6, // Made thicker for better visibility
+        height: 8, // Made thicker for better circular marker fit
         backgroundColor: "#333",
-        borderRadius: 3,
+        borderRadius: 4,
         overflow: "hidden",
         position: "relative",
         shadowColor: '#000',
@@ -766,8 +787,8 @@ const styles = StyleSheet.create({
     leftRedSection: {
         flex: 1,
         backgroundColor: "#A1232B", // � Crimson Rust - Most negative (left end)
-        borderTopLeftRadius: 3,
-        borderBottomLeftRadius: 3,
+        borderTopLeftRadius: 4,
+        borderBottomLeftRadius: 4,
     },
     leftOrangeSection: {
         flex: 1,
@@ -793,8 +814,8 @@ const styles = StyleSheet.create({
     rightRedSection: {
         flex: 1,
         backgroundColor: "#A1232B", // � Crimson Rust - Most negative (right end)
-        borderTopRightRadius: 3,
-        borderBottomRightRadius: 3,
+        borderTopRightRadius: 4,
+        borderBottomRightRadius: 4,
     },
     
     // Psychological Health Bar Styles (0-100 scale)
@@ -864,25 +885,25 @@ const styles = StyleSheet.create({
     },
     emotionIndicator: {
         position: "absolute",
-        top: -2, // Adjusted for thicker bar
-        marginLeft: -6,
+        top: -3, // Adjusted for thicker bar (8px height)
+        marginLeft: -7, // Centered for 14px wide dots
         zIndex: 10,
     },
     midpointLine: {
         position: "absolute",
         left: "50%",
-        top: -3,
+        top: -4,
         width: 1,
-        height: 12,
+        height: 16,
         backgroundColor: "rgba(255,255,255,0.4)",
         zIndex: 5,
         marginLeft: -0.5, // Center the line
     },
     emotionDot: {
-        width: 12, // Made larger for thicker bar
-        height: 12,
-        borderRadius: 6,
-        backgroundColor: '#000000', // Both dots are now black
+        width: 14, // Slightly larger for better fit with 8px bar
+        height: 14,
+        borderRadius: 7, // Perfect circle
+        backgroundColor: '#000000', // Will be overridden by individual colors
         shadowColor: '#000000',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.8,
@@ -894,14 +915,12 @@ const styles = StyleSheet.create({
     leftPersonDot: {
         borderColor: "#fff",
         borderWidth: 2,
-        // Add a subtle square shape to distinguish from right person
-        borderRadius: 5, // Slightly less rounded for thicker dot
+        borderRadius: 7, // Perfect circle for partner
     },
     rightPersonDot: {
         borderColor: "#fff", 
         borderWidth: 2,
-        // Keep fully round to distinguish from left person
-        borderRadius: 6, // Fully round for thicker dot
+        borderRadius: 7, // Perfect circle for user
     },
     messagesList: {
         flex: 1,
