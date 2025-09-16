@@ -71,8 +71,8 @@ npm run dev
 
 ### 1. **Tone-Colored Message Bubbles**
 - Each message gets analyzed for emotional tone
-- Color-coded border indicates: positive (green), stressed (orange), supportive (light green), etc.
-- Confidence percentage shows AI accuracy
+- Color-coded bubbles indicate: angry (red), stressed (orange), neutral (green), excited (blue)
+- AI explanations help users understand emotional undertones
 
 ### 2. **Message Explainer**
 - Tap the "?" button on any message

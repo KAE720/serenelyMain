@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         zIndex: 2,
     },
-   
+
     soundwave: {
         position: 'absolute',
         borderWidth: 2,

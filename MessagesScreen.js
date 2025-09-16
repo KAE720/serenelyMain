@@ -57,16 +57,19 @@ export default function MessagesScreen({ onNavigateToChat, currentUser }) {
 
     const getToneColor = (tone) => {
         const toneColors = {
-            positive: "#4CAF50",
-            negative: "#F44336",
-            neutral: "#9E9E9E",
-            excited: "#FF9800",
-            sad: "#3F51B5",
-            angry: "#E91E63",
-            supportive: "#8BC34A",
-            stressed: "#FF5722",
+            // New 4-emotion color scale
+            angry: "#FF4D4F",      // 🔴 Red - Anger/Frustration
+            stressed: "#FF8C00",   // 🟠 Orange - Stress/Anxiety
+            neutral: "#4CAF50",    // 🟢 Green - Calm/Content
+            excited: "#40C4FF",    // 🔵 Blue - Joy/Love/Excitement
+
+            // Legacy mappings
+            positive: "#4CAF50",   // -> neutral (green)
+            negative: "#FF4D4F",   // -> angry (red)
+            supportive: "#40C4FF", // -> excited (blue)
+            sad: "#FF8C00",        // -> stressed (orange)
         };
-        return toneColors[tone] || "#9E9E9E";
+        return toneColors[tone] || "#4CAF50";
     };
 
     const openChat = (conversation) => {
@@ -82,21 +85,21 @@ export default function MessagesScreen({ onNavigateToChat, currentUser }) {
     // Filter conversations based on search query
     const filteredConversations = conversations.filter(conversation => {
         if (!searchQuery.trim()) return true;
-        
+
         const query = searchQuery.toLowerCase();
         const partnerName = conversation.partnerName.toLowerCase();
         const lastMessage = conversation.lastMessage.toLowerCase();
-        
+
         return partnerName.includes(query) || lastMessage.includes(query);
     });
 
     // Highlight search terms in text
     const highlightSearchTerms = (text, searchQuery) => {
         if (!searchQuery.trim()) return text;
-        
+
         const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         const parts = text.split(regex);
-        
+
         return parts.map((part, index) => {
             if (regex.test(part)) {
                 return (
@@ -178,7 +181,7 @@ export default function MessagesScreen({ onNavigateToChat, currentUser }) {
                     placeholderTextColor="#666"
                 />
                 {searchQuery.length > 0 && (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={styles.clearSearchButton}
                         onPress={() => setSearchQuery("")}
                     >

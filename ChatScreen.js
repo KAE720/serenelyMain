@@ -166,20 +166,20 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
     const getToneColor = (tone) => {
         const toneColors = {
-            // 4-emotion scale: Negative → Positive (Visually Distinctive)
-            angry: "#D32F2F",      // 🔴 Red - Anger/Frustration (intense, negative)
-            stressed: "#F57C00",   // 🟠 Orange - Stress/Anxiety (transitional, alert)
-            neutral: "#388E3C",    // 🟢 Green - Calm/Content (balanced, soothing)
-            excited: "#7B1FA2",    // 🟣 Purple - Joy/Love/Excitement (vibrant, passion)
+            // 4-emotion scale: Natural, Muted Colors
+            angry: "#A1232B",      // � Crimson Rust - Deep, muted red with a hint of brown
+            stressed: "#D9772B",   // � Burnt Amber - Earthy orange, less neon, more grounded
+            neutral: "#4A90A4",    // � Slate Blue - Cool, slightly dusty blue
+            excited: "#4CAF50",    // 😄 Verdant Spring - Fresh green with a natural softness
 
             // Map legacy variations
-            happy: "#7B1FA2",      // Map to excited (purple)
-            sad: "#F57C00",        // Map to stressed (orange) - low-energy negative
-            positive: "#7B1FA2",   // -> excited (purple)
-            negative: "#D32F2F",   // -> angry (red)
-            supportive: "#7B1FA2", // -> excited (purple)
-            worried: "#F57C00",    // -> stressed (orange)
-            calm: "#388E3C",       // -> neutral (green)
+            happy: "#4CAF50",      // Map to excited (verdant spring)
+            sad: "#D9772B",        // Map to stressed (burnt amber) - low-energy negative
+            positive: "#4CAF50",   // -> excited (verdant spring)
+            negative: "#A1232B",   // -> angry (crimson rust)
+            supportive: "#4CAF50", // -> excited (verdant spring)
+            worried: "#D9772B",    // -> stressed (burnt amber)
+            calm: "#4A90A4",       // -> neutral (slate blue)
         };
         return toneColors[tone] || toneColors.neutral;
     };
@@ -205,15 +205,15 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         const personMessages = messages.filter(msg => msg.sender === personId);
         if (personMessages.length === 0) return 0.67; // neutral starting point (green section)
 
-        // 4-emotion progression: 0.0=angry, 0.33=stressed, 0.67=neutral, 1.0=excited (purple center)
+        // 4-emotion progression: 0.0=angry, 0.33=stressed, 0.67=neutral, 1.0=excited (blue center)
         const emotionValues = {
             angry: 0.0,     // Far from center (most negative) - Red
             stressed: 0.33, // Moving toward center - Orange
             neutral: 0.67,  // Getting closer to center - Green
-            excited: 1.0,   // Center (meeting point) - Purple
+            excited: 1.0,   // Center (meeting point) - Blue
 
             // Legacy mappings
-            happy: 1.0,     // Map to excited (purple)
+            happy: 1.0,     // Map to excited (blue)
             sad: 0.33,      // Map to stressed (orange)
         };
 
@@ -221,12 +221,22 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         return total / personMessages.length;
     };
 
-    // Get dynamic color based on person's emotion (4-emotion symmetric gradient)
-    const getPersonTrackerColor = (emotion) => {
-        if (emotion <= 0.25) return '#D32F2F';    // 🔴 Red (angry)
-        if (emotion <= 0.5) return '#F57C00';     // 🟠 Orange (stressed)
-        if (emotion <= 0.75) return '#388E3C';    // 🟢 Green (neutral/calm)
-        return '#7B1FA2';                         // 🟣 Purple (excited - center meeting point)
+    // Get dynamic color for each person's tracker dot
+    const getPersonTrackerColor = (emotion, isPartner = false) => {
+        // Different color schemes for each person to distinguish them
+        if (isPartner) {
+            // Partner's color scheme (cooler tones)
+            if (emotion <= 0.25) return '#A1232B';    // � Crimson Rust (angry)
+            if (emotion <= 0.5) return '#D9772B';     // � Burnt Amber (stressed)
+            if (emotion <= 0.75) return '#4A90A4';    // � Slate Blue (neutral) - partner's distinctive color
+            return '#4CAF50';                         // � Verdant Spring (excited - center meeting point)
+        } else {
+            // User's color scheme (warmer tones)
+            if (emotion <= 0.25) return '#A1232B';    // 😞 Crimson Rust (angry) - same base red
+            if (emotion <= 0.5) return '#D9772B';     // 😐 Burnt Amber (stressed) - same amber
+            if (emotion <= 0.75) return '#4CAF50';    // 😄 Verdant Spring (neutral) - user's distinctive color
+            return '#4A90A4';                         // 🙂 Slate Blue (excited) - user's blue when excited
+        }
     };
 
     const renderMessage = ({ item }) => {
@@ -383,7 +393,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     <View style={styles.rightOrangeSection} />
                     <View style={styles.rightRedSection} />
 
-                    {/* Partner's emotion indicator (left side, never crosses past 50%) */}
+                    {/* Partner's emotion indicator (left side, starts from 0% and can go up to 50% max) */}
                     <View style={[
                         styles.emotionIndicator,
                         { left: `${Math.min(getPersonEmotion(chatPartner.id) * 50, 50)}%` }
@@ -393,25 +403,25 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                                 styles.emotionDot,
                                 styles.leftPersonDot,
                                 {
-                                    backgroundColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id)),
-                                    shadowColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id)),
+                                    backgroundColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id), true),
+                                    shadowColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id), true),
                                 }
                             ]}
                         />
                     </View>
 
-                    {/* Your emotion indicator (right side, never crosses past 50%) */}
+                    {/* Your emotion indicator (right side, starts from 100% and can go down to 50% min) */}
                     <View style={[
                         styles.emotionIndicator,
-                        { left: `${Math.max(50 + (getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user") * 50), 50)}%` }
+                        { left: `${Math.max(100 - (getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user") * 50), 50)}%` }
                     ]}>
                         <View
                             style={[
                                 styles.emotionDot,
                                 styles.rightPersonDot,
                                 {
-                                    backgroundColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user")),
-                                    shadowColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user")),
+                                    backgroundColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user"), false),
+                                    shadowColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user"), false),
                                 }
                             ]}
                         />
@@ -578,37 +588,37 @@ const styles = StyleSheet.create({
         shadowRadius: 1,
         elevation: 1,
     },
-    // Left side progression: Red → Orange → Green → Purple (center)
+    // Left side progression: Red → Orange → Green → Blue (center)
     leftRedSection: {
         flex: 1,
-        backgroundColor: "#D32F2F", // 🔴 Red - Most negative (left end)
+        backgroundColor: "#A1232B", // � Crimson Rust - Most negative (left end)
         borderTopLeftRadius: 2,
         borderBottomLeftRadius: 2,
     },
     leftOrangeSection: {
         flex: 1,
-        backgroundColor: "#F57C00", // 🟠 Orange - Moving toward center
+        backgroundColor: "#D9772B", // � Burnt Amber - Moving toward center
     },
     leftGreenSection: {
         flex: 1,
-        backgroundColor: "#388E3C", // � Green - Getting closer to center
+        backgroundColor: "#4A90A4", // � Slate Blue - Getting closer to center
     },
     centerPurpleSection: {
         flex: 1,
-        backgroundColor: "#7B1FA2", // 🟣 Purple - Center meeting point
+        backgroundColor: "#4CAF50", // � Blue - Center meeting point
     },
-    // Right side progression: Purple (center) → Green → Orange → Red
+    // Right side progression: Blue (center) → Green → Orange → Red
     rightGreenSection: {
         flex: 1,
-        backgroundColor: "#388E3C", // 🟢 Green - Near center
+        backgroundColor: "#4A90A4", // � Slate Blue - Near center
     },
     rightOrangeSection: {
         flex: 1,
-        backgroundColor: "#F57C00", // 🟠 Orange - Moving away from center
+        backgroundColor: "#D9772B", // � Burnt Amber - Moving away from center
     },
     rightRedSection: {
         flex: 1,
-        backgroundColor: "#D32F2F", // 🔴 Red - Most negative (right end)
+        backgroundColor: "#A1232B", // � Crimson Rust - Most negative (right end)
         borderTopRightRadius: 2,
         borderBottomRightRadius: 2,
     },
@@ -632,10 +642,14 @@ const styles = StyleSheet.create({
     leftPersonDot: {
         borderColor: "#fff",
         borderWidth: 2,
+        // Add a subtle square shape to distinguish from right person
+        borderRadius: 3, // Slightly less rounded
     },
     rightPersonDot: {
         borderColor: "#fff",
         borderWidth: 2,
+        // Keep fully round to distinguish from left person
+        borderRadius: 4, // Fully round
     },
     messagesList: {
         flex: 1,

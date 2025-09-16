@@ -46,6 +46,13 @@ export default function AuthScreen() {
             const { id_token } = response.params;
             const credential = GoogleAuthProvider.credential(id_token);
             signInWithCredential(auth, credential)
+                .then(() => {
+                    // Clear form fields after successful Google sign-in
+                    setEmail("");
+                    setPassword("");
+                    setConfirmPassword("");
+                    setFullName("");
+                })
                 .catch((err) => Alert.alert("Error", err.message));
         }
     }, [response]);
@@ -77,9 +84,21 @@ export default function AuthScreen() {
                     displayName: fullName.trim()
                 });
                 Alert.alert("Success", "Account created successfully!");
+
+                // Clear form fields after successful sign-up
+                setEmail("");
+                setPassword("");
+                setConfirmPassword("");
+                setFullName("");
             } else {
                 // Sign in existing user
                 await signInWithEmailAndPassword(auth, email, password);
+
+                // Clear form fields after successful sign-in
+                setEmail("");
+                setPassword("");
+                setConfirmPassword("");
+                setFullName("");
             }
         } catch (error) {
             Alert.alert("Error", error.message);
