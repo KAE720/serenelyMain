@@ -89,17 +89,21 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const analyzeToneForMessage = async (text) => {
         try {
             const analysis = await analyzeTone(text);
-            // Map to 4 core emotions for dual tracker design
-            const coreEmotions = ['angry', 'stressed', 'neutral', 'excited'];
+            // Map to 5 core emotions for symmetric design
+            const coreEmotions = ['angry', 'stressed', 'neutral', 'happy', 'excited'];
             let mappedTone = analysis.tone;
 
-            // Map common variations to our 4 core emotions
-            if (['positive', 'supportive', 'cheerful', 'content', 'calm', 'joyful', 'loving', 'happy'].includes(analysis.tone)) {
-                mappedTone = 'excited'; // All positive emotions -> excited (purple)
+            // Map common variations to our 5 core emotions
+            if (['positive', 'supportive', 'cheerful', 'content', 'calm', 'joyful', 'loving'].includes(analysis.tone)) {
+                mappedTone = 'happy';
             } else if (['negative', 'frustrated', 'irritated', 'furious'].includes(analysis.tone)) {
                 mappedTone = 'angry';
-            } else if (['anxious', 'worried', 'overwhelmed', 'tense', 'sad', 'down', 'melancholy', 'disappointed'].includes(analysis.tone)) {
-                mappedTone = 'stressed'; // Map anxiety and sadness to stressed (orange)
+            } else if (['anxious', 'worried', 'overwhelmed', 'tense'].includes(analysis.tone)) {
+                mappedTone = 'stressed';
+            } else if (['sad', 'down', 'melancholy', 'disappointed'].includes(analysis.tone)) {
+                mappedTone = 'angry'; // Map sadness to angry (red) - both negative
+            } else if (['enthusiastic', 'thrilled', 'energetic'].includes(analysis.tone)) {
+                mappedTone = 'excited'; // Map excitement to excited (purple center)
             } else if (!coreEmotions.includes(analysis.tone)) {
                 mappedTone = 'neutral';
             }
@@ -111,7 +115,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         } catch (error) {
             console.error("Tone analysis failed:", error);
             // Randomly assign a core emotion for demo purposes
-            const coreEmotions = ['angry', 'stressed', 'neutral', 'excited'];
+            const coreEmotions = ['angry', 'stressed', 'neutral', 'happy', 'excited'];
             const randomTone = coreEmotions[Math.floor(Math.random() * coreEmotions.length)];
             return {
                 tone: randomTone,
@@ -166,20 +170,20 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
     const getToneColor = (tone) => {
         const toneColors = {
-            // 4-emotion scale: Negative → Positive (Visually Distinctive)
-            angry: "#D32F2F",      // 🔴 Red - Anger/Frustration (intense, negative)
-            stressed: "#F57C00",   // 🟠 Orange - Stress/Anxiety (transitional, alert)
-            neutral: "#388E3C",    // 🟢 Green - Calm/Content (balanced, soothing)
-            excited: "#7B1FA2",    // 🟣 Purple - Joy/Love/Excitement (vibrant, passion)
+            // 5-emotion symmetric gradient: Red → Orange → Blue → Green → Purple (center)
+            angry: "#D32F2F",      // 🔴 Red - Most negative (far ends)
+            stressed: "#F57C00",   // 🟠 Orange - Moving toward center
+            neutral: "#2196F3",    // 🔵 Blue - Getting closer to center
+            happy: "#388E3C",      // 🟢 Green - Near center
+            excited: "#7B1FA2",    // 🟣 Purple - Center meeting point (peak positive)
 
             // Map legacy variations
-            happy: "#7B1FA2",      // Map to excited (purple)
-            sad: "#F57C00",        // Map to stressed (orange) - low-energy negative
-            positive: "#7B1FA2",   // -> excited (purple)
+            sad: "#D32F2F",        // Map to angry (red) - very negative
+            positive: "#7B1FA2",   // -> excited (purple center)
             negative: "#D32F2F",   // -> angry (red)
-            supportive: "#7B1FA2", // -> excited (purple)
+            supportive: "#388E3C", // -> happy (green)
             worried: "#F57C00",    // -> stressed (orange)
-            calm: "#388E3C",       // -> neutral (green)
+            calm: "#2196F3",       // -> neutral (blue)
         };
         return toneColors[tone] || toneColors.neutral;
     };
@@ -203,30 +207,32 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     // Calculate conversation emotion for each person separately - SYMMETRIC MEETING DESIGN
     const getPersonEmotion = (personId) => {
         const personMessages = messages.filter(msg => msg.sender === personId);
-        if (personMessages.length === 0) return 0.67; // neutral starting point (green section)
+        if (personMessages.length === 0) return 0.5; // neutral starting point (center - meeting point)
 
-        // 4-emotion progression: 0.0=angry, 0.33=stressed, 0.67=neutral, 1.0=excited (purple center)
+        // Symmetric mapping: Both people move from their negative ends toward positive center (0.5)
+        // 5-emotion progression: 0.0=angry, 0.25=stressed, 0.5=neutral, 0.75=happy, 1.0=excited (purple center)
         const emotionValues = {
-            angry: 0.0,     // Far from center (most negative) - Red
-            stressed: 0.33, // Moving toward center - Orange
-            neutral: 0.67,  // Getting closer to center - Green
-            excited: 1.0,   // Center (meeting point) - Purple
+            angry: 0.0,     // Far from center (most negative)
+            stressed: 0.25, // Moving toward center
+            neutral: 0.5,   // Halfway point
+            happy: 0.75,    // Getting closer to center
+            excited: 1.0,   // Center (meeting point - purple)
 
             // Legacy mappings
-            happy: 1.0,     // Map to excited (purple)
-            sad: 0.33,      // Map to stressed (orange)
+            sad: 0.1,       // Map to very negative (close to angry)
         };
 
         const total = personMessages.reduce((sum, msg) => sum + (emotionValues[msg.tone] || 0.5), 0);
         return total / personMessages.length;
     };
 
-    // Get dynamic color based on person's emotion (4-emotion symmetric gradient)
+    // Get dynamic color based on person's emotion (symmetric gradient)
     const getPersonTrackerColor = (emotion) => {
-        if (emotion <= 0.25) return '#D32F2F';    // 🔴 Red (angry)
-        if (emotion <= 0.5) return '#F57C00';     // 🟠 Orange (stressed)
-        if (emotion <= 0.75) return '#388E3C';    // 🟢 Green (neutral/calm)
-        return '#7B1FA2';                         // 🟣 Purple (excited - center meeting point)
+        if (emotion <= 0.125) return '#D32F2F';    // 🔴 Red (angry)
+        if (emotion <= 0.375) return '#F57C00';    // 🟠 Orange (stressed)
+        if (emotion <= 0.625) return '#2196F3';    // 🔵 Blue (neutral)
+        if (emotion <= 0.875) return '#388E3C';    // 🟢 Green (happy)
+        return '#7B1FA2';                          // 🟣 Purple (excited - center meeting point)
     };
 
     const renderMessage = ({ item }) => {
@@ -288,8 +294,21 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                                 }
                             }}
                         >
-                            {/* AI Text Icon */}
-                            <Text style={styles.aiIconText}>AI</Text>
+                            {/* AI Icon - Brain/Neural Network Style */}
+                            <View style={styles.aiIcon}>
+                                {/* Central node */}
+                                <View style={styles.aiCentralNode} />
+                                {/* Connection lines */}
+                                <View style={styles.aiConnectionTop} />
+                                <View style={styles.aiConnectionBottom} />
+                                <View style={styles.aiConnectionLeft} />
+                                <View style={styles.aiConnectionRight} />
+                                {/* Outer nodes */}
+                                <View style={[styles.aiOuterNode, styles.aiNodeTop]} />
+                                <View style={[styles.aiOuterNode, styles.aiNodeBottom]} />
+                                <View style={[styles.aiOuterNode, styles.aiNodeLeft]} />
+                                <View style={[styles.aiOuterNode, styles.aiNodeRight]} />
+                            </View>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -364,55 +383,63 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                 </View>
             </View>
 
-            {/* Single Emotion Tracker - Both Dots Meet in Middle */}
-            <View style={styles.singleEmotionTracker}>
-                <View style={styles.trackerLabels}>
-                    <Text style={styles.leftLabel}>{chatPartner.name}</Text>
-                    <Text style={styles.rightLabel}>You</Text>
+            {/* Dual Person Emotion Trackers - SYMMETRIC DESIGN */}
+            <View style={styles.dualEmotionTracker}>
+                {/* Partner's Emotion Tracker */}
+                <View style={styles.personTrackerContainer}>
+                    <Text style={styles.trackerLabel}>{chatPartner.name}</Text>
+                    <View style={styles.emotionBar}>
+                        {/* Left side: Red → Orange → Blue → Green → Purple (center) */}
+                        <View style={styles.leftRedSection} />
+                        <View style={styles.leftOrangeSection} />
+                        <View style={styles.leftBlueSection} />
+                        <View style={styles.leftGreenSection} />
+                        <View style={styles.centerPurpleSection} />
+
+                        {/* Partner's emotion indicator */}
+                        <View style={[
+                            styles.emotionIndicator,
+                            { left: `${getPersonEmotion(chatPartner.id) * 100}%` }
+                        ]}>
+                            <View
+                                style={[
+                                    styles.emotionDot,
+                                    {
+                                        backgroundColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id)),
+                                        shadowColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id)),
+                                    }
+                                ]}
+                            />
+                        </View>
+                    </View>
                 </View>
 
-                <View style={styles.emotionBar}>
-                    {/* Single bar: Red → Orange → Green → Purple → Green → Orange → Red */}
-                    <View style={styles.leftRedSection} />
-                    <View style={styles.leftOrangeSection} />
-                    <View style={styles.leftGreenSection} />
-                    <View style={styles.centerPurpleSection} />
-                    <View style={styles.rightGreenSection} />
-                    <View style={styles.rightOrangeSection} />
-                    <View style={styles.rightRedSection} />
+                {/* Your Emotion Tracker */}
+                <View style={styles.personTrackerContainer}>
+                    <Text style={styles.trackerLabel}>You</Text>
+                    <View style={styles.emotionBar}>
+                        {/* Right side: Purple (center) → Green → Blue → Orange → Red */}
+                        <View style={styles.centerPurpleSection} />
+                        <View style={styles.rightGreenSection} />
+                        <View style={styles.rightBlueSection} />
+                        <View style={styles.rightOrangeSection} />
+                        <View style={styles.rightRedSection} />
 
-                    {/* Partner's emotion indicator (left side, never crosses past 50%) */}
-                    <View style={[
-                        styles.emotionIndicator,
-                        { left: `${Math.min(getPersonEmotion(chatPartner.id) * 50, 50)}%` }
-                    ]}>
-                        <View
-                            style={[
-                                styles.emotionDot,
-                                styles.leftPersonDot,
-                                {
-                                    backgroundColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id)),
-                                    shadowColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id)),
-                                }
-                            ]}
-                        />
-                    </View>
-
-                    {/* Your emotion indicator (right side, never crosses past 50%) */}
-                    <View style={[
-                        styles.emotionIndicator,
-                        { left: `${Math.max(50 + (getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user") * 50), 50)}%` }
-                    ]}>
-                        <View
-                            style={[
-                                styles.emotionDot,
-                                styles.rightPersonDot,
-                                {
-                                    backgroundColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user")),
-                                    shadowColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user")),
-                                }
-                            ]}
-                        />
+                        {/* Your emotion indicator */}
+                        <View style={[
+                            styles.emotionIndicator,
+                            { left: `${getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user") * 100}%` }
+                        ]}>
+                            <View
+                                style={[
+                                    styles.emotionDot,
+                                    {
+                                        backgroundColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user")),
+                                        shadowColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user")),
+                                    }
+                                ]}
+                            />
+                        </View>
                     </View>
                 </View>
             </View>
@@ -536,27 +563,22 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: "600",
     },
-    singleEmotionTracker: {
+    dualEmotionTracker: {
         backgroundColor: "#1E1E1E",
         paddingVertical: 16,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: "#333",
     },
-    trackerLabels: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 8,
+    personTrackerContainer: {
+        marginBottom: 12,
     },
-    leftLabel: {
+    trackerLabel: {
         color: "#E8E8E8",
         fontSize: 12,
         fontWeight: "600",
-    },
-    rightLabel: {
-        color: "#E8E8E8",
-        fontSize: 12,
-        fontWeight: "600",
+        marginBottom: 6,
+        textAlign: "center",
     },
     emotionBar: {
         flexDirection: "row",
@@ -571,7 +593,7 @@ const styles = StyleSheet.create({
         shadowRadius: 1,
         elevation: 1,
     },
-    // Left side progression: Red → Orange → Green → Purple (center)
+    // Left side progression: Red → Orange → Blue → Green → Purple (center)
     leftRedSection: {
         flex: 1,
         backgroundColor: "#D32F2F", // 🔴 Red - Most negative (left end)
@@ -582,18 +604,26 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#F57C00", // 🟠 Orange - Moving toward center
     },
+    leftBlueSection: {
+        flex: 1,
+        backgroundColor: "#2196F3", // 🔵 Blue - Getting closer to center
+    },
     leftGreenSection: {
         flex: 1,
-        backgroundColor: "#388E3C", // � Green - Getting closer to center
+        backgroundColor: "#388E3C", // 🟢 Green - Near center
     },
     centerPurpleSection: {
         flex: 1,
         backgroundColor: "#7B1FA2", // 🟣 Purple - Center meeting point
     },
-    // Right side progression: Purple (center) → Green → Orange → Red
+    // Right side progression: Purple (center) → Green → Blue → Orange → Red
     rightGreenSection: {
         flex: 1,
         backgroundColor: "#388E3C", // 🟢 Green - Near center
+    },
+    rightBlueSection: {
+        flex: 1,
+        backgroundColor: "#2196F3", // 🔵 Blue - Getting farther from center
     },
     rightOrangeSection: {
         flex: 1,
@@ -621,14 +651,6 @@ const styles = StyleSheet.create({
         elevation: 2,
         borderWidth: 1.5,
         borderColor: "#fff",
-    },
-    leftPersonDot: {
-        borderColor: "#fff",
-        borderWidth: 2,
-    },
-    rightPersonDot: {
-        borderColor: "#fff",
-        borderWidth: 2,
     },
     messagesList: {
         flex: 1,
@@ -919,11 +941,5 @@ const styles = StyleSheet.create({
     sendButtonText: {
         color: "#fff",
         fontWeight: "600",
-    },
-    aiIconText: {
-        color: '#fff',
-        fontSize: 10,
-        fontStyle: 'italic',
-        fontWeight: '600',
     },
 });

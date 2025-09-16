@@ -13,7 +13,7 @@ import CallsScreen from './CallsScreen';
 import ContactsScreen from './ContactsScreen';
 import AIShrinkScreen from './AIShrinkScreen';
 import ChatScreen from './ChatScreen';
-import { MessageIcon, PhoneIcon, ContactsIcon, SereneIcon } from './components/TabIcons';
+import { MessageIcon, CallsIcon, ContactsIcon, SereneIcon } from './components/TabIcons';
 
 export default function HomeScreen({ userId, onLogout, user }) {
     const [showProfile, setShowProfile] = useState(false);
@@ -112,7 +112,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
                     style={[styles.tab, activeTab === 'Calls' && styles.activeTab]}
                     onPress={() => setActiveTab('Calls')}
                 >
-                    <PhoneIcon active={activeTab === 'Calls'} size={24} />
+                    <CallsIcon active={activeTab === 'Calls'} size={24} />
                     <Text style={[styles.tabText, activeTab === 'Calls' && styles.activeTabText]}>
                         Calls
                     </Text>

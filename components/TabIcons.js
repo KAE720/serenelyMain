@@ -54,7 +54,7 @@ export const MessageIcon = ({ active, size = 24 }) => (
     </View>
 );
 
-export const PhoneIcon = ({ active, size = 24 }) => (
+export const CallsIcon = ({ active, size = 24 }) => (
     <View style={{
         width: size,
         height: size,
