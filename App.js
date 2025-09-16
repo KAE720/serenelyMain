@@ -79,5 +79,6 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 18,
     color: "#fff",
+    fontFamily: 'SF Pro Text',
   },
 });

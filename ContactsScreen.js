@@ -71,7 +71,7 @@ export default function ContactsScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20 },
-    title: { fontSize: 20, fontWeight: "bold", color: "#fff", marginBottom: 20 },
+    title: { fontSize: 20, fontWeight: "bold", color: "#fff", marginBottom: 20, fontFamily: 'SF Pro Text' },
     addSection: {
         flexDirection: 'row',
         marginBottom: 20,
@@ -94,13 +94,14 @@ const styles = StyleSheet.create({
     addButtonText: {
         color: '#fff',
         fontWeight: '600',
+        fontFamily: 'SF Pro Text',
     },
     emptyState: { flex: 1, justifyContent: "center", alignItems: "center" },
     emptyIconContainer: {
         marginBottom: 16,
         opacity: 0.6,
     },
-    emptyText: { fontSize: 18, fontWeight: "600", color: "#fff", marginBottom: 8 },
+    emptyText: { fontSize: 18, fontWeight: "600", color: "#fff", marginBottom: 8, fontFamily: 'SF Pro Text' },
     emptySubText: { fontSize: 14, color: "#aaa", textAlign: 'center' },
     contactItem: {
         backgroundColor: '#1E1E1E',
@@ -113,9 +114,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 4,
+        fontFamily: 'SF Pro Text',
     },
     contactId: {
         color: '#aaa',
         fontSize: 14,
+        fontFamily: 'SF Pro Text',
     },
 });

@@ -326,6 +326,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         );
     };
 
+
+
     return (
         <KeyboardAvoidingView
             style={styles.container}
@@ -517,12 +519,14 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "bold",
+        fontFamily: 'SF Pro Text',
     },
     profileName: {
         color: "#fff",
         fontSize: 12,
         fontWeight: "500",
         textAlign: "center",
+        fontFamily: 'SF Pro Text',
     },
     centerSection: {
         alignItems: "center",
@@ -535,6 +539,7 @@ const styles = StyleSheet.create({
         color: "#4A90E2",
         fontSize: 14,
         fontWeight: "600",
+        fontFamily: 'SF Pro Text',
     },
     singleEmotionTracker: {
         backgroundColor: "#1E1E1E",
@@ -552,11 +557,13 @@ const styles = StyleSheet.create({
         color: "#E8E8E8",
         fontSize: 12,
         fontWeight: "600",
+        fontFamily: 'SF Pro Text',
     },
     rightLabel: {
         color: "#E8E8E8",
         fontSize: 12,
         fontWeight: "600",
+        fontFamily: 'SF Pro Text',
     },
     emotionBar: {
         flexDirection: "row",
@@ -686,6 +693,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         lineHeight: 22,
         fontWeight: '500',
+        fontFamily: 'SF Pro Text',
     },
     aiButtonContainer: {
         alignItems: "flex-end",
@@ -819,10 +827,12 @@ const styles = StyleSheet.create({
         fontSize: 13,
         lineHeight: 19,
         fontWeight: '400',
+        fontFamily: 'SF Pro Text',
     },
     emotionWord: {
         fontWeight: 'bold',
         fontSize: 14,
+        fontFamily: 'SF Pro Text',
     },
     aiPopupArrow: {
         position: 'absolute',
@@ -846,6 +856,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: "#666",
         marginTop: 2,
+        fontFamily: 'SF Pro Text',
     },
     ownTimestamp: {
         textAlign: "right",
@@ -875,11 +886,13 @@ const styles = StyleSheet.create({
         color: "#4A90E2",
         fontSize: 14,
         fontWeight: "600",
+        fontFamily: 'SF Pro Text',
     },
     dismissButton: {
         color: "#666",
         fontSize: 16,
         fontWeight: "bold",
+        fontFamily: 'SF Pro Text',
     },
     suggestionItem: {
         backgroundColor: "#333",
@@ -890,6 +903,7 @@ const styles = StyleSheet.create({
     suggestionText: {
         color: "#fff",
         fontSize: 14,
+        fontFamily: 'SF Pro Text',
     },
     inputRow: {
         flexDirection: "row",
@@ -906,6 +920,7 @@ const styles = StyleSheet.create({
         color: "#fff",
         maxHeight: 100,
         marginRight: 12,
+        fontFamily: 'SF Pro Text',
     },
     sendButton: {
         backgroundColor: "#4A90E2",
@@ -919,11 +934,69 @@ const styles = StyleSheet.create({
     sendButtonText: {
         color: "#fff",
         fontWeight: "600",
+        fontFamily: 'SF Pro Text',
     },
     aiIconText: {
         color: '#fff',
         fontSize: 10,
         fontStyle: 'italic',
         fontWeight: '600',
+        fontFamily: 'SF Pro Text',
+    },
+    searchContainer: {
+        backgroundColor: "#1E1E1E",
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#333",
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    searchInput: {
+        flex: 1,
+        backgroundColor: "#333",
+        borderRadius: 20,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        fontSize: 14,
+        color: "#fff",
+        marginRight: 8,
+        fontFamily: 'SF Pro Text',
+    },
+    clearSearchButton: {
+        padding: 8,
+        borderRadius: 12,
+        backgroundColor: "#666",
+        alignItems: "center",
+        justifyContent: "center",
+        minWidth: 32,
+    },
+    clearSearchText: {
+        color: "#fff",
+        fontSize: 12,
+        fontWeight: "bold",
+        fontFamily: 'SF Pro Text',
+    },
+    searchResultsContainer: {
+        backgroundColor: "#2A2A2A",
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: "#333",
+    },
+    searchResultsText: {
+        color: "#4A90E2",
+        fontSize: 12,
+        fontWeight: "500",
+        textAlign: "center",
+        fontFamily: 'SF Pro Text',
+    },
+    highlightedText: {
+        backgroundColor: "#FFD54F",
+        color: "#000",
+        fontWeight: "bold",
+        borderRadius: 2,
+        paddingHorizontal: 2,
+        fontFamily: 'SF Pro Text',
     },
 });

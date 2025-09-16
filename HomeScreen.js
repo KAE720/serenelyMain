@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 16,
     },
-    topBarText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
+    topBarText: { color: "#fff", fontSize: 20, fontWeight: "bold", fontFamily: 'SF Pro Text' },
     profileIconContainer: {
         padding: 4,
     },
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     },
     content: { flex: 1 },
     emptyState: { flex: 1, justifyContent: "center", alignItems: "center" },
-    emptyText: { fontSize: 18, fontWeight: "600", color: "#fff", marginBottom: 8 },
+    emptyText: { fontSize: 18, fontWeight: "600", color: "#fff", marginBottom: 8, fontFamily: 'SF Pro Text' },
     emptySubText: { fontSize: 14, color: "#aaa" },
     chatItem: {
         padding: 15,
@@ -194,6 +194,7 @@ const styles = StyleSheet.create({
         color: '#aaa',
         fontSize: 12,
         fontWeight: '600',
+        fontFamily: 'SF Pro Text',
     },
     activeTabText: {
         color: '#1976D2',

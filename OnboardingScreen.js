@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         textAlign: 'center',
         marginBottom: 10,
+        fontFamily: 'SF Pro Text',
     },
     subtitle: {
         fontSize: 18,
@@ -196,6 +197,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 20,
         fontWeight: '600',
+        fontFamily: 'SF Pro Text',
     },
     description: {
         fontSize: 16,
@@ -203,6 +205,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         lineHeight: 24,
         maxWidth: width - 80,
+        fontFamily: 'SF Pro Text',
     },
     progressContainer: {
         flexDirection: 'row',
@@ -243,13 +246,16 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
+        fontFamily: 'SF Pro Text',
     },
     nextButtonText: {
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
+        fontFamily: 'SF Pro Text',
     },
     disabledText: {
         color: '#333',
+        fontFamily: 'SF Pro Text',
     },
 });

@@ -218,11 +218,13 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#4A90E2",
         marginBottom: 10,
+        fontFamily: 'SF Pro Text',
     },
     subtitle: {
         fontSize: 16,
         color: "#aaa",
         textAlign: "center",
+        fontFamily: 'SF Pro Text',
     },
     authContainer: {
         backgroundColor: "#1E1E1E",
@@ -236,6 +238,7 @@ const styles = StyleSheet.create({
         color: "#fff",
         textAlign: "center",
         marginBottom: 30,
+        fontFamily: 'SF Pro Text',
     },
     formContainer: {
         marginBottom: 20,
@@ -264,6 +267,7 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 18,
         fontWeight: "600",
+        fontFamily: 'SF Pro Text',
     },
     dividerContainer: {
         flexDirection: "row",
@@ -297,6 +301,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         color: "#000",
+        fontFamily: 'SF Pro Text',
     },
     toggleContainer: {
         alignItems: "center",
@@ -305,5 +310,6 @@ const styles = StyleSheet.create({
     toggleText: {
         color: "#4A90E2",
         fontSize: 14,
+        fontFamily: 'SF Pro Text',
     },
 });

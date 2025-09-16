@@ -152,7 +152,8 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#9C27B0",
         marginBottom: 20,
-        textAlign: 'center'
+        textAlign: 'center',
+        fontFamily: 'SF Pro Text',
     },
     spiritContainer: {
         position: 'relative',
@@ -229,5 +230,6 @@ const styles = StyleSheet.create({
     sendButtonText: {
         color: '#fff',
         fontWeight: '600',
+        fontFamily: 'SF Pro Text',
     },
 });

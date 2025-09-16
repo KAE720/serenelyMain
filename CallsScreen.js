@@ -26,6 +26,6 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         opacity: 0.6,
     },
-    emptyText: { fontSize: 18, fontWeight: "600", color: "#fff", marginBottom: 8 },
+    emptyText: { fontSize: 18, fontWeight: "600", color: "#fff", marginBottom: 8, fontFamily: 'SF Pro Text' },
     emptySubText: { fontSize: 14, color: "#aaa", textAlign: 'center' },
 });

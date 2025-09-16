@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
         color: '#1976D2',
         fontSize: 16,
         fontWeight: '600',
+        fontFamily: 'SF Pro Text',
     },
     profileImage: {
         width: 120,
@@ -64,11 +65,13 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 10,
+        fontFamily: 'SF Pro Text',
     },
     idText: {
         color: '#aaa',
         fontSize: 16,
         marginBottom: 30,
+        fontFamily: 'SF Pro Text',
     },
     logoutButton: {
         backgroundColor: '#dc3545',
@@ -81,5 +84,6 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
+        fontFamily: 'SF Pro Text',
     },
 });
