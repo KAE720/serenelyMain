@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     FlatList
 } from "react-native";
+import { ContactsIcon } from "./components/TabIcons";
 
 export default function ContactsScreen() {
     const [contacts, setContacts] = useState([]);
@@ -44,7 +45,10 @@ export default function ContactsScreen() {
 
             {contacts.length === 0 ? (
                 <View style={styles.emptyState}>
-                    <Text style={styles.emptyText}>No contacts yet 👥</Text>
+                    <View style={styles.emptyIconContainer}>
+                        <ContactsIcon active={false} size={48} />
+                    </View>
+                    <Text style={styles.emptyText}>No contacts yet</Text>
                     <Text style={styles.emptySubText}>
                         Add friends using their SerenID or sync with phone contacts.
                     </Text>
@@ -92,6 +96,10 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     emptyState: { flex: 1, justifyContent: "center", alignItems: "center" },
+    emptyIconContainer: {
+        marginBottom: 16,
+        opacity: 0.6,
+    },
     emptyText: { fontSize: 18, fontWeight: "600", color: "#fff", marginBottom: 8 },
     emptySubText: { fontSize: 14, color: "#aaa", textAlign: 'center' },
     contactItem: {

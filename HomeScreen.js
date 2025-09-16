@@ -13,6 +13,7 @@ import CallsScreen from './CallsScreen';
 import ContactsScreen from './ContactsScreen';
 import AIShrinkScreen from './AIShrinkScreen';
 import ChatScreen from './ChatScreen';
+import { MessageIcon, PhoneIcon, ContactsIcon, SereneIcon } from './components/TabIcons';
 
 export default function HomeScreen({ userId, onLogout, user }) {
     const [showProfile, setShowProfile] = useState(false);
@@ -102,6 +103,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
                     style={[styles.tab, activeTab === 'Messages' && styles.activeTab]}
                     onPress={() => setActiveTab('Messages')}
                 >
+                    <MessageIcon active={activeTab === 'Messages'} size={24} />
                     <Text style={[styles.tabText, activeTab === 'Messages' && styles.activeTabText]}>
                         Messages
                     </Text>
@@ -110,6 +112,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
                     style={[styles.tab, activeTab === 'Calls' && styles.activeTab]}
                     onPress={() => setActiveTab('Calls')}
                 >
+                    <PhoneIcon active={activeTab === 'Calls'} size={24} />
                     <Text style={[styles.tabText, activeTab === 'Calls' && styles.activeTabText]}>
                         Calls
                     </Text>
@@ -118,6 +121,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
                     style={[styles.tab, activeTab === 'Contacts' && styles.activeTab]}
                     onPress={() => setActiveTab('Contacts')}
                 >
+                    <ContactsIcon active={activeTab === 'Contacts'} size={24} />
                     <Text style={[styles.tabText, activeTab === 'Contacts' && styles.activeTabText]}>
                         Contacts
                     </Text>
@@ -126,6 +130,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
                     style={[styles.tab, activeTab === 'AI Shrink' && styles.activeTab]}
                     onPress={() => setActiveTab('AI Shrink')}
                 >
+                    <SereneIcon active={activeTab === 'AI Shrink'} size={24} />
                     <Text style={[styles.tabText, activeTab === 'AI Shrink' && styles.activeTabText]}>
                         Serene
                     </Text>
@@ -178,6 +183,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         paddingVertical: 12,
+        gap: 4,
     },
     activeTab: {
         backgroundColor: '#333',
