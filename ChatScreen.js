@@ -19,8 +19,6 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState("");
     const [loading, setLoading] = useState(false);
-    const [suggestions, setSuggestions] = useState([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
     const [aiExplanation, setAiExplanation] = useState(null); // For AI popup
     const [isLLMReady, setIsLLMReady] = useState(false); // Track LLM status
     const [moodScore, setMoodScore] = useState(50); // Mood tracking score (0-100)
@@ -278,13 +276,6 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
             setMoodScore(moodUpdate.currentScore);
             setMoodHealth(moodUpdate.healthStatus);
 
-            // Get suggestions for the partner based on the tone
-            if (toneAnalysis.tone !== 'neutral') {
-                const toneSuggestions = await enhancedToneAnalysisService.getToneSuggestions(toneAnalysis.tone, messageText);
-                setSuggestions(toneSuggestions);
-                setShowSuggestions(true);
-            }
-
             // Scroll to bottom
             setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: true });
@@ -462,15 +453,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                         {item.text}
                     </Text>
 
-                    {/* AI button and enhancement indicator */}
+                    {/* AI button */}
                     <View style={styles.aiButtonContainer}>
-                        {/* LLM Enhancement Indicator */}
-                        {item.isEnhanced && (
-                            <View style={styles.enhancementIndicator}>
-                                <Text style={styles.enhancementText}>✓</Text>
-                            </View>
-                        )}
-                        
                         <TouchableOpacity
                             style={[styles.aiButton, showingExplanation && styles.aiButtonActive]}
                             onPress={async () => {
@@ -519,11 +503,6 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                             </Text>
                             {" - " + aiExplanation.explanation}
                         </Text>
-                        {item.isEnhanced && (
-                            <Text style={styles.enhancementBadge}>
-                                Enhanced Analysis
-                            </Text>
-                        )}
                         <View style={[
                             styles.aiPopupArrow,
                             isOwnMessage ? styles.aiArrowRight : styles.aiArrowLeft
@@ -655,30 +634,6 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
             {/* Input */}
             <View style={styles.inputContainer}>
-                {/* Tone Suggestions */}
-                {showSuggestions && suggestions.length > 0 && (
-                    <View style={styles.suggestionsContainer}>
-                        <View style={styles.suggestionsHeader}>
-                            <Text style={styles.suggestionsTitle}>💡 Suggested responses:</Text>
-                            <TouchableOpacity onPress={() => setShowSuggestions(false)}>
-                                <Text style={styles.dismissButton}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-                        {suggestions.map((suggestion, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={styles.suggestionItem}
-                                onPress={() => {
-                                    setInputText(suggestion);
-                                    setShowSuggestions(false);
-                                }}
-                            >
-                                <Text style={styles.suggestionText}>{suggestion}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                )}
-
                 <View style={styles.inputRow}>
                     <TextInput
                         style={styles.textInput}
@@ -965,9 +920,9 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     messageBubble: {
-        padding: 16,
-        borderRadius: 20,
-        marginBottom: 6,
+        padding: 12,
+        borderRadius: 24,
+        marginBottom: 4,
         minWidth: 50,
         maxWidth: "100%",
         borderWidth: 0.5,
@@ -976,32 +931,32 @@ const styles = StyleSheet.create({
     ownBubble: {
         borderBottomRightRadius: 8,
         shadowColor: '#000',
-        shadowOffset: { width: 3, height: 5 },
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
-        elevation: 8,
-        borderTopWidth: 1,
-        borderLeftWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.15)',
-        borderLeftColor: 'rgba(255,255,255,0.1)',
-        transform: [{ perspective: 1000 }, { rotateY: '1deg' }, { rotateX: '-0.5deg' }],
+        shadowOffset: { width: 5, height: 8 },
+        shadowOpacity: 0.5,
+        shadowRadius: 12,
+        elevation: 15,
+        borderTopWidth: 2,
+        borderLeftWidth: 2,
+        borderTopColor: 'rgba(255,255,255,0.25)',
+        borderLeftColor: 'rgba(255,255,255,0.2)',
+        transform: [{ perspective: 1000 }, { rotateY: '3deg' }, { rotateX: '-2deg' }],
     },
     otherBubble: {
         borderBottomLeftRadius: 8,
         shadowColor: '#000',
-        shadowOffset: { width: -2, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 6,
-        borderTopWidth: 1,
-        borderRightWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.12)',
-        borderRightColor: 'rgba(255,255,255,0.08)',
-        transform: [{ perspective: 1000 }, { rotateY: '-1deg' }, { rotateX: '0.5deg' }],
+        shadowOffset: { width: -4, height: 7 },
+        shadowOpacity: 0.4,
+        shadowRadius: 10,
+        elevation: 12,
+        borderTopWidth: 2,
+        borderRightWidth: 2,
+        borderTopColor: 'rgba(255,255,255,0.2)',
+        borderRightColor: 'rgba(255,255,255,0.15)',
+        transform: [{ perspective: 1000 }, { rotateY: '-3deg' }, { rotateX: '2deg' }],
     },
     messageText: {
-        fontSize: 16,
-        lineHeight: 22,
+        fontSize: 15,
+        lineHeight: 20,
         fontWeight: '500',
         fontFamily: 'SF Pro Text',
     },
@@ -1011,20 +966,22 @@ const styles = StyleSheet.create({
         paddingTop: 8,
     },
     aiButton: {
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 18,
         backgroundColor: "rgba(255,255,255,0.15)",
-        borderWidth: 0.5,
-        borderColor: "rgba(255,255,255,0.2)",
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.25)",
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 8,
         alignSelf: 'flex-end',
         minWidth: 50,
         alignItems: 'center',
         justifyContent: 'center',
+        transform: [{ perspective: 500 }, { rotateX: '-1deg' }],
     },
     aiIcon: {
         width: 20,
@@ -1180,41 +1137,6 @@ const styles = StyleSheet.create({
         borderTopColor: "#333",
         paddingBottom: Platform.OS === "ios" ? 34 : 16,
     },
-    suggestionsContainer: {
-        padding: 16,
-        backgroundColor: "#2A2A2A",
-        borderBottomWidth: 1,
-        borderBottomColor: "#333",
-    },
-    suggestionsHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 12,
-    },
-    suggestionsTitle: {
-        color: "#4A90E2",
-        fontSize: 14,
-        fontWeight: "600",
-        fontFamily: 'SF Pro Text',
-    },
-    dismissButton: {
-        color: "#666",
-        fontSize: 16,
-        fontWeight: "bold",
-        fontFamily: 'SF Pro Text',
-    },
-    suggestionItem: {
-        backgroundColor: "#333",
-        padding: 12,
-        borderRadius: 12,
-        marginBottom: 8,
-    },
-    suggestionText: {
-        color: "#fff",
-        fontSize: 14,
-        fontFamily: 'SF Pro Text',
-    },
     inputRow: {
         flexDirection: "row",
         alignItems: "flex-end",
@@ -1260,28 +1182,6 @@ const styles = StyleSheet.create({
         textShadowColor: 'rgba(0,0,0,0.3)',
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 1,
-    },
-    enhancementIndicator: {
-        position: 'absolute',
-        top: -8,
-        right: -8,
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: 10,
-        width: 20,
-        height: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1,
-    },
-    enhancementText: {
-        fontSize: 10,
-    },
-    enhancementBadge: {
-        fontSize: 11,
-        color: '#4A90A4',
-        fontWeight: '600',
-        marginTop: 4,
-        textAlign: 'center',
     },
     searchContainer: {
         backgroundColor: "#1E1E1E",
