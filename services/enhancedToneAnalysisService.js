@@ -63,15 +63,23 @@ class EnhancedToneAnalysisService {
   async analyzeTone(text) {
     try {
       // Try LLM analysis first if available
-      if (this.isLLMReady && llmService.isReady()) {
-        console.log('Using LLM for emotion analysis');
-        const llmResult = await llmService.analyzeEmotion(text);
+      if (this.isLLMReady) {
+        console.log('Using advanced on-device AI for emotion analysis');
+        const toneResult = await llmService.analyzeTone(text);
         
-        // Enhance with additional metadata
+        // Map colors back to emotion names
+        const colorToEmotionMap = {
+          'red': 'angry',
+          'orange': 'stressed', 
+          'blue': 'neutral',
+          'green': 'excited'
+        };
+        
         return {
-          ...llmResult,
+          tone: colorToEmotionMap[toneResult.color] || 'neutral',
+          confidence: toneResult.confidence,
           method: 'llm',
-          enhanced: true,
+          enhanced: toneResult.isLLMEnhanced,
           timestamp: new Date().toISOString()
         };
       }
@@ -79,16 +87,27 @@ class EnhancedToneAnalysisService {
       console.error('LLM analysis failed, falling back to keyword analysis:', error);
     }
 
-    // Fallback to keyword-based analysis
+    // Fallback to simple keyword-based analysis
     console.log('Using fallback keyword analysis');
-    const fallbackResult = await fallbackAnalyzeTone(text);
+    return this.simpleKeywordAnalysis(text);
+  }
+
+  // Simple keyword-based fallback analysis
+  simpleKeywordAnalysis(text) {
+    const lowerText = text.toLowerCase();
     
-    return {
-      ...fallbackResult,
-      method: 'keyword',
-      enhanced: false,
-      timestamp: new Date().toISOString()
-    };
+    // Simple emotion detection patterns
+    if (lowerText.includes('angry') || lowerText.includes('mad') || lowerText.includes('furious')) {
+      return { tone: 'angry', confidence: 0.7, method: 'keyword', enhanced: false };
+    }
+    if (lowerText.includes('stressed') || lowerText.includes('overwhelmed') || lowerText.includes('anxious')) {
+      return { tone: 'stressed', confidence: 0.7, method: 'keyword', enhanced: false };
+    }
+    if (lowerText.includes('happy') || lowerText.includes('excited') || lowerText.includes('love') || lowerText.includes('great')) {
+      return { tone: 'excited', confidence: 0.7, method: 'keyword', enhanced: false };
+    }
+    
+    return { tone: 'neutral', confidence: 0.5, method: 'keyword', enhanced: false };
   }
 
   // Check if model is downloaded and ready

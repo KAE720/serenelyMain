@@ -12,6 +12,7 @@ import {
     Platform,
 } from "react-native";
 import enhancedToneAnalysisService from "./services/enhancedToneAnalysisService";
+import llmService from "./llmService";
 
 export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const [messages, setMessages] = useState([]);
@@ -28,11 +29,16 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         // Initialize the enhanced tone analysis service
         const initializeEnhancedAnalysis = async () => {
             try {
+                // COPILOT INTEGRATION: Initialize the new LLM service
+                await llmService.initialize();
+                const llmStatus = llmService.getStatus();
+                
+                // Fallback to enhanced tone analysis service
                 const isReady = await enhancedToneAnalysisService.initializeLLM();
-                setIsLLMReady(isReady);
-                console.log('Enhanced tone analysis initialized:', isReady ? 'LLM ready' : 'Using fallback');
+                setIsLLMReady(llmStatus.initialized || isReady);
+                console.log('AI Analysis initialized:', llmStatus.initialized ? 'LLM ready' : 'Using fallback');
             } catch (error) {
-                console.error('Failed to initialize enhanced tone analysis:', error);
+                console.error('Failed to initialize AI analysis:', error);
                 setIsLLMReady(false);
             }
         };
@@ -50,8 +56,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 3600000).toISOString(),
                     tone: "happy",
                     toneConfidence: 0.85,
-                    explanation: "This message has a warm, caring tone that shows genuine interest in the other person's wellbeing",
-                    isEnhanced: false, // Keyword analysis
+                    explanation: "They want to know how you're feeling today",
+                    isEnhanced: false,
                 },
                 {
                     id: "2",
@@ -60,8 +66,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 3000000).toISOString(),
                     tone: "stressed",
                     toneConfidence: 0.78,
-                    explanation: "This message expresses anxiety and worry, indicating the sender is dealing with workplace pressure",
-                    isEnhanced: true, // Enhanced LLM analysis
+                    explanation: "They're overwhelmed by work pressure",
+                    isEnhanced: true,
                 },
                 {
                     id: "3",
@@ -70,7 +76,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 2700000).toISOString(),
                     tone: "happy",
                     toneConfidence: 0.92,
-                    explanation: "This message shows empathy and offers emotional support, creating a safe space for further discussion",
+                    explanation: "They're offering to listen and support you",
                     isEnhanced: false,
                 },
                 {
@@ -80,8 +86,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 2400000).toISOString(),
                     tone: "stressed",
                     toneConfidence: 0.76,
-                    explanation: "This message conveys stress and feeling overwhelmed by work pressures",
-                    isEnhanced: true, // Enhanced LLM analysis
+                    explanation: "Their supervisor is giving them a hard time",
+                    isEnhanced: true,
                 },
                 {
                     id: "5",
@@ -90,7 +96,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 2100000).toISOString(),
                     tone: "neutral",
                     toneConfidence: 0.65,
-                    explanation: "This message offers practical advice in a calm, balanced way",
+                    explanation: "They're suggesting you get HR involved",
                     isEnhanced: false,
                 },
                 {
@@ -100,8 +106,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                     timestamp: new Date(Date.now() - 1800000).toISOString(),
                     tone: "excited",
                     toneConfidence: 0.91,
-                    explanation: "This message demonstrates high positive energy, love, and appreciation",
-                    isEnhanced: true, // Enhanced LLM analysis
+                    explanation: "They appreciate how you support them emotionally",
+                    isEnhanced: true,
                 },
             ]);
         }, 500);
@@ -109,6 +115,32 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
     const analyzeToneForMessage = async (text) => {
         try {
+            // COPILOT INTEGRATION: Use the new analyzeTone function
+            const copilotAnalysis = await llmService.analyzeTone(text);
+            
+            // Map Copilot colors back to existing emotion names for UI compatibility
+            const colorToEmotionMap = {
+                'red': 'angry',
+                'orange': 'stressed', 
+                'blue': 'neutral',
+                'green': 'excited'
+            };
+            
+            const mappedTone = colorToEmotionMap[copilotAnalysis.color] || 'neutral';
+            
+            // Get proper message explanation (what the message is saying)
+            const messageExplanation = await llmService.getExplainer(text);
+            
+            return {
+                tone: mappedTone,
+                confidence: copilotAnalysis.confidence,
+                explanation: messageExplanation, // Now uses proper message meaning explanation
+                method: copilotAnalysis.isLLMEnhanced ? 'llm' : 'demo',
+                isEnhanced: copilotAnalysis.isLLMEnhanced
+            };
+        } catch (error) {
+            console.error("Enhanced tone analysis failed:", error);
+            // Fallback to existing logic with improved explanations
             const analysis = await enhancedToneAnalysisService.analyzeTone(text);
             
             // Map to 4 core emotions for dual tracker design
@@ -129,24 +161,66 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                 }
             }
 
+            // Generate a simple message explanation for fallback
+            const fallbackExplanation = generateFallbackExplanation(text);
+
             return {
                 ...analysis,
                 tone: mappedTone,
+                explanation: fallbackExplanation,
                 isEnhanced: analysis.method === 'llm' // Track if LLM was used
             };
-        } catch (error) {
-            console.error("Enhanced tone analysis failed:", error);
-            // Randomly assign a core emotion for demo purposes
-            const coreEmotions = ['angry', 'stressed', 'neutral', 'excited'];
-            const randomTone = coreEmotions[Math.floor(Math.random() * coreEmotions.length)];
-            return {
-                tone: randomTone,
-                confidence: 0.6,
-                explanation: `Fallback: Detected ${randomTone} emotion`,
-                method: 'fallback',
-                isEnhanced: false
-            };
         }
+    };
+
+    // Fallback explanation generator for when LLM service fails
+    const generateFallbackExplanation = (text) => {
+        const lowerText = text.toLowerCase();
+        
+        // Concise, specific explanations of what they actually mean
+        if (lowerText.includes('i love you') || lowerText === 'love you') {
+            return 'They\'re expressing romantic feelings';
+        }
+        if (lowerText.includes('thank you') || lowerText.includes('thanks')) {
+            return 'They\'re saying thanks for something specific';
+        }
+        if (lowerText.includes('how are you') || lowerText.includes('how\'s it going')) {
+            return 'They want to know how you\'re feeling today';
+        }
+        if (lowerText.includes('stressed about work') || lowerText.includes('work is stressing')) {
+            return 'They\'re overwhelmed by work pressure';
+        }
+        if (lowerText.includes('not happy with you') || lowerText.includes('angry with you')) {
+            return 'They\'re upset about something you did';
+        }
+        if (lowerText.includes('why didn\'t you') || lowerText.includes('expected you to')) {
+            return 'They\'re disappointed you didn\'t meet their expectations';
+        }
+        if (lowerText.includes('supportive') && (lowerText.includes('love') || lowerText.includes('💕'))) {
+            return 'They appreciate how you support them emotionally';
+        }
+        if (lowerText.includes('shops') || lowerText.includes('shopping')) {
+            return 'They\'re telling you about shopping plans';
+        }
+        if (lowerText.includes('boss') && lowerText.includes('demanding')) {
+            return 'Their supervisor is giving them a hard time';
+        }
+        if (lowerText.includes('sorry to hear') && lowerText.includes('talk about')) {
+            return 'They\'re offering to listen and support you';
+        }
+        if (lowerText.includes('talking to hr') || lowerText.includes('thought about hr')) {
+            return 'They\'re suggesting you get HR involved';
+        }
+        if (text.includes('?')) {
+            return 'They\'re asking you a question';
+        }
+        if (lowerText.includes('thank') || lowerText.includes('appreciate')) {
+            return 'They\'re grateful for something you did';
+        }
+        if (text.length < 20) {
+            return 'Quick response or reaction';
+        }
+        return 'They\'re sharing information with you';
     };
 
     const sendMessage = async () => {
@@ -268,6 +342,12 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         }
     };
 
+    // COPILOT HELPER: Color mapping function for message bubbles
+    const getMessageBubbleColorFromCopilot = (copilotColor, tone) => {
+        // Use existing getToneColor function with mapped tone
+        return getToneColor(tone);
+    };
+
     const renderMessage = ({ item }) => {
         const userId = currentUser?.uid || currentUser?.id || "current_user";
         const isOwnMessage = item.sender === userId;
@@ -321,22 +401,38 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                         
                         <TouchableOpacity
                             style={[styles.aiButton, showingExplanation && styles.aiButtonActive]}
-                            onPress={() => {
+                            onPress={async () => {
                                 if (showingExplanation) {
                                     setAiExplanation(null);
                                 } else {
-                                    setAiExplanation({
-                                        messageId: item.id,
-                                        tone: item.tone,
-                                        explanation: getToneExplanation(item),
-                                        color: toneColor,
-                                        isEnhanced: item.isEnhanced
-                                    });
+                                    // Generate fresh AI explanation using LLM
+                                    try {
+                                        const freshExplanation = await llmService.getExplainer(item.text);
+                                        setAiExplanation({
+                                            messageId: item.id,
+                                            tone: item.tone,
+                                            explanation: freshExplanation,
+                                            color: toneColor,
+                                            isEnhanced: item.isEnhanced
+                                        });
+                                    } catch (error) {
+                                        console.error('Failed to get AI explanation:', error);
+                                        // Fallback to stored explanation
+                                        setAiExplanation({
+                                            messageId: item.id,
+                                            tone: item.tone,
+                                            explanation: item.explanation || getToneExplanation(item),
+                                            color: toneColor,
+                                            isEnhanced: item.isEnhanced
+                                        });
+                                    }
                                 }
                             }}
                         >
-                            {/* AI Text Icon */}
-                            <Text style={styles.aiIconText}>AI</Text>
+                            {/* Emotion Label with Color */}
+                            <Text style={[styles.aiEmotionText, { color: toneColor }]}>
+                                {item.tone.charAt(0).toUpperCase() + item.tone.slice(1)}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -351,7 +447,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                             <Text style={[styles.emotionWord, { color: toneColor }]}>
                                 {item.tone.charAt(0).toUpperCase() + item.tone.slice(1)}
                             </Text>
-                            {" - " + getToneExplanation(item)}
+                            {" - " + aiExplanation.explanation}
                         </Text>
                         {item.isEnhanced && (
                             <Text style={styles.enhancementBadge}>
@@ -757,7 +853,7 @@ const styles = StyleSheet.create({
         paddingTop: 8,
     },
     aiButton: {
-        paddingHorizontal: 8,
+        paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 12,
         backgroundColor: "rgba(255,255,255,0.15)",
@@ -768,7 +864,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 2,
         alignSelf: 'flex-end',
-        minWidth: 32,
+        minWidth: 50,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -998,6 +1094,14 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
         fontWeight: '600',
         fontFamily: 'SF Pro Text',
+    },
+    aiEmotionText: {
+        fontSize: 11,
+        fontWeight: '700',
+        fontFamily: 'SF Pro Text',
+        textShadowColor: 'rgba(0,0,0,0.3)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 1,
     },
     enhancementIndicator: {
         position: 'absolute',
