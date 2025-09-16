@@ -12,11 +12,12 @@ class EmotionClassificationEngine {
                 keywords: ['angry', 'furious', 'mad', 'annoyed', 'irritated', 'frustrated', 'pissed', 'rage', 'hate'],
                 phrases: [
                     'not happy with you', 'disappointed in you', 'what is wrong with you',
-                    'this is ridiculous', 'fed up with', 'sick of', 'had enough'
+                    'this is ridiculous', 'fed up with', 'sick of', 'had enough',
+                    'angry with you', 'mad at you', 'upset with you'
                 ],
                 contextualClues: [
-                    'why did you not', 'why didn\'t you', 'you should have', 'you never',
-                    'always forget', 'never listen', 'don\'t care'
+                    'why did you not', 'why didn\'t you', 'why did you', 'you should have', 'you never',
+                    'always forget', 'never listen', 'don\'t care', 'with you', 'at you'
                 ],
                 intensifiers: ['very', 'extremely', 'really', 'so', 'absolutely'],
                 negationHandling: true
@@ -112,6 +113,15 @@ class EmotionClassificationEngine {
             scores.excited *= 0.3;
         }
 
+        // BOOST CLEAR ANGER EXPRESSIONS - prevent misclassification as neutral
+        if (normalizedText.includes('angry') || normalizedText.includes('mad')) {
+            if (normalizedText.includes('with you') || normalizedText.includes('at you')) {
+                scores.angry += 3; // Strong boost for direct anger expressions
+            } else {
+                scores.angry += 1.5; // Moderate boost for general anger
+            }
+        }
+
         // Calculate neutral score based on question patterns and neutral indicators
         scores.neutral = this.calculateNeutralScore(normalizedText);
 
@@ -178,7 +188,13 @@ class EmotionClassificationEngine {
         const patterns = this.emotionPatterns.neutral;
         let score = 0;
         
-        // Questions tend to be neutral
+        // Don't give neutral score if there are clear emotional expressions
+        if (text.includes('angry') || text.includes('mad') || text.includes('upset') || 
+            text.includes('love') || text.includes('hate') || text.includes('frustrated')) {
+            return 0;
+        }
+        
+        // Questions tend to be neutral (but not emotional questions)
         if (patterns.questions.some(q => text.includes(q + ' '))) {
             score += 1;
         }
