@@ -291,20 +291,20 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
     const getToneColor = (tone) => {
         const toneColors = {
-            // 4-emotion scale: Natural, Muted Colors
-            angry: "#A1232B",      // � Crimson Rust - Deep, muted red with a hint of brown
-            stressed: "#D9772B",   // � Burnt Amber - Earthy orange, less neon, more grounded
-            neutral: "#4A90A4",    // � Slate Blue - Cool, slightly dusty blue
-            excited: "#4CAF50",    // 😄 Verdant Spring - Fresh green with a natural softness
+            // More distinctive, legible colors for better contrast
+            angry: "#D32F2F",      // 🔴 Vibrant red - clear negative emotion
+            stressed: "#D32F2F",   // 🔴 Same vibrant red for stressed emotions
+            neutral: "#1976D2",    // 🔵 Strong blue - clear neutral tone
+            excited: "#388E3C",    // 🟢 Forest green - distinct positive emotion
 
             // Map legacy variations
-            happy: "#4CAF50",      // Map to excited (verdant spring)
-            sad: "#D9772B",        // Map to stressed (burnt amber) - low-energy negative
-            positive: "#4CAF50",   // -> excited (verdant spring)
-            negative: "#A1232B",   // -> angry (crimson rust)
-            supportive: "#4CAF50", // -> excited (verdant spring)
-            worried: "#D9772B",    // -> stressed (burnt amber)
-            calm: "#4A90A4",       // -> neutral (slate blue)
+            happy: "#388E3C",      // Map to excited (forest green)
+            sad: "#D32F2F",        // Map to negative (vibrant red)
+            positive: "#388E3C",   // -> excited (forest green)
+            negative: "#D32F2F",   // -> angry (vibrant red)
+            supportive: "#388E3C", // -> excited (forest green)
+            worried: "#D32F2F",    // -> stressed (vibrant red)
+            calm: "#1976D2",       // -> neutral (strong blue)
         };
         return toneColors[tone] || toneColors.neutral;
     };
@@ -425,31 +425,9 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
                 <View style={[
                     styles.messageBubble,
                     isOwnMessage ? styles.ownBubble : styles.otherBubble,
-                    {
-                        backgroundColor: toneColor,
-                        // Enhanced visual distinction
-                        opacity: isOwnMessage ? 1.0 : 0.9,
-                        borderWidth: isOwnMessage ? 0 : 1.5,
-                        borderColor: isOwnMessage ? 'transparent' : 'rgba(255,255,255,0.3)',
-                        // Subtle inner shadow effect
-                        ...(isOwnMessage ? {
-                            shadowColor: toneColor,
-                            shadowOffset: { width: 0, height: -1 },
-                            shadowOpacity: 0.3,
-                            shadowRadius: 2,
-                        } : {}),
-                    }
+                    { backgroundColor: toneColor }
                 ]}>
-                    <Text style={[
-                        styles.messageText,
-                        // Enhanced text styling
-                        {
-                            color: '#fff',
-                            textShadowColor: 'rgba(0,0,0,0.3)',
-                            textShadowOffset: { width: 0, height: 1 },
-                            textShadowRadius: 2,
-                        }
-                    ]}>
+                    <Text style={styles.messageText}>
                         {item.text}
                     </Text>
 
@@ -566,14 +544,12 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
             {/* Single Emotion Tracker - Both Dots Meet in Middle */}
             <View style={styles.singleEmotionTracker}>
                 <View style={styles.emotionBar}>
-                    {/* Single bar: Red → Orange → Green → Purple → Green → Orange → Red */}
+                    {/* Progress bar: Red → Blue → Green → Blue → Red (5 sections) */}
                     <View style={styles.leftRedSection} />
                     <View style={styles.leftOrangeSection} />
                     <View style={styles.leftGreenSection} />
                     <View style={styles.centerPurpleSection} />
                     <View style={styles.rightGreenSection} />
-                    <View style={styles.rightOrangeSection} />
-                    <View style={styles.rightRedSection} />
 
                     {/* Subtle midpoint line */}
                     <View style={styles.midpointLine} />
@@ -763,39 +739,39 @@ const styles = StyleSheet.create({
         shadowRadius: 1,
         elevation: 1,
     },
-    // Left side progression: Red → Orange → Green → Blue (center)
+    // Progress bar: Red → Blue → Green → Blue → Red
     leftRedSection: {
         flex: 1,
-        backgroundColor: "#A1232B", // � Crimson Rust - Most negative (left end)
+        backgroundColor: "#D32F2F", // 🔴 Vibrant red - most negative (left end)
         borderTopLeftRadius: 4,
         borderBottomLeftRadius: 4,
     },
     leftOrangeSection: {
         flex: 1,
-        backgroundColor: "#D9772B", // � Burnt Amber - Moving toward center
+        backgroundColor: "#1976D2", // 🔵 Strong blue - transitioning toward center
     },
     leftGreenSection: {
         flex: 1,
-        backgroundColor: "#4A90A4", // � Slate Blue - Getting closer to center
+        backgroundColor: "#388E3C", // 🟢 Forest green - center positive zone
     },
     centerPurpleSection: {
         flex: 1,
-        backgroundColor: "#4CAF50", // � Blue - Center meeting point
+        backgroundColor: "#1976D2", // 🔵 Strong blue - transitioning from center
     },
-    // Right side progression: Blue (center) → Green → Orange → Red
+    // Right side: Blue → Red
     rightGreenSection: {
         flex: 1,
-        backgroundColor: "#4A90A4", // � Slate Blue - Near center
-    },
-    rightOrangeSection: {
-        flex: 1,
-        backgroundColor: "#D9772B", // � Burnt Amber - Moving away from center
-    },
-    rightRedSection: {
-        flex: 1,
-        backgroundColor: "#A1232B", // � Crimson Rust - Most negative (right end)
+        backgroundColor: "#D32F2F", // 🔴 Vibrant red - most negative (right end)
         borderTopRightRadius: 4,
         borderBottomRightRadius: 4,
+    },
+    rightOrangeSection: {
+        flex: 0, // Remove this section to make it Red-Blue-Green-Blue-Red
+        backgroundColor: "transparent",
+    },
+    rightRedSection: {
+        flex: 0, // Remove this section to make it Red-Blue-Green-Blue-Red
+        backgroundColor: "transparent",
     },
 
     // Psychological Health Bar Styles (0-100 scale)
@@ -907,7 +883,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
     },
     messageContainer: {
-        marginVertical: 8,
+        marginVertical: 2,
         maxWidth: "65%",
     },
     ownMessageContainer: {
@@ -920,68 +896,46 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     messageBubble: {
-        padding: 12,
-        borderRadius: 24,
-        marginBottom: 4,
-        minWidth: 50,
+        padding: 8,
+        borderRadius: 16,
+        marginBottom: 2,
+        minWidth: 60,
         maxWidth: "100%",
-        borderWidth: 0.5,
-        borderColor: 'rgba(255,255,255,0.1)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     ownBubble: {
-        borderBottomRightRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 5, height: 8 },
-        shadowOpacity: 0.5,
-        shadowRadius: 12,
-        elevation: 15,
-        borderTopWidth: 2,
-        borderLeftWidth: 2,
-        borderTopColor: 'rgba(255,255,255,0.25)',
-        borderLeftColor: 'rgba(255,255,255,0.2)',
-        transform: [{ perspective: 1000 }, { rotateY: '3deg' }, { rotateX: '-2deg' }],
+        borderBottomRightRadius: 6,
+        alignSelf: 'flex-end',
     },
     otherBubble: {
-        borderBottomLeftRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: -4, height: 7 },
-        shadowOpacity: 0.4,
-        shadowRadius: 10,
-        elevation: 12,
-        borderTopWidth: 2,
-        borderRightWidth: 2,
-        borderTopColor: 'rgba(255,255,255,0.2)',
-        borderRightColor: 'rgba(255,255,255,0.15)',
-        transform: [{ perspective: 1000 }, { rotateY: '-3deg' }, { rotateX: '2deg' }],
+        borderBottomLeftRadius: 6,
+        alignSelf: 'flex-start',
     },
     messageText: {
-        fontSize: 15,
-        lineHeight: 20,
-        fontWeight: '500',
+        fontSize: 14,
+        lineHeight: 16,
+        fontWeight: '400',
+        color: '#FFFFFF',
         fontFamily: 'SF Pro Text',
     },
     aiButtonContainer: {
         alignItems: "flex-end",
-        marginTop: 8,
-        paddingTop: 8,
+        marginTop: 2,
     },
     aiButton: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 18,
-        backgroundColor: "rgba(255,255,255,0.15)",
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.25)",
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 8,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 10,
+        backgroundColor: "rgba(255,255,255,0.2)",
         alignSelf: 'flex-end',
-        minWidth: 50,
+        marginTop: 2,
+        minWidth: 28,
         alignItems: 'center',
         justifyContent: 'center',
-        transform: [{ perspective: 500 }, { rotateX: '-1deg' }],
     },
     aiIcon: {
         width: 20,
@@ -1170,8 +1124,7 @@ const styles = StyleSheet.create({
     },
     aiIconText: {
         color: '#fff',
-        fontSize: 10,
-        fontStyle: 'italic',
+        fontSize: 11,
         fontWeight: '600',
         fontFamily: 'SF Pro Text',
     },
