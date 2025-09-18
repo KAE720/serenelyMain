@@ -23,7 +23,8 @@ import {
   where,
   onSnapshot,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
+  orderBy
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -78,5 +79,6 @@ export {
   where,
   onSnapshot,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
+  orderBy
 };

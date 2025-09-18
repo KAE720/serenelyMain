@@ -20,14 +20,7 @@ export const MessageIcon = ({ active, size = 24 }) => (
             position: 'relative',
         }}>
             {/* Message lines */}
-            <View style={{
-                position: 'absolute',
-                top: size * 0.12,
-                left: size * 0.08,
-                right: size * 0.08,
-                height: 1,
-                backgroundColor: active ? '#7B2CBF' : '#aaa',
-            }} />
+
             <View style={{
                 position: 'absolute',
                 top: size * 0.22,
@@ -291,6 +284,63 @@ export const SereneIcon = ({ active, size = 24 }) => (
                 height: 2,
                 borderRadius: 1,
                 backgroundColor: active ? '#7B2CBF' : '#aaa',
+            }} />
+        </View>
+    </View>
+);
+
+export const ChatBubbleIcon = ({ active, size = 32 }) => (
+    <View style={{
+        width: size,
+        height: size,
+        alignItems: 'center',
+        justifyContent: 'center',
+    }}>
+        <View style={{
+            width: size * 0.82,
+            height: size * 0.56,
+            borderRadius: size * 0.28,
+            backgroundColor: active ? '#7B2CBF' : '#aaa',
+            borderWidth: 2,
+            borderColor: active ? '#7B2CBF' : '#aaa',
+            position: 'relative',
+            justifyContent: 'center',
+            alignItems: 'center',
+        }}>
+            {/* Bubble tail - classic chat bubble shape */}
+            <View style={{
+                position: 'absolute',
+                bottom: -size * 0.12,
+                left: size * 0.38,
+                width: size * 0.16,
+                height: size * 0.16,
+                backgroundColor: active ? '#7B2CBF' : '#aaa',
+                borderBottomLeftRadius: size * 0.08,
+                borderBottomRightRadius: size * 0.08,
+                transform: [{ rotate: '45deg' }],
+                borderWidth: 2,
+                borderColor: active ? '#7B2CBF' : '#aaa',
+            }} />
+            {/* Message lines - curved and spaced for chat look */}
+            <View style={{
+                position: 'absolute',
+                top: size * 0.18,
+                left: size * 0.22,
+                right: size * 0.22,
+                height: 3,
+                backgroundColor: '#fff',
+                borderRadius: 2,
+                opacity: 0.85,
+            }} />
+            <View style={{
+                position: 'absolute',
+                top: size * 0.30,
+                left: size * 0.22,
+                right: size * 0.22,
+                height: 3,
+                backgroundColor: '#fff',
+                borderRadius: 2,
+                opacity: 0.85,
             }} />
         </View>
     </View>

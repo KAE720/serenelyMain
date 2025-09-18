@@ -58,6 +58,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
             <ChatScreen
                 chatPartner={selectedChat}
                 currentUser={user}
+                conversationId={selectedChat.conversationId}
                 onBack={navigateBack}
             />
         );
@@ -67,18 +68,24 @@ export default function HomeScreen({ userId, onLogout, user }) {
     const renderTabContent = () => {
         switch (activeTab) {
             case 'Messages':
-                return <MessagesScreen onNavigateToChat={navigateToChat} currentUser={user} />;
+                return <MessagesScreen onNavigateToChat={(chatPartner, conversationId) => {
+                    setSelectedChat({ ...chatPartner, conversationId });
+                    setCurrentScreen('chat');
+                }} currentUser={user} />;
             case 'Calls':
                 return <CallsScreen />;
             case 'Contacts':
-                if (selectedContact) {
-                    return <ChatScreen chatPartnerId={selectedContact} onBack={() => setSelectedContact(null)} />;
-                }
-                return <ContactsScreen onSelectContact={setSelectedContact} />;
+                return <ContactsScreen onSelectContact={(chatPartner, conversationId) => {
+                    setSelectedChat({ ...chatPartner, conversationId });
+                    setCurrentScreen('chat');
+                }} />;
             case 'AI Shrink':
                 return <SereneAIScreen currentUser={user} />;
             default:
-                return <MessagesScreen onNavigateToChat={navigateToChat} currentUser={user} />;
+                return <MessagesScreen onNavigateToChat={(chatPartner, conversationId) => {
+                    setSelectedChat({ ...chatPartner, conversationId });
+                    setCurrentScreen('chat');
+                }} currentUser={user} />;
         }
     };
 

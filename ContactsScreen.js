@@ -7,12 +7,13 @@ import {
     TextInput,
     TouchableOpacity,
     FlatList,
-    Alert
+    Alert,
+    Image
 } from "react-native";
 import { db, doc, collection, query, where, getDocs, addDoc, onSnapshot, getAuth, getDoc, setDoc } from "./firebase";
-import { ContactsIcon } from "./components/TabIcons"; // Assuming this is correct
+import { ContactsIcon, MessageIcon, ChatBubbleIcon } from "./components/TabIcons";
 
-export default function ContactsScreen({ navigation }) {
+export default function ContactsScreen({ navigation, onSelectContact }) {
     const [serenId, setSerenId] = useState('');
     const [contacts, setContacts] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -99,7 +100,6 @@ export default function ContactsScreen({ navigation }) {
             const conversationId = [currentUser.uid, contact.contactUid].sort().join('_');
             const conversationsRef = doc(db, "conversations", conversationId);
             const conversationSnap = await getDoc(conversationsRef);
-
             if (!conversationSnap.exists()) {
                 await setDoc(conversationsRef, {
                     participants: [currentUser.uid, contact.contactUid],
@@ -107,14 +107,18 @@ export default function ContactsScreen({ navigation }) {
                     lastMessage: null
                 });
             }
-            // No permission error if rules are correct and participants array is set
-            navigation.navigate("Chat", {
-                conversationId: conversationId,
-                chatPartner: {
-                    id: contact.contactUid,
-                    name: contact.contactName
-                }
-            });
+            const chatPartner = {
+                id: contact.contactUid,
+                name: contact.contactName
+            };
+            if (onSelectContact) {
+                onSelectContact(chatPartner, conversationId);
+            } else if (navigation) {
+                navigation.navigate("Chat", {
+                    conversationId: conversationId,
+                    chatPartner: chatPartner
+                });
+            }
         } catch (error) {
             Alert.alert("Error", "Failed to open chat. Please check your permissions and Firestore rules.");
             console.error("Error opening chat:", error);
@@ -151,12 +155,15 @@ export default function ContactsScreen({ navigation }) {
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <View style={styles.contactItem}>
-                            <View>
+                            <View style={styles.profileRow}>
+                                <Image
+                                    source={item.profilePicUrl ? { uri: item.profilePicUrl } : require('./assets/default-profile.png')}
+                                    style={styles.profilePic}
+                                />
                                 <Text style={styles.contactName}>{item.contactName}</Text>
-                                <Text style={styles.contactId}>SerenID: {item.contactUid.substring(0, 8)}...</Text>
                             </View>
                             <TouchableOpacity style={styles.chatButton} onPress={() => startChat(item)}>
-                                <Text style={styles.chatButtonText}>Chat</Text>
+                                <ChatBubbleIcon active={true} size={32} />
                             </TouchableOpacity>
                         </View>
                     )}
@@ -186,13 +193,26 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginBottom: 10,
     },
+    profileRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    profilePic: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#333',
+        marginRight: 8,
+    },
     contactName: { color: '#fff', fontSize: 16, fontWeight: '600', marginBottom: 4 },
-    contactId: { color: '#aaa', fontSize: 14 },
     chatButton: {
-        backgroundColor: '#007AFF', // iOS blue
-        paddingHorizontal: 12,
-        paddingVertical: 6,
+        backgroundColor: 'transparent',
+        paddingHorizontal: 4,
+        paddingVertical: 4,
         borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     chatButtonText: {
         color: '#fff',
