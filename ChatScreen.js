@@ -291,20 +291,20 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
 
     const getToneColor = (tone) => {
         const toneColors = {
-            // More distinctive, legible colors for better contrast
-            angry: "#D32F2F",      // 🔴 Vibrant red - clear negative emotion
-            stressed: "#D32F2F",   // 🔴 Same vibrant red for stressed emotions
-            neutral: "#1976D2",    // 🔵 Strong blue - clear neutral tone
-            excited: "#388E3C",    // 🟢 Forest green - distinct positive emotion
+            // Rich, vibrant colors that are not too bright
+            angry: "#DC3545",      // 🔴 Rich red - clear negative emotion
+            stressed: "#DC3545",   // 🔴 Same rich red for stressed emotions
+            neutral: "#007BFF",    // 🔵 Rich blue - clear neutral tone
+            excited: "#28A745",    // 🟢 Rich green - distinct positive emotion
 
             // Map legacy variations
-            happy: "#388E3C",      // Map to excited (forest green)
-            sad: "#D32F2F",        // Map to negative (vibrant red)
-            positive: "#388E3C",   // -> excited (forest green)
-            negative: "#D32F2F",   // -> angry (vibrant red)
-            supportive: "#388E3C", // -> excited (forest green)
-            worried: "#D32F2F",    // -> stressed (vibrant red)
-            calm: "#1976D2",       // -> neutral (strong blue)
+            happy: "#28A745",      // Map to excited (rich green)
+            sad: "#DC3545",        // Map to negative (rich red)
+            positive: "#28A745",   // -> excited (rich green)
+            negative: "#DC3545",   // -> angry (rich red)
+            supportive: "#28A745", // -> excited (rich green)
+            worried: "#DC3545",    // -> stressed (rich red)
+            calm: "#007BFF",       // -> neutral (rich blue)
         };
         return toneColors[tone] || toneColors.neutral;
     };
@@ -683,11 +683,14 @@ const styles = StyleSheet.create({
         fontFamily: 'SF Pro Text',
     },
     profileName: {
-        color: "#fff",
+        color: "#FFFFFF",
         fontSize: 12,
-        fontWeight: "500",
+        fontWeight: "600",
         textAlign: "center",
         fontFamily: 'SF Pro Text',
+        textShadowColor: 'rgba(0, 0, 0, 0.2)',
+        textShadowOffset: { width: 0, height: 0.5 },
+        textShadowRadius: 0.5,
     },
     centerSection: {
         alignItems: "center",
@@ -715,16 +718,22 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     leftLabel: {
-        color: "#E8E8E8",
+        color: "#FFFFFF",
         fontSize: 12,
-        fontWeight: "600",
+        fontWeight: "700",
         fontFamily: 'SF Pro Text',
+        textShadowColor: 'rgba(0, 0, 0, 0.2)',
+        textShadowOffset: { width: 0, height: 0.5 },
+        textShadowRadius: 0.5,
     },
     rightLabel: {
-        color: "#E8E8E8",
+        color: "#FFFFFF",
         fontSize: 12,
-        fontWeight: "600",
+        fontWeight: "700",
         fontFamily: 'SF Pro Text',
+        textShadowColor: 'rgba(0, 0, 0, 0.2)',
+        textShadowOffset: { width: 0, height: 0.5 },
+        textShadowRadius: 0.5,
     },
     emotionBar: {
         flexDirection: "row",
@@ -742,26 +751,26 @@ const styles = StyleSheet.create({
     // Progress bar: Red → Blue → Green → Blue → Red
     leftRedSection: {
         flex: 1,
-        backgroundColor: "#D32F2F", // 🔴 Vibrant red - most negative (left end)
+        backgroundColor: "#DC3545", // 🔴 Rich red - most negative (left end)
         borderTopLeftRadius: 4,
         borderBottomLeftRadius: 4,
     },
     leftOrangeSection: {
         flex: 1,
-        backgroundColor: "#1976D2", // 🔵 Strong blue - transitioning toward center
+        backgroundColor: "#007BFF", // 🔵 Rich blue - transitioning toward center
     },
     leftGreenSection: {
         flex: 1,
-        backgroundColor: "#388E3C", // 🟢 Forest green - center positive zone
+        backgroundColor: "#28A745", // 🟢 Rich green - center positive zone
     },
     centerPurpleSection: {
         flex: 1,
-        backgroundColor: "#1976D2", // 🔵 Strong blue - transitioning from center
+        backgroundColor: "#007BFF", // 🔵 Rich blue - transitioning from center
     },
     // Right side: Blue → Red
     rightGreenSection: {
         flex: 1,
-        backgroundColor: "#D32F2F", // 🔴 Vibrant red - most negative (right end)
+        backgroundColor: "#DC3545", // 🔴 Rich red - most negative (right end)
         borderTopRightRadius: 4,
         borderBottomRightRadius: 4,
     },
@@ -808,9 +817,12 @@ const styles = StyleSheet.create({
     scoreText: {
         color: "#FFFFFF",
         fontSize: 14,
-        fontWeight: "700",
+        fontWeight: "800",
         fontFamily: 'SF Pro Text',
         textAlign: 'center',
+        textShadowColor: 'rgba(0, 0, 0, 0.2)',
+        textShadowOffset: { width: 0, height: 0.5 },
+        textShadowRadius: 0.5,
     },
     healthText: {
         fontSize: 10,
@@ -917,10 +929,13 @@ const styles = StyleSheet.create({
     },
     messageText: {
         fontSize: 14,
-        lineHeight: 16,
-        fontWeight: '400',
+        lineHeight: 18,
+        fontWeight: '500',
         color: '#FFFFFF',
         fontFamily: 'SF Pro Text',
+        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+        textShadowOffset: { width: 0, height: 0.5 },
+        textShadowRadius: 1,
     },
     aiButtonContainer: {
         alignItems: "flex-end",

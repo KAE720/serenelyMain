@@ -234,9 +234,9 @@ async function incrementUsage(queryType, inferenceTime) {
 // Get color for sentiment-based bubble coloring
 export function getSentimentColor(sentiment) {
     const colors = {
-        positive: '#2AB67B',  // Teal-ish green (matches your app theme)
-        negative: '#E63946',  // Vivid red (matches your app theme)
-        neutral: '#2D6CDF'    // Medium vibrant blue (matches your app theme)
+        positive: '#28A745',  // 🟢 Rich green - clear positive emotion
+        negative: '#DC3545',  // 🔴 Rich red - clear negative emotion  
+        neutral: '#007BFF'    // 🔵 Rich blue - clear neutral tone
     };
     return colors[sentiment] || colors.neutral;
 }
