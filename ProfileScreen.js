@@ -109,7 +109,7 @@ export default function ProfileScreen({ user, onBack, onLogout, onOpenModelManag
                 </View>
             )}
 
-       
+
 
             {/* Logout button */}
             <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>

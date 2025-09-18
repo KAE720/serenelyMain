@@ -1,5 +1,4 @@
-// firebase.js
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getAuth,
   GoogleAuthProvider,
@@ -15,9 +14,16 @@ import {
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getFirestore,
+  collection,
   doc,
   setDoc,
-  getDoc // You need to import this to check for existing documents
+  getDoc,
+  getDocs,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  serverTimestamp
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -29,15 +35,33 @@ const firebaseConfig = {
   appId: "1:635219552771:web:804159b24edbde1016bc36",
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-});
+// Check if a Firebase app is already running to avoid re-initialization errors
+let app;
+if (getApps().length === 0) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
+}
+
+// Initialize Auth only if it hasn't been initialized yet
+let auth;
+try {
+  auth = getAuth(app);
+} catch (e) {
+  if (e.code === 'auth/internal-error' || e.code === 'auth/auth-not-initialized') {
+    auth = initializeAuth(app, {
+      persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+    });
+  } else {
+    throw e;
+  }
+}
 const db = getFirestore(app);
 
 export {
   auth,
   db,
+  getAuth,
   GoogleAuthProvider,
   signInWithCredential,
   createUserWithEmailAndPassword,
@@ -45,7 +69,14 @@ export {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  collection,
   doc,
   setDoc,
-  getDoc // Export getDoc as well
+  getDoc,
+  getDocs,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  serverTimestamp
 };
