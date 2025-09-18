@@ -9,7 +9,7 @@ dist/
 web-build/
 expo-env.d.ts
 assets/models/phi-2.Q2_K.gguf
-assets/models/phi-2.Q4_K.gguf
+assets/models/phi-2.Q4_K_M.gguf
 
 # Native
 .kotlin/
