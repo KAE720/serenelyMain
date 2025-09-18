@@ -14,8 +14,10 @@ import {
 
 import llmService from "./llmService";
 import moodTrackingService from "./moodTrackingService";
+import { db, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from "./firebase";
+import { getAuth } from "firebase/auth";
 
-export default function ChatScreen({ chatPartner, currentUser, onBack }) {
+export default function ChatScreen({ chatPartner, currentUser, onBack, conversationId }) {
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState("");
     const [loading, setLoading] = useState(false);
@@ -24,6 +26,39 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     const [moodScore, setMoodScore] = useState(50); // Mood tracking score (0-100)
     const [moodHealth, setMoodHealth] = useState(null); // Health status object
     const flatListRef = useRef(null);
+    const auth = getAuth();
+    const userId = currentUser?.uid || currentUser?.id || auth.currentUser?.uid || "current_user";
+
+    // Real-time Firestore listener for messages
+    useEffect(() => {
+        if (!conversationId) return;
+        const messagesRef = collection(db, "conversations", conversationId, "messages");
+        const q = query(messagesRef, orderBy("timestamp", "asc"));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const msgs = [];
+            querySnapshot.forEach((doc) => {
+                msgs.push({ id: doc.id, ...doc.data() });
+            });
+            setMessages(msgs);
+            // Mood tracking with real messages
+            let currentScore = 50;
+            msgs.forEach(message => {
+                const moodUpdate = moodTrackingService.updateConversationScore(
+                    conversationId,
+                    message.sender,
+                    message.tone || "neutral",
+                    message.toneConfidence || 0.5
+                );
+                currentScore = moodUpdate.currentScore;
+            });
+            setMoodScore(currentScore);
+            const finalHealth = moodTrackingService.getConversationScore(conversationId);
+            if (finalHealth) {
+                setMoodHealth(moodTrackingService.getHealthStatus(currentScore));
+            }
+        });
+        return unsubscribe;
+    }, [conversationId]);
 
     // Initialize enhanced tone analysis and mock messages
     useEffect(() => {
@@ -45,96 +80,6 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
         };
 
         initializeEnhancedAnalysis();
-
-        // Simulate loading messages from backend
-        setTimeout(() => {
-            const userId = currentUser?.uid || currentUser?.id || "current_user";
-            const mockMessages = [
-                {
-                    id: "1",
-                    text: "Hey, how are you doing today?",
-                    sender: chatPartner.id,
-                    timestamp: new Date(Date.now() - 3600000).toISOString(),
-                    tone: "excited",
-                    toneConfidence: 0.85,
-                    explanation: "Checking on your wellbeing",
-                    isEnhanced: false,
-                },
-                {
-                    id: "2",
-                    text: "I'm feeling a bit stressed about work lately.",
-                    sender: userId,
-                    timestamp: new Date(Date.now() - 3000000).toISOString(),
-                    tone: "stressed",
-                    toneConfidence: 0.78,
-                    explanation: "Sharing work stress",
-                    isEnhanced: true,
-                },
-                {
-                    id: "3",
-                    text: "I'm sorry to hear that. Want to talk about it?",
-                    sender: chatPartner.id,
-                    timestamp: new Date(Date.now() - 2700000).toISOString(),
-                    tone: "excited",
-                    toneConfidence: 0.92,
-                    explanation: "Offering emotional support",
-                    isEnhanced: false,
-                },
-                {
-                    id: "4",
-                    text: "Yeah, my boss has been really demanding lately and I feel overwhelmed.",
-                    sender: userId,
-                    timestamp: new Date(Date.now() - 2400000).toISOString(),
-                    tone: "stressed",
-                    toneConfidence: 0.76,
-                    explanation: "Complaining about supervisor",
-                    isEnhanced: true,
-                },
-                {
-                    id: "5",
-                    text: "That sounds really tough. Have you thought about talking to HR?",
-                    sender: chatPartner.id,
-                    timestamp: new Date(Date.now() - 2100000).toISOString(),
-                    tone: "neutral",
-                    toneConfidence: 0.65,
-                    explanation: "Suggesting HR involvement",
-                    isEnhanced: false,
-                },
-                {
-                    id: "6",
-                    text: "I love that you're always so supportive! 💕",
-                    sender: userId,
-                    timestamp: new Date(Date.now() - 1800000).toISOString(),
-                    tone: "excited",
-                    toneConfidence: 0.91,
-                    explanation: "Appreciating your support",
-                    isEnhanced: true,
-                },
-            ];
-
-            setMessages(mockMessages);
-
-            // Initialize mood tracking with existing messages
-            const conversationId = `${userId}_${chatPartner.id}`;
-            let currentScore = 50; // Start at neutral
-
-            mockMessages.forEach(message => {
-                const moodUpdate = moodTrackingService.updateConversationScore(
-                    conversationId,
-                    message.sender,
-                    message.tone,
-                    message.toneConfidence
-                );
-                currentScore = moodUpdate.currentScore;
-            });
-
-            // Set final mood state
-            setMoodScore(currentScore);
-            const finalHealth = moodTrackingService.getConversationScore(conversationId);
-            if (finalHealth) {
-                setMoodHealth(moodTrackingService.getHealthStatus(currentScore));
-            }
-        }, 500);
     }, []);
 
     const analyzeToneForMessage = async (text) => {
@@ -240,7 +185,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
     };
 
     const sendMessage = async () => {
-        if (!inputText.trim()) return;
+        if (!inputText.trim() || !conversationId) return;
 
         setLoading(true);
         const messageText = inputText.trim();
@@ -250,36 +195,17 @@ export default function ChatScreen({ chatPartner, currentUser, onBack }) {
             // Analyze tone
             const toneAnalysis = await analyzeToneForMessage(messageText);
 
-            const newMessage = {
-                id: Date.now().toString(),
+            // Add message to Firestore
+            const messagesRef = collection(db, "conversations", conversationId, "messages");
+            await addDoc(messagesRef, {
                 text: messageText,
-                sender: currentUser?.uid || currentUser?.id || "current_user",
-                timestamp: new Date().toISOString(),
+                sender: userId,
+                timestamp: serverTimestamp(),
                 tone: toneAnalysis.tone,
                 toneConfidence: toneAnalysis.confidence,
                 explanation: toneAnalysis.explanation,
-                isEnhanced: toneAnalysis.isEnhanced || false, // Include enhancement status
-            };
-
-            setMessages(prev => [...prev, newMessage]);
-
-            // Update mood tracking based on message emotion
-            const conversationId = `${currentUser?.uid || currentUser?.id}_${chatPartner.id}`;
-            const moodUpdate = moodTrackingService.updateConversationScore(
-                conversationId,
-                currentUser?.uid || currentUser?.id || "current_user",
-                toneAnalysis.tone,
-                toneAnalysis.confidence
-            );
-
-            // Update mood state
-            setMoodScore(moodUpdate.currentScore);
-            setMoodHealth(moodUpdate.healthStatus);
-
-            // Scroll to bottom
-            setTimeout(() => {
-                flatListRef.current?.scrollToEnd({ animated: true });
-            }, 100);
+                isEnhanced: toneAnalysis.isEnhanced || false,
+            });
 
         } catch (error) {
             Alert.alert("Error", "Failed to send message");

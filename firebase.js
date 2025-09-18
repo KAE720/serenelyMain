@@ -13,6 +13,12 @@ import {
   getReactNativePersistence
 } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc // You need to import this to check for existing documents
+} from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDqYLl3pGyeSHw3y2C9oWqgrERxXt_ZfGo",
@@ -27,14 +33,19 @@ const app = initializeApp(firebaseConfig);
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
+const db = getFirestore(app);
 
 export {
   auth,
+  db,
   GoogleAuthProvider,
   signInWithCredential,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  doc,
+  setDoc,
+  getDoc // Export getDoc as well
 };

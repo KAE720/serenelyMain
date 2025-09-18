@@ -19,6 +19,10 @@ import {
     auth,
     GoogleAuthProvider,
     signInWithCredential,
+    db,
+    doc,
+    setDoc,
+    getDoc // Import getDoc here
 } from "./firebase";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -88,13 +92,36 @@ export default function AuthScreen() {
         ]).start();
     }, []);
 
+    const createUserProfile = async (user) => {
+        try {
+            // Use getDoc to check if the user document already exists
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
+
+            if (!userSnap.exists()) {
+                // If the user is new, create a document for them
+                await setDoc(userRef, {
+                    uid: user.uid,
+                    email: user.email,
+                    profileName: user.displayName || user.email,
+                    createdAt: new Date(),
+                });
+            }
+        } catch (error) {
+            console.error("Error creating user profile:", error);
+        }
+    };
+
+
     React.useEffect(() => {
         if (response?.type === "success") {
             setLoading(true);
             const { id_token } = response.params;
             const credential = GoogleAuthProvider.credential(id_token);
             signInWithCredential(auth, credential)
-                .then(() => {
+                .then(async (userCredential) => {
+                    // Call the new function to create the user profile in Firestore
+                    await createUserProfile(userCredential.user);
                     setLoading(false);
                 })
                 .catch((err) => {

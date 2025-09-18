@@ -234,6 +234,8 @@ export default function MessagesScreen({ onNavigateToChat, currentUser }) {
     );
 }
 
+
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,

@@ -11,7 +11,6 @@ import ProfileScreen from './ProfileScreen';
 import MessagesScreen from './MessagesScreen';
 import CallsScreen from './CallsScreen';
 import ContactsScreen from './ContactsScreen';
-
 import ChatScreen from './ChatScreen';
 import SereneAIScreen from './SereneAIScreen';
 
@@ -24,6 +23,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
     const [activeTab, setActiveTab] = useState('Messages');
     const [currentScreen, setCurrentScreen] = useState('main'); // 'main' or 'chat'
     const [selectedChat, setSelectedChat] = useState(null);
+    const [selectedContact, setSelectedContact] = useState(null);
 
     // Navigation functions
     const navigateToChat = (chatPartner) => {
@@ -52,10 +52,6 @@ export default function HomeScreen({ userId, onLogout, user }) {
         );
     }
 
-
-
-
-
     // If showing chat, render ChatScreen
     if (currentScreen === 'chat' && selectedChat) {
         return (
@@ -75,7 +71,10 @@ export default function HomeScreen({ userId, onLogout, user }) {
             case 'Calls':
                 return <CallsScreen />;
             case 'Contacts':
-                return <ContactsScreen />;
+                if (selectedContact) {
+                    return <ChatScreen chatPartnerId={selectedContact} onBack={() => setSelectedContact(null)} />;
+                }
+                return <ContactsScreen onSelectContact={setSelectedContact} />;
             case 'AI Shrink':
                 return <SereneAIScreen currentUser={user} />;
             default:
@@ -216,3 +215,7 @@ const styles = StyleSheet.create({
         color: '#7B2CBF',
     },
 });
+
+// Note for MVP integration: ContactsScreen and ChatScreen now provide real messaging between users.
+// If you want to keep SereneAI and other tabs, you can show ContactsScreen/ChatScreen in a modal or as a separate tab.
+// For MVP, this replaces the main screen with contacts and chat.

@@ -1,5 +1,5 @@
 // ContactsScreen.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -9,20 +9,37 @@ import {
     FlatList
 } from "react-native";
 import { ContactsIcon } from "./components/TabIcons";
+import { db } from "./firebase";
+import { collection, addDoc, query, where, onSnapshot } from "firebase/firestore";
 
-export default function ContactsScreen() {
+export default function ContactsScreen({ user }) {
     const [contacts, setContacts] = useState([]);
     const [serenId, setSerenId] = useState('');
 
-    const addContact = () => {
-        if (serenId.trim()) {
-            const newContact = {
-                id: Date.now().toString(),
-                serenId: serenId.trim(),
-                name: `User ${serenId.substring(0, 4)}`, // placeholder name
-            };
-            setContacts([...contacts, newContact]);
-            setSerenId('');
+    // Fetch contacts from Firestore in real time
+    useEffect(() => {
+        if (!user?.uid) return;
+        const q = query(collection(db, "contacts"), where("ownerUid", "==", user.uid));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setContacts(fetched);
+        });
+        return unsubscribe;
+    }, [user?.uid]);
+
+    // Add contact to Firestore
+    const addContact = async () => {
+        if (serenId.trim() && user?.uid) {
+            try {
+                await addDoc(collection(db, "contacts"), {
+                    ownerUid: user.uid,
+                    serenId: serenId.trim(),
+                    name: `User ${serenId.substring(0, 4)}`,
+                });
+                setSerenId('');
+            } catch (e) {
+                // Optionally show error
+            }
         }
     };
 
@@ -68,15 +85,6 @@ export default function ContactsScreen() {
         </View>
     );
 }
-
-
-
-
-
-
-
-
-
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20 },
