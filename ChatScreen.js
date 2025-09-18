@@ -11,7 +11,7 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from "react-native";
-import enhancedToneAnalysisService from "./services/enhancedToneAnalysisService";
+
 import llmService from "./llmService";
 import moodTrackingService from "./moodTrackingService";
 

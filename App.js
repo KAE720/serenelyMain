@@ -7,12 +7,13 @@ import { auth, GoogleAuthProvider, signInWithCredential } from "./firebase";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import HomeScreen from "./HomeScreen";
 import AuthScreen from "./AuthScreen";
-import enhancedToneAnalysisService from "./services/enhancedToneAnalysisService";
+
 
 WebBrowser.maybeCompleteAuthSession();
 
 const googleLogo = { uri: "https://img.icons8.com/color/48/000000/google-logo.png" };
 
+// ENTRY POINT OF THE APP
 export default function App() {
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -37,21 +38,7 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  // Initialize enhanced tone analysis service on app start
-  useEffect(() => {
-    const initializeServices = async () => {
-      try {
-        // Try to initialize the LLM service in the background
-        // This will work if the model is already downloaded
-        await enhancedToneAnalysisService.initializeLLM();
-        console.log('Enhanced tone analysis service initialized');
-      } catch (error) {
-        console.log('LLM not available, will use fallback analysis:', error.message);
-      }
-    };
 
-    initializeServices();
-  }, []);
 
   const handleLogout = () => {
     signOut(auth)

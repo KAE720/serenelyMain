@@ -11,15 +11,15 @@ import ProfileScreen from './ProfileScreen';
 import MessagesScreen from './MessagesScreen';
 import CallsScreen from './CallsScreen';
 import ContactsScreen from './ContactsScreen';
-import AIShrinkScreen from './AIShrinkScreen';
+
 import ChatScreen from './ChatScreen';
-import ModelManagementScreen from './ModelManagementScreen';
-import TestLLMScreen from './TestLLMScreen';
+import SereneAIScreen from './SereneAIScreen';
+
 import { MessageIcon, CallsIcon, ContactsIcon, SereneIcon } from './components/TabIcons';
 
 export default function HomeScreen({ userId, onLogout, user }) {
     const [showProfile, setShowProfile] = useState(false);
-    const [showModelManagement, setShowModelManagement] = useState(false);
+
     const [showLLMTest, setShowLLMTest] = useState(false);
     const [activeTab, setActiveTab] = useState('Messages');
     const [currentScreen, setCurrentScreen] = useState('main'); // 'main' or 'chat'
@@ -43,10 +43,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
                 user={user}
                 onBack={() => setShowProfile(false)}
                 onLogout={onLogout}
-                onOpenModelManagement={() => {
-                    setShowProfile(false);
-                    setShowModelManagement(true);
-                }}
+
                 onOpenLLMTest={() => {
                     setShowProfile(false);
                     setShowLLMTest(true);
@@ -55,23 +52,9 @@ export default function HomeScreen({ userId, onLogout, user }) {
         );
     }
 
-    // If showing model management, render ModelManagementScreen
-    if (showModelManagement) {
-        return (
-            <ModelManagementScreen
-                onBack={() => setShowModelManagement(false)}
-            />
-        );
-    }
 
-    // If showing LLM test, render TestLLMScreen
-    if (showLLMTest) {
-        return (
-            <TestLLMScreen
-                onBack={() => setShowLLMTest(false)}
-            />
-        );
-    }
+
+
 
     // If showing chat, render ChatScreen
     if (currentScreen === 'chat' && selectedChat) {
@@ -94,7 +77,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
             case 'Contacts':
                 return <ContactsScreen />;
             case 'AI Shrink':
-                return <AIShrinkScreen />;
+                return <SereneAIScreen currentUser={user} />;
             default:
                 return <MessagesScreen onNavigateToChat={navigateToChat} currentUser={user} />;
         }
@@ -169,6 +152,9 @@ export default function HomeScreen({ userId, onLogout, user }) {
         </View>
     );
 }
+
+
+
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#121212" },

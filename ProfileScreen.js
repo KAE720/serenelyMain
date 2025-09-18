@@ -11,43 +11,6 @@ export default function ProfileScreen({ user, onBack, onLogout, onOpenModelManag
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handlePasswordChange = async () => {
-        if (!currentPassword || !newPassword || !confirmPassword) {
-            Alert.alert('Error', 'Please fill in all password fields');
-            return;
-        }
-
-        if (newPassword !== confirmPassword) {
-            Alert.alert('Error', 'New passwords do not match');
-            return;
-        }
-
-        if (newPassword.length < 6) {
-            Alert.alert('Error', 'New password must be at least 6 characters');
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            // Re-authenticate user before changing password
-            const credential = EmailAuthProvider.credential(user.email, currentPassword);
-            await reauthenticateWithCredential(user, credential);
-
-            // Update password
-            await updatePassword(user, newPassword);
-
-            Alert.alert('Success', 'Password updated successfully');
-            setShowPasswordChange(false);
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-        } catch (error) {
-            Alert.alert('Error', error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const isGoogleUser = user?.providerData?.some(provider => provider.providerId === 'google.com');
 
@@ -146,15 +109,7 @@ export default function ProfileScreen({ user, onBack, onLogout, onOpenModelManag
                 </View>
             )}
 
-            {/* AI Model Management button */}
-            <TouchableOpacity style={styles.modelManagementButton} onPress={onOpenModelManagement}>
-                <Text style={styles.modelManagementText}>🧠 AI Model Management</Text>
-            </TouchableOpacity>
-
-            {/* LLM Test button */}
-            <TouchableOpacity style={styles.testButton} onPress={onOpenLLMTest}>
-                <Text style={styles.testButtonText}>🧪 Test LLM Architecture</Text>
-            </TouchableOpacity>
+       
 
             {/* Logout button */}
             <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>

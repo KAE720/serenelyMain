@@ -69,6 +69,15 @@ export default function ContactsScreen() {
     );
 }
 
+
+
+
+
+
+
+
+
+
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 20 },
     title: { fontSize: 20, fontWeight: "bold", color: "#fff", marginBottom: 20, fontFamily: 'SF Pro Text' },
