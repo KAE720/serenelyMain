@@ -10,6 +10,7 @@ import {
     Alert,
     KeyboardAvoidingView,
     Platform,
+    Dimensions
 } from "react-native";
 
 import llmService from "./llmService";
@@ -25,6 +26,9 @@ export default function ConversationScreen({ chatPartner, currentUser, onBack, c
     const [isLLMReady, setIsLLMReady] = useState(false); // Track LLM status
     const [moodScore, setMoodScore] = useState(50); // Mood tracking score (0-100)
     const [moodHealth, setMoodHealth] = useState(null); // Health status object
+    const [aiBubbleLayout, setAiBubbleLayout] = useState({}); // Fix: add missing state for AI dropdown layout
+    // Track if dropdown needs to be above input
+    const [showingDropdownAboveInput, setShowingDropdownAboveInput] = useState(false);
     const flatListRef = useRef(null);
     const auth = getAuth();
     const userId = currentUser?.uid || currentUser?.id || auth.currentUser?.uid || "current_user";
@@ -81,6 +85,23 @@ export default function ConversationScreen({ chatPartner, currentUser, onBack, c
 
         initializeEnhancedAnalysis();
     }, []);
+
+    // Ensure last message's dropdown is always above input
+    useEffect(() => {
+        if (
+            aiExplanation &&
+            messages.length > 0 &&
+            aiExplanation.messageId === messages[messages.length - 1].id
+        ) {
+            setShowingDropdownAboveInput(true);
+            // Scroll so last message is fully visible above input
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            }, 100);
+        } else {
+            setShowingDropdownAboveInput(false);
+        }
+    }, [aiExplanation, messages]);
 
     const analyzeToneForMessage = async (text) => {
         try {
@@ -334,11 +355,15 @@ export default function ConversationScreen({ chatPartner, currentUser, onBack, c
         return getToneColor(tone);
     };
 
-    const renderMessage = ({ item }) => {
+    // Helper to check if message is last in the list
+    const isLastMessage = (index) => index === messages.length - 1;
+
+    const renderMessage = ({ item, index }) => {
         const userId = currentUser?.uid || currentUser?.id || "current_user";
         const isOwnMessage = item.sender === userId;
         const toneColor = getToneColor(item.tone);
         const showingExplanation = aiExplanation?.messageId === item.id;
+        const isLast = isLastMessage(index);
 
         // Fix timestamp logic: handle Firestore Timestamp, JS Date, or string
         let messageDate = "";
@@ -357,9 +382,32 @@ export default function ConversationScreen({ chatPartner, currentUser, onBack, c
             });
         }
 
+        // Clamp dropdown left so it never goes off screen
+        let popupLeft = 8;
+        if (aiBubbleLayout.x !== undefined && aiBubbleLayout.width !== undefined) {
+            const maxPopupWidth = screenWidth * 0.95;
+            if (aiBubbleLayout.x + maxPopupWidth > screenWidth - 8) {
+                popupLeft = screenWidth - maxPopupWidth - 8;
+            } else {
+                popupLeft = aiBubbleLayout.x;
+            }
+        }
+
         return (
-            <View style={[styles.messageContainer, isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer]}>
-                <View style={[styles.messageBubble, isOwnMessage ? styles.ownBubble : styles.otherBubble, { backgroundColor: toneColor }]}>
+            <View style={[styles.messageContainer, isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer, isLast && { marginBottom: showingExplanation && showingDropdownAboveInput ? 120 : 32 }]}> {/* Push up last message if dropdown showing */}
+                <View
+                    style={[styles.messageBubble, isOwnMessage ? styles.ownBubble : styles.otherBubble, { backgroundColor: toneColor }]}
+                    onLayout={event => {
+                        if (showingExplanation) {
+                            setAiBubbleLayout({
+                                y: event.nativeEvent.layout.y,
+                                height: event.nativeEvent.layout.height,
+                                x: event.nativeEvent.layout.x,
+                                width: event.nativeEvent.layout.width
+                            });
+                        }
+                    }}
+                >
                     {/* Message text at the top inside bubble */}
                     <Text style={[styles.messageText, { marginBottom: 4, textAlign: 'center' }]}>{item.text}</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -399,9 +447,17 @@ export default function ConversationScreen({ chatPartner, currentUser, onBack, c
                         </View>
                     </View>
                 </View>
-                {/* AI Explanation Dropdown (absolutely positioned below the bubble) */}
+                {/* AI Explanation Dropdown (always fully in view, centered below bubble) */}
                 {showingExplanation && (
-                    <View style={[styles.aiExplanationPopup, isOwnMessage ? styles.aiPopupRight : styles.aiPopupLeft]}>
+                    <View
+                        style={[
+                            styles.aiExplanationPopup,
+                            { left: 0, right: 0, alignSelf: 'center', maxWidth: '95%', marginHorizontal: 8 }, // Wider popup
+                            (aiBubbleLayout.y + aiBubbleLayout.height + 120 > (Platform.OS === 'ios' ? 812 : 700) || (isLastMessage(index) && showingExplanation))
+                                ? { top: undefined, bottom: '100%', marginBottom: 6 } // Always above input if last message
+                                : { top: '100%', marginTop: 6 }
+                        ]}
+                    >
                         <Text style={styles.aiExplanationText}>
                             <Text style={[styles.emotionWord, { color: toneColor }]}>{item.tone.charAt(0).toUpperCase() + item.tone.slice(1)}</Text>
                             {" - " + aiExplanation.explanation}
@@ -518,7 +574,9 @@ export default function ConversationScreen({ chatPartner, currentUser, onBack, c
                     renderItem={renderMessage}
                     keyExtractor={(item) => item.id}
                     style={styles.messagesList}
-                    contentContainerStyle={{ paddingBottom: 20 }}
+                    contentContainerStyle={{
+                        paddingBottom: (aiExplanation && messages.length > 0 && aiExplanation.messageId === messages[messages.length-1].id && showingDropdownAboveInput) ? 120 : 20 // Add extra space if last message's AI dropdown is open
+                    }}
                     showsVerticalScrollIndicator={false}
                     onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
                     onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
@@ -536,6 +594,11 @@ export default function ConversationScreen({ chatPartner, currentUser, onBack, c
                         placeholderTextColor="#666"
                         multiline
                         maxLength={500}
+                        onSubmitEditing={() => {
+                            if (inputText.trim()) sendMessage();
+                        }}
+                        blurOnSubmit={Platform.OS !== 'ios'}
+                        returnKeyType="send"
                     />
                     <TouchableOpacity
                         style={[styles.sendButton, (!inputText.trim() || loading) && styles.disabledButton]}
@@ -956,7 +1019,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#2C2C2C',
         borderRadius: 16,
         padding: 14,
-        maxWidth: '82%',
+        maxWidth: '95%', // Wider popup
         borderWidth: 0.5,
         borderColor: '#555',
         shadowColor: '#000',
@@ -1026,7 +1089,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#1E1E1E",
         borderTopWidth: 1,
         borderTopColor: "#333",
-        paddingBottom: Platform.OS === "ios" ? 34 : 16,
+        paddingBottom: Platform.OS === "ios" ? 44 : 28, // Increased for more space
     },
     inputRow: {
         flexDirection: "row",
