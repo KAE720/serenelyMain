@@ -19,7 +19,8 @@ import {
     getDoc,
 } from "./firebase";
 
-export default function MessagesScreen({ navigation }) {
+// Accepts the custom navigation prop from HomeScreen
+export default function MessagesScreen({ onNavigateToChat, currentUser }) {
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -72,7 +73,8 @@ export default function MessagesScreen({ navigation }) {
             id: conversation.partnerId,
             name: conversation.partnerName,
         };
-        navigation.navigate("Chat", { chatPartner: chatPartner, conversationId: conversation.id });
+        // Use the passed function to navigate
+        onNavigateToChat(chatPartner, conversation.id);
     };
 
     const renderConversation = ({ item }) => (

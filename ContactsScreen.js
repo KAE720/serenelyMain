@@ -10,6 +10,7 @@ import {
     Alert,
     Image
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { db, doc, collection, query, where, getDocs, addDoc, onSnapshot, getAuth, getDoc, setDoc } from "./firebase";
 import { ContactsIcon, MessageIcon, ChatBubbleIcon } from "./components/TabIcons";
 
@@ -126,54 +127,57 @@ export default function ContactsScreen({ navigation, onSelectContact }) {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Your SerenID: {currentUser?.uid.substring(0, 8)}...</Text>
-            <View style={styles.addSection}>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Enter SerenID..."
-                    placeholderTextColor="#666"
-                    value={serenId}
-                    onChangeText={setSerenId}
-                />
-                <TouchableOpacity style={styles.addButton} onPress={addContact} disabled={loading}>
-                    <Text style={styles.addButtonText}>{loading ? "Adding..." : "Add Friend"}</Text>
-                </TouchableOpacity>
-            </View>
-
-            {contacts.length === 0 ? (
-                <View style={styles.emptyState}>
-                    <ContactsIcon active={false} size={48} style={styles.emptyIconContainer} />
-                    <Text style={styles.emptyText}>No contacts yet</Text>
-                    <Text style={styles.emptySubText}>
-                        Add friends using their SerenID.
-                    </Text>
+        <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+            <View style={styles.container}>
+                <Text style={styles.title}>Your SerenID: {currentUser?.uid.substring(0, 8)}...</Text>
+                <View style={styles.addSection}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter SerenID..."
+                        placeholderTextColor="#666"
+                        value={serenId}
+                        onChangeText={setSerenId}
+                    />
+                    <TouchableOpacity style={styles.addButton} onPress={addContact} disabled={loading}>
+                        <Text style={styles.addButtonText}>{loading ? "Adding..." : "Add Friend"}</Text>
+                    </TouchableOpacity>
                 </View>
-            ) : (
-                <FlatList
-                    data={contacts}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <View style={styles.contactItem}>
-                            <View style={styles.profileRow}>
-                                <Image
-                                    source={item.profilePicUrl ? { uri: item.profilePicUrl } : require('./assets/default-profile.png')}
-                                    style={styles.profilePic}
-                                />
-                                <Text style={styles.contactName}>{item.contactName}</Text>
+
+                {contacts.length === 0 ? (
+                    <View style={styles.emptyState}>
+                        <ContactsIcon active={false} size={48} style={styles.emptyIconContainer} />
+                        <Text style={styles.emptyText}>No contacts yet</Text>
+                        <Text style={styles.emptySubText}>
+                            Add friends using their SerenID.
+                        </Text>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={contacts}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <View style={styles.contactItem}>
+                                <View style={styles.profileRow}>
+                                    <Image
+                                        source={item.profilePicUrl ? { uri: item.profilePicUrl } : require('./assets/default-profile.png')}
+                                        style={styles.profilePic}
+                                    />
+                                    <Text style={styles.contactName}>{item.contactName}</Text>
+                                </View>
+                                <TouchableOpacity style={styles.chatButton} onPress={() => startChat(item)}>
+                                    <ChatBubbleIcon active={true} size={32} />
+                                </TouchableOpacity>
                             </View>
-                            <TouchableOpacity style={styles.chatButton} onPress={() => startChat(item)}>
-                                <ChatBubbleIcon active={true} size={32} />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                />
-            )}
-        </View>
+                        )}
+                    />
+                )}
+            </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: '#0A0A0A' },
     container: { flex: 1, padding: 20, backgroundColor: '#0A0A0A' },
     title: { fontSize: 16, fontWeight: "bold", color: "#fff", marginBottom: 20, fontFamily: 'SF Pro Text' },
     addSection: { flexDirection: 'row', marginBottom: 20 },

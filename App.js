@@ -1,54 +1,36 @@
 // App.js
 import React, { useEffect, useState } from "react";
-import { View, Text, Alert, Image, TouchableOpacity, StyleSheet } from "react-native";
-import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
-import { auth, GoogleAuthProvider, signInWithCredential } from "./firebase";
-import { signOut, onAuthStateChanged } from "firebase/auth";
+import { View, Text, StyleSheet } from "react-native";
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { auth, onAuthStateChanged, signOut } from "./firebase";
 import HomeScreen from "./HomeScreen";
 import AuthScreen from "./AuthScreen";
+import MessagesScreen from "./MessagesScreen";
+import ChatScreen from "./ChatScreen";
+import ContactsScreen from "./ContactsScreen";
+import CallsScreen from "./CallsScreen";
+import ProfileScreen from "./ProfileScreen";
+import SereneAIScreen from "./SereneAIScreen";
 
 
-WebBrowser.maybeCompleteAuthSession();
-
-const googleLogo = { uri: "https://img.icons8.com/color/48/000000/google-logo.png" };
+const Stack = createNativeStackNavigator();
 
 // ENTRY POINT OF THE APP
 export default function App() {
   const [user, setUser] = useState(null);
-  const [userId, setUserId] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Listen for authentication state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-        setUserId(user.uid);
-        setIsLoggedIn(true);
-      } else {
-        setUser(null);
-        setUserId(null);
-        setIsLoggedIn(false);
-      }
+      setUser(user);
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
-
-
-
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        setUser(null);
-        setUserId(null);
-        setIsLoggedIn(false);
-      })
-      .catch((error) => Alert.alert("Error", error.message));
-  };
 
   if (loading) {
     return (
@@ -58,19 +40,39 @@ export default function App() {
     );
   }
 
-  // 🔹 If logged in → show HomeScreen
-  if (isLoggedIn && user) {
-    return (
-      <HomeScreen
-        userId={userId}
-        user={user}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
-  // 🔹 If NOT logged in → show AuthScreen
-  return <AuthScreen />;
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {user ? (
+            <>
+              <Stack.Screen name="Home">
+                {props => <HomeScreen {...props} user={user} />}
+              </Stack.Screen>
+              <Stack.Screen name="Messages">
+                {props => <MessagesScreen {...props} currentUser={user} />}
+              </Stack.Screen>
+              <Stack.Screen name="Chat">
+                {props => <ChatScreen {...props} currentUser={user} />}
+              </Stack.Screen>
+              <Stack.Screen name="Contacts">
+                {props => <ContactsScreen {...props} currentUser={user} />}
+              </Stack.Screen>
+              <Stack.Screen name="Calls" component={CallsScreen} />
+              <Stack.Screen name="Profile">
+                {props => <ProfileScreen {...props} user={user} />}
+              </Stack.Screen>
+              <Stack.Screen name="SereneAI">
+                {props => <SereneAIScreen {...props} currentUser={user} />}
+              </Stack.Screen>
+            </>
+          ) : (
+            <Stack.Screen name="Auth" component={AuthScreen} />
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
+  );
 }
 
 const styles = StyleSheet.create({
