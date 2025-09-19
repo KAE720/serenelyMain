@@ -1,4 +1,4 @@
-// ChatScreen.js
+// ConversationScreen.js
 import React, { useState, useEffect, useRef } from "react";
 import {
     View,
@@ -17,7 +17,7 @@ import moodTrackingService from "./moodTrackingService";
 import { db, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from "./firebase";
 import { getAuth } from "firebase/auth";
 
-export default function ChatScreen({ chatPartner, currentUser, onBack, conversationId }) {
+export default function ConversationScreen({ chatPartner, currentUser, onBack, conversationId }) {
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState("");
     const [loading, setLoading] = useState(false);
@@ -217,20 +217,17 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
 
     const getToneColor = (tone) => {
         const toneColors = {
-            // Rich, vibrant colors that are not too bright
-            angry: "#DC3545",      // 🔴 Rich red - clear negative emotion
-            stressed: "#DC3545",   // 🔴 Same rich red for stressed emotions
-            neutral: "#007BFF",    // 🔵 Rich blue - clear neutral tone
-            excited: "#28A745",    // 🟢 Rich green - distinct positive emotion
-
-            // Map legacy variations
-            happy: "#28A745",      // Map to excited (rich green)
-            sad: "#DC3545",        // Map to negative (rich red)
-            positive: "#28A745",   // -> excited (rich green)
-            negative: "#DC3545",   // -> angry (rich red)
-            supportive: "#28A745", // -> excited (rich green)
-            worried: "#DC3545",    // -> stressed (rich red)
-            calm: "#007BFF",       // -> neutral (rich blue)
+            positive: "#1ABC9C",   // 🟢 Modern teal for positive
+            excited: "#1ABC9C",   // Map excited to positive teal
+            happy: "#1ABC9C",     // Map happy to positive teal
+            neutral: "#3498DB",   // 🔵 Soft blue for neutral
+            calm: "#3498DB",      // Map calm to neutral blue
+            negative: "#E74C3C",  // 🔴 Warm red for negative
+            angry: "#E74C3C",     // Map angry to negative red
+            stressed: "#E74C3C",  // Map stressed to negative red
+            sad: "#E74C3C",       // Map sad to negative red
+            supportive: "#1ABC9C",// Map supportive to positive teal
+            worried: "#E74C3C",   // Map worried to negative red
         };
         return toneColors[tone] || toneColors.neutral;
     };
@@ -362,8 +359,8 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
 
         return (
             <View style={[styles.messageContainer, isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer]}>
-                <View style={[styles.messageBubble, isOwnMessage ? styles.ownBubble : styles.otherBubble, { backgroundColor: toneColor }]}>                
-                    {/* Message text above timestamp and AI button, inside bubble */}
+                <View style={[styles.messageBubble, isOwnMessage ? styles.ownBubble : styles.otherBubble, { backgroundColor: toneColor }]}>
+                    {/* Message text at the top inside bubble */}
                     <Text style={[styles.messageText, { marginBottom: 4, textAlign: 'center' }]}>{item.text}</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         {/* Timestamp on left */}
@@ -402,7 +399,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                         </View>
                     </View>
                 </View>
-                {/* AI Explanation Popup */}
+                {/* AI Explanation Dropdown (absolutely positioned below the bubble) */}
                 {showingExplanation && (
                     <View style={[styles.aiExplanationPopup, isOwnMessage ? styles.aiPopupRight : styles.aiPopupLeft]}>
                         <Text style={styles.aiExplanationText}>
@@ -420,8 +417,9 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
+            style={{ flex: 1, backgroundColor: '#000' }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={80} // Adjust if header overlaps
         >
             {/* Header */}
             <View style={styles.header}>
@@ -456,7 +454,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                 </View>
             </View>
 
-            {/* Single Emotion Tracker - Both Dots Meet in Middle */}
+            {/* Single Emotion Tracker */}
             <View style={styles.singleEmotionTracker}>
                 <View style={styles.emotionBar}>
                     {/* Progress bar: Red → Blue → Green → Blue → Red (5 sections) */}
@@ -513,15 +511,19 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
             </View>
 
             {/* Messages */}
-            <FlatList
-                ref={flatListRef}
-                data={messages}
-                renderItem={renderMessage}
-                keyExtractor={(item) => item.id}
-                style={styles.messagesList}
-                contentContainerStyle={{ paddingBottom: 20 }}
-                showsVerticalScrollIndicator={false}
-            />
+            <View style={{ flex: 1 }}>
+                <FlatList
+                    ref={flatListRef}
+                    data={messages}
+                    renderItem={renderMessage}
+                    keyExtractor={(item) => item.id}
+                    style={styles.messagesList}
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                    showsVerticalScrollIndicator={false}
+                    onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                    onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                />
+            </View>
 
             {/* Input */}
             <View style={styles.inputContainer}>
@@ -666,26 +668,26 @@ const styles = StyleSheet.create({
     // Progress bar: Red → Blue → Green → Blue → Red
     leftRedSection: {
         flex: 1,
-        backgroundColor: "#DC3545", // 🔴 Rich red - most negative (left end)
+        backgroundColor: "#E74C3C", // 🔴 Warm red - most negative (left end)
         borderTopLeftRadius: 4,
         borderBottomLeftRadius: 4,
     },
     leftOrangeSection: {
         flex: 1,
-        backgroundColor: "#007BFF", // 🔵 Rich blue - transitioning toward center
+        backgroundColor: "#3498DB", // 🔵 Soft blue - transitioning toward center
     },
     leftGreenSection: {
         flex: 1,
-        backgroundColor: "#28A745", // 🟢 Rich green - center positive zone
+        backgroundColor: "#1ABC9C", // 🟢 Modern teal - center positive zone
     },
     centerPurpleSection: {
         flex: 1,
-        backgroundColor: "#007BFF", // 🔵 Rich blue - transitioning from center
+        backgroundColor: "#3498DB", // 🔵 Soft blue - transitioning from center
     },
     // Right side: Blue → Red
     rightGreenSection: {
         flex: 1,
-        backgroundColor: "#DC3545", // 🔴 Rich red - most negative (right end)
+        backgroundColor: "#E74C3C", // 🔴 Warm red - most negative (right end)
         borderTopRightRadius: 4,
         borderBottomRightRadius: 4,
     },
@@ -811,7 +813,8 @@ const styles = StyleSheet.create({
     },
     messageContainer: {
         marginVertical: 2,
-        maxWidth: "65%",
+        maxWidth: "80%", // Make messages wider
+        position: 'relative', // Allow dropdown to be absolutely positioned
     },
     ownMessageContainer: {
         alignSelf: "flex-end",
@@ -833,6 +836,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 2,
+        backgroundColor: '#3498DB', // Default to neutral blue, will be overridden by getToneColor
     },
     ownBubble: {
         borderBottomRightRadius: 6,
@@ -952,7 +956,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#2C2C2C',
         borderRadius: 16,
         padding: 14,
-        marginTop: 10,
         maxWidth: '82%',
         borderWidth: 0.5,
         borderColor: '#555',
@@ -961,7 +964,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.4,
         shadowRadius: 6,
         elevation: 8,
-        position: 'relative',
+        position: 'absolute', // Absolutely position dropdown
+        left: 0,
+        top: '100%', // Place directly below bubble
+        zIndex: 20,
+        marginTop: 6,
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.1)',
     },
