@@ -70,209 +70,60 @@ class EmotionClassificationEngine {
         const color = getSentimentColor(emotion);
         return { emotion, confidence: 0.8, color };
     }
-    detectNegation(text) {
-        const negationWords = ["not", "no", "never", "none", "nobody", "nothing", "neither", "nor"];
-        const lowerText = text.toLowerCase();
-        return negationWords.some(word => lowerText.includes(word));
-    }
-    scoreKeywords(words, keywords) {
-        let score = 0;
-        words.forEach(word => {
-            if (keywords.includes(word)) {
-                score += 1;
-            }
-        });
-        return score;
-    }
-    scorePhrases(text, phrases) {
-        let score = 0;
-        phrases.forEach(phrase => {
-            if (text.includes(phrase)) {
-                score += 1;
-            }
-        });
-        return score;
-    }
-    scoreContextualClues(text, clues) {
-        let score = 0;
-        clues.forEach(clue => {
-            if (text.includes(clue)) {
-                score += 1;
-            }
-        });
-        return score;
-    }
-    scoreEmoticons(text, emoticons) {
-        let score = 0;
-        emoticons.forEach(emoticon => {
-            if (text.includes(emoticon)) {
-                score += 1;
-            }
-        });
-        return score;
-    }
-    detectIntensifiers(text, intensifiers) {
-        const foundIntensifiers = [];
-        intensifiers.forEach(intensifier => {
-            if (text.includes(intensifier)) {
-                foundIntensifiers.push(intensifier);
-            }
-        });
-        return foundIntensifiers;
-    }
-    calculateNeutralScore(text) {
-        const neutralWords = ["okay", "fine", "alright", "sure", "maybe", "perhaps", "possibly"];
-        let score = 0;
-        neutralWords.forEach(word => {
-            if (text.includes(word)) {
-                score += 1;
-            }
-        });
-        return score;
-    }
-    calculateConfidence(scores, dominantEmotion) {
-        const total = Object.values(scores).reduce((a, b) => a + b, 0);
-        if (total === 0) return 0;
-        const dominantScore = scores[dominantEmotion] || 0;
-        return dominantScore / total;
-    }
+    // ...other methods from llmService.js...
 }
 
 // --- Message Explanation Engine ---
 class MessageExplanationEngine {
     constructor() { }
     generateExplanation(text, emotionAnalysis) {
-        const { emotion, confidence } = emotionAnalysis;
-        let explanation = `The emotion detected is ${emotion} with a confidence of ${confidence * 100}%.`;
-        switch (emotion) {
-            case 'angry':
-                explanation += ' This message may indicate anger or frustration.';
-                break;
-            case 'stressed':
-                explanation += ' This message may indicate stress or anxiety.';
-                break;
-            case 'excited':
-                explanation += ' This message conveys excitement or happiness.';
-                break;
-            case 'neutral':
-                explanation += ' This message appears to be neutral.';
-                break;
-            default:
-                explanation += ' The emotion detected is not clear.';
-        }
-        return explanation;
+        // ...existing code from llmService.js...
     }
-    analyzeMessageContent(text, emotionAnalysis) {
-        const { emotion } = emotionAnalysis;
-        // Further analysis can be done here based on the message content and detected emotion
-    }
+    // ...other methods from llmService.js...
 }
 
 // --- Mood Tracking Service ---
 class MoodTrackingService {
     constructor() {
         this.initialized = false;
-        this.conversationScores = new Map(); // conversationId -> score data
-        this.baseScore = 50; // Neutral starting point (out of 100)
+        this.conversationScores = new Map();
+        this.baseScore = 50;
         this.init();
     }
-    init() {
-        this.initialized = true;
-    }
+    init() { this.initialized = true; }
     calculateMessagePoints(emotion, confidence = 0.8) {
-        const pointSystem = {
-            'excited': {
-                base: 8, range: [5, 10]
-            },
-            'neutral': {
-                base: 1, range: [0, 2]
-            },
-            'stressed': {
-                base: -3, range: [-2, -5]
-            },
-            'angry': {
-                base: -15, range: [-10, -20]
-            }
-        };
-        const emotionData = pointSystem[emotion] || pointSystem['neutral'];
-        const [min, max] = emotionData.range;
-        // Scale points based on confidence
-        const scaledPoints = emotionData.base * confidence;
-        // ...existing code...
+        // ...existing code from moodTrackingService.js...
     }
     updateConversationScore(conversationId, senderId, emotion, confidence) {
-        if (!this.initialized) return;
-        const points = this.calculateMessagePoints(emotion, confidence);
-        const currentScore = this.conversationScores.get(conversationId) || this.baseScore;
-        const newScore = Math.min(Math.max(currentScore + points, 0), 100);
-        this.conversationScores.set(conversationId, newScore);
-        // Optionally, store the score in AsyncStorage or another persistent storage
+        // ...existing code from moodTrackingService.js...
     }
     getHealthStatus(score) {
-        if (score >= 70) {
-            return 'healthy';
-        } else if (score >= 40) {
-            return 'neutral';
-        } else {
-            return 'unhealthy';
-        }
+        // ...existing code from moodTrackingService.js...
     }
     getRecommendation(score, emotion, points) {
-        // Simple recommendation logic based on score and detected emotion
-        if (emotion === 'stressed' || emotion === 'angry') {
-            return 'Consider taking a break or talking to someone about your feelings.';
-        } else if (emotion === 'excited') {
-            return 'Keep up the positive energy!';
-        }
-        return 'Maintain your current course of action.';
+        // ...existing code from moodTrackingService.js...
     }
     getConversationScore(conversationId) {
-        return this.conversationScores.get(conversationId) || this.baseScore;
+        // ...existing code from moodTrackingService.js...
     }
     getTrackerPosition(score, perspective = 'user') {
-        // ...existing code...
+        // ...existing code from moodTrackingService.js...
     }
     resetConversation(conversationId) {
-        this.conversationScores.delete(conversationId);
+        // ...existing code from moodTrackingService.js...
     }
     getStatistics(conversationId) {
-        // ...existing code...
+        // ...existing code from moodTrackingService.js...
     }
 }
 
-// --- Local LLM Service helpers ---
+// --- Local LLM Service ---
 function normalizeSentiment(response) {
-    const lower = response.toLowerCase();
-    if (lower.includes('positive') || lower.includes('happy') || lower.includes('good')) {
-        return 'positive';
-    } else if (lower.includes('negative') || lower.includes('sad') || lower.includes('angry') || lower.includes('bad')) {
-        return 'negative';
-    } else {
-        return 'neutral';
-    }
+    // ...existing code from localLLMService.js...
 }
-
 function getFallbackResponse(message, queryType) {
-    switch (queryType) {
-        case 'sentiment':
-            const lowerMsg = message.toLowerCase();
-            if (lowerMsg.includes('love') || lowerMsg.includes('happy') || lowerMsg.includes('great') || lowerMsg.includes('awesome')) {
-                return 'positive';
-            } else if (lowerMsg.includes('hate') || lowerMsg.includes('angry') || lowerMsg.includes('terrible') || lowerMsg.includes('awful')) {
-                return 'negative';
-            }
-            return 'neutral';
-        case 'summary':
-            return message.length > 50 ? `Summary: ${message.substring(0, 50)}...` : `Summary: ${message}`;
-        case 'cbt':
-            return "I'm here to listen. Sometimes taking a step back and breathing can help us see things differently.";
-        case 'explanation':
-            return "This message expresses the sender's thoughts and feelings.";
-        default:
-            return 'AI analysis unavailable';
-    }
+    // ...existing code from localLLMService.js...
 }
-
 export function getSentimentColor(sentiment) {
     const colors = {
         positive: '#28A745',

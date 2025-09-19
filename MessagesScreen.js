@@ -19,7 +19,7 @@ import {
     getDoc,
 } from "./firebase";
 
-// Accepts the custom navigation prop from HomeScreen
+// CONVERSATIONS LOGS SCREEN
 export default function MessagesScreen({ onNavigateToChat, currentUser }) {
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -112,6 +112,13 @@ export default function MessagesScreen({ onNavigateToChat, currentUser }) {
         );
     }
 
+
+
+
+
+
+
+
     return (
         <View style={styles.container}>
             <View style={styles.searchContainer}>
@@ -132,6 +139,13 @@ export default function MessagesScreen({ onNavigateToChat, currentUser }) {
         </View>
     );
 }
+
+
+
+
+
+
+
 
 const styles = StyleSheet.create({
     container: {

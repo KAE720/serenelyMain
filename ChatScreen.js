@@ -7,30 +7,27 @@ import {
     TouchableOpacity,
     FlatList,
     StyleSheet,
-    Alert,
     KeyboardAvoidingView,
     Platform,
+    Alert,
 } from "react-native";
-
-
-
 import { db, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from "./firebase";
 import { getAuth } from "firebase/auth";
 import llmUnifiedService from './LLMUnifiedService';
 
+
+// ACTUAL MESSAGES SCREEN
 export default function ChatScreen({ chatPartner, currentUser, onBack, conversationId }) {
+    // State for messages and input
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState("");
     const [loading, setLoading] = useState(false);
     const [aiExplanation, setAiExplanation] = useState(null); // For AI popup
-    const [isLLMReady, setIsLLMReady] = useState(false); // Track LLM status
-    const [moodScore, setMoodScore] = useState(50); // Mood tracking score (0-100)
-    const [moodHealth, setMoodHealth] = useState(null); // Health status object
     const flatListRef = useRef(null);
     const auth = getAuth();
-    const userId = currentUser?.uid || currentUser?.id || auth.currentUser?.uid || "current_user";
+    const userId = currentUser?.uid || auth.currentUser?.uid || "current_user";
 
-    // Real-time Firestore listener for messages
+    // Listen for new messages in Firestore
     useEffect(() => {
         if (!conversationId) return;
         const messagesRef = collection(db, "conversations", conversationId, "messages");
@@ -41,80 +38,29 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                 msgs.push({ id: doc.id, ...doc.data() });
             });
             setMessages(msgs);
-            // Mood tracking with real messages
-
-
         });
         return unsubscribe;
     }, [conversationId]);
 
-
-
-    // Fallback explanation generator - concise message meaning
-    const generateFallbackExplanation = (text) => {
-        const lowerText = text.toLowerCase();
-
-        // Ultra-concise explanations of what was actually said
-        if (lowerText.includes('why did you') && lowerText.includes('without me')) {
-            return 'Questioning exclusion';
-        }
-        if (lowerText.includes('happy now') && lowerText.includes('wanna')) {
-            return 'Mood improved, suggesting activity';
-        }
-        if (lowerText.includes('watch') && (lowerText.includes('football') || lowerText.includes('game'))) {
-            return 'Inviting to watch sports';
-        }
-        if (lowerText.includes('i love you')) {
-            return 'Declaring love';
-        }
-        if (lowerText.includes('thank you') || lowerText.includes('thanks')) {
-            return 'Expressing gratitude';
-        }
-        if (lowerText.includes('how are you')) {
-            return 'Checking wellbeing';
-        }
-        if (lowerText.includes('stressed about work')) {
-            return 'Sharing work stress';
-        }
-        if (lowerText.includes('not happy with you')) {
-            return 'Expressing displeasure';
-        }
-        if (lowerText.includes('sorry to hear')) {
-            return 'Offering sympathy';
-        }
-        if (text.includes('?')) {
-            return 'Asking question';
-        }
-        if (text.length < 15) {
-            return 'Brief message';
-        }
-
-        return 'Personal communication';
-    };
-
+    // Send a new message
     const sendMessage = async () => {
         if (!inputText.trim() || !conversationId) return;
-
         setLoading(true);
         const messageText = inputText.trim();
         setInputText("");
-
         try {
-            // Analyze tone
-            const toneAnalysis = await analyzeToneForMessage(messageText);
-
-            // Add message to Firestore
+            // Get tone and explanation from LLM
+            const toneResult = await llmUnifiedService.analyzeTone(messageText);
+            const explanation = await llmUnifiedService.getExplainer(messageText);
+            // Save message to Firestore
             const messagesRef = collection(db, "conversations", conversationId, "messages");
             await addDoc(messagesRef, {
                 text: messageText,
                 sender: userId,
                 timestamp: serverTimestamp(),
-                tone: toneAnalysis.tone,
-                toneConfidence: toneAnalysis.confidence,
-                explanation: toneAnalysis.explanation,
-
+                tone: toneResult?.tone || 'neutral',
+                explanation: explanation || '',
             });
-
         } catch (error) {
             Alert.alert("Error", "Failed to send message");
             setInputText(messageText); // Restore text on error
@@ -123,168 +69,47 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
         }
     };
 
+    // Get color for message bubble based on tone
     const getToneColor = (tone) => {
         const toneColors = {
-            // Rich, vibrant colors that are not too bright
-            angry: "#DC3545",      // 🔴 Rich red - clear negative emotion
-            stressed: "#DC3545",   // 🔴 Same rich red for stressed emotions
-            neutral: "#007BFF",    // 🔵 Rich blue - clear neutral tone
-            excited: "#28A745",    // 🟢 Rich green - distinct positive emotion
-
-            // Map legacy variations
-            happy: "#28A745",      // Map to excited (rich green)
-            sad: "#DC3545",        // Map to negative (rich red)
-            positive: "#28A745",   // -> excited (rich green)
-            negative: "#DC3545",   // -> angry (rich red)
-            supportive: "#28A745", // -> excited (rich green)
-            worried: "#DC3545",    // -> stressed (rich red)
-            calm: "#007BFF",       // -> neutral (rich blue)
+            angry: "#DC3545",
+            stressed: "#DC3545",
+            neutral: "#007BFF",
+            excited: "#28A745",
+            happy: "#28A745",
+            sad: "#DC3545",
+            positive: "#28A745",
+            negative: "#DC3545",
         };
         return toneColors[tone] || toneColors.neutral;
     };
 
-    const getToneExplanation = (message) => {
-        // Enhanced explanations for the 5 symmetric emotions
-        const detailedExplanations = {
-            angry: `This message shows frustration, irritation, or strong displeasure. The sender is expressing negative emotions that may need addressing and empathy.`,
-            stressed: `This message indicates anxiety, worry, or feeling overwhelmed. The sender may be dealing with pressure and could benefit from support and understanding.`,
-            neutral: `This message maintains a balanced, calm tone without strong emotional indicators. It's factual and measured in approach.`,
-            happy: `This message conveys contentment, positivity, and warmth. The sender is expressing satisfaction and creating a welcoming atmosphere for conversation.`,
-            excited: `This message demonstrates enthusiasm, joy, and high energy. The sender is sharing positive excitement, love, or awe about something special.`,
-
-            // Legacy mappings
-            sad: `This message reflects feelings of sorrow or disappointment. The sender may be seeking comfort or expressing vulnerability.`,
-        };
-
-        return message.explanation || detailedExplanations[message.tone] || `This message has a ${message.tone} tone with ${Math.round(message.toneConfidence * 100)}% confidence`;
-    };
-
-    // Calculate conversation emotion for each person separately - NEW SCORING SYSTEM
-    const getPersonEmotion = (personId) => {
-        const personMessages = messages.filter(msg => msg.sender === personId);
-        if (personMessages.length === 0) return 0.5; // neutral starting point (50/100)
-
-        // Calculate total points based on your specified scoring system
-        let totalPoints = 50; // Start at neutral (50/100)
-
-        personMessages.forEach(msg => {
-            switch (msg.tone) {
-                case 'excited':
-                case 'happy':
-                    // Happy: +5 to +10 points (using +7.5 average)
-                    totalPoints += 7.5;
-                    break;
-                case 'stressed':
-                    // Stressed: -2 to -5 points (using -3.5 average)
-                    totalPoints -= 3.5;
-                    break;
-                case 'angry':
-                    // Angry: -10 to -20 points (using -15 average)
-                    totalPoints -= 15;
-                    break;
-                case 'neutral':
-                    // Calm/Neutral: +1 to +2 points (using +1.5 average)
-                    totalPoints += 1.5;
-                    break;
-                default:
-                    // Unknown tone, treat as neutral
-                    totalPoints += 1.5;
-                    break;
-            }
-        });
-
-        // Clamp between 0 and 100
-        totalPoints = Math.max(0, Math.min(100, totalPoints));
-
-        // Convert to 0.0-1.0 scale for positioning
-        return totalPoints / 100;
-    };
-
-    // Calculate individual person's score (0-100) - now uses the new scoring system
-    const getPersonScore = (personId) => {
-        const emotion = getPersonEmotion(personId);
-        // emotion is already 0.0-1.0 from the new scoring system
-        return Math.round(emotion * 100);
-    };
-
-    // Calculate relative relationship health based on both people's positions and proximity to center
-    const getRelativeRelationshipHealth = () => {
-        const partnerScore = getPersonScore(chatPartner.id);
-        const userScore = getPersonScore(currentUser?.uid || currentUser?.id || "current_user");
-
-        // Calculate how close each person is to the optimal center (50)
-        const partnerDistanceFromCenter = Math.abs(50 - partnerScore);
-        const userDistanceFromCenter = Math.abs(50 - userScore);
-
-        // Convert distance to closeness score (0-50 becomes 50-0)
-        const partnerCloseness = 50 - partnerDistanceFromCenter;
-        const userCloseness = 50 - userDistanceFromCenter;
-
-        // Relationship health is based on how close both are to meeting in the middle
-        // When both are at 50 (center), closeness = 50 each, total = 100
-        // When one is at 0 and other at 100, average closeness = 25, total = 50
-        // When both are at 0 or both at 100, closeness = 0 each, total = 0
-        const relationshipHealth = Math.round((partnerCloseness + userCloseness));
-
-        // Ensure it's between 0-100
-        return Math.max(0, Math.min(100, relationshipHealth));
-    };
-
-    // Get dynamic color for each person's tracker dot - magenta for partner, black for user
-    const getPersonTrackerColor = (emotion, isPartner = false) => {
-        if (isPartner) {
-            return '#FF00FF'; // Bright Magenta/Fuchsia for partner
-        } else {
-            return '#000000'; // Jet Black for user
-        }
-    };
-
-    // COPILOT HELPER: Color mapping function for message bubbles
-    const getMessageBubbleColorFromCopilot = (copilotColor, tone) => {
-        // Use existing getToneColor function with mapped tone
-        return getToneColor(tone);
-    };
-
-    const renderMessage = ({ item }) => {
-        const userId = currentUser?.uid || currentUser?.id || "current_user";
+    // Render each message
+    const renderMessage = ({ item, index }) => {
         const isOwnMessage = item.sender === userId;
         const toneColor = getToneColor(item.tone);
         const showingExplanation = aiExplanation?.messageId === item.id;
+        const isLastMessage = index === messages.length - 1;
 
         return (
-            <View style={[
-                styles.messageContainer,
-                isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer
-            ]}>
-                <View style={[
-                    styles.messageBubble,
-                    isOwnMessage ? styles.ownBubble : styles.otherBubble,
-                    { backgroundColor: toneColor }
-                ]}>
-                    <Text style={styles.messageText}>
-                        {item.text}
-                    </Text>
-                    {/* Timestamp inside bubble, opposite side of AI button */}
-                    <Text style={[
-                        styles.timestamp,
-                        styles.timestampInsideBubble,
-                        isOwnMessage ? styles.timestampLeft : styles.timestampRight
-                    ]}>
+            <View style={[styles.messageContainer, isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer]}>
+                <View style={[styles.messageBubble, isOwnMessage ? styles.ownBubble : styles.otherBubble, { backgroundColor: toneColor, marginBottom: isLastMessage ? 2 : 2 }]}>
+                    <Text style={styles.messageText}>{item.text}</Text>
+                    <Text style={[styles.timestamp, styles.timestampInsideBubble, isOwnMessage ? styles.timestampLeft : styles.timestampRight]}>
                         {item.timestamp && item.timestamp.seconds
                             ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                             : '...'}
                     </Text>
-                    {/* AI button only, no phone icon in bubble */}
                     <View style={styles.aiButtonContainer}>
                         <TouchableOpacity
                             style={[styles.aiButton, showingExplanation && styles.aiButtonActive]}
-                            onPress={async () => {
+                            onPress={() => {
                                 if (showingExplanation) {
                                     setAiExplanation(null);
                                 } else {
                                     setAiExplanation({
                                         messageId: item.id,
-                                        explanation: getToneExplanation(item)
+                                        explanation: item.explanation || '',
                                     });
                                 }
                             }}
@@ -293,141 +118,121 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                         </TouchableOpacity>
                     </View>
                 </View>
-                {/* AI explanation popup */}
                 {showingExplanation && (
-                    <View style={[
-                        styles.aiExplanationPopup,
-                        isOwnMessage ? styles.aiPopupRight : styles.aiPopupLeft
-                    ]}>
-                        <Text style={styles.aiExplanationText}>
-                            <Text style={[styles.emotionWord, { color: toneColor }]}>
-                                {item.tone.charAt(0).toUpperCase() + item.tone.slice(1)}
-                            </Text>
-                            {" - " + aiExplanation.explanation}
-                        </Text>
-                        <View style={[
-                            styles.aiPopupArrow,
-                            isOwnMessage ? styles.aiArrowRight : styles.aiArrowLeft
-                        ]} />
+                    <View style={[styles.aiExplanationPopup, isOwnMessage ? styles.aiPopupRight : styles.aiPopupLeft]}>
+                        <Text style={styles.aiExplanationText}>{item.explanation}</Text>
+                        <View style={[styles.aiPopupArrow, isOwnMessage ? styles.aiArrowRight : styles.aiArrowLeft]} />
                     </View>
                 )}
             </View>
         );
     };
 
+    // Helper: Calculate a simple emotion score for each person
+    const getPersonScore = (personId) => {
+        const personMessages = messages.filter(msg => msg.sender === personId);
+        if (personMessages.length === 0) return 50; // Neutral
+        let score = 50;
+        personMessages.forEach(msg => {
+            switch (msg.tone) {
+                case 'excited':
+                case 'happy':
+                case 'positive':
+                    score += 7;
+                    break;
+                case 'stressed':
+                case 'angry':
+                case 'negative':
+                case 'sad':
+                    score -= 10;
+                    break;
+                case 'neutral':
+                default:
+                    score += 1;
+                    break;
+            }
+        });
+        return Math.max(0, Math.min(100, score));
+    };
 
+    // Helper: Relationship health is how close both are to center (50)
+    const getRelationshipHealth = () => {
+        const partnerScore = getPersonScore(chatPartner.id);
+        const userScore = getPersonScore(userId);
+        const closeness = 100 - (Math.abs(50 - partnerScore) + Math.abs(50 - userScore)) / 2;
+        return Math.round(closeness);
+    };
 
+    // Main UI
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-            {/* Header */}
+        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            {/* Header with chat partner, call button, and back button */}
             <View style={styles.header}>
                 <View style={styles.profileSection}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <View style={[styles.profilePicture, styles.partnerProfilePicture]}>
                             <Text style={styles.profileInitial}>{chatPartner.name.charAt(0).toUpperCase()}</Text>
                         </View>
-                        <TouchableOpacity
-                            style={styles.callButton}
-                            onPress={() => initiateCall(userId, chatPartner.id)}
-                        >
-                            <Text style={{ fontSize: 22, color: '#fff' }}>📞</Text>
+                        {/* Large call button directly beside profile pic */}
+                        <TouchableOpacity style={styles.largeCallButton} onPress={() => Alert.alert('Call', `Calling ${chatPartner.name}...`)}>
+                            <Text style={styles.largeCallIcon}>📞</Text>
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.profileName}>{chatPartner.name}</Text>
                 </View>
-
-                {/* Center - Back button only */}
                 <View style={styles.centerSection}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={onBack}
-                    >
+                    <TouchableOpacity style={styles.backButton} onPress={onBack}>
                         <Text style={styles.backButtonText}>← Back</Text>
                     </TouchableOpacity>
                 </View>
-
-                {/* User Profile */}
                 <View style={styles.profileSection}>
                     <View style={[styles.profilePicture, styles.userProfilePicture]}>
-                        <Text style={styles.profileInitial}>
-                            {(currentUser?.displayName || currentUser?.email || "You").charAt(0).toUpperCase()}
-                        </Text>
+                        <Text style={styles.profileInitial}>{(currentUser?.displayName || currentUser?.email || "You").charAt(0).toUpperCase()}</Text>
                     </View>
                     <Text style={styles.profileName}>You</Text>
                 </View>
             </View>
 
-            {/* Single Emotion Tracker - Both Dots Meet in Middle */}
-            <View style={styles.singleEmotionTracker}>
-                <View style={styles.emotionBar}>
-                    {/* Progress bar: Red → Blue → Green → Blue → Red (5 sections) */}
-                    <View style={styles.leftRedSection} />
-                    <View style={styles.leftOrangeSection} />
-                    <View style={styles.leftGreenSection} />
-                    <View style={styles.centerPurpleSection} />
-                    <View style={styles.rightGreenSection} />
-
-                    {/* Subtle midpoint line */}
-                    <View style={styles.midpointLine} />
-
-                    {/* Partner's emotion indicator (left side, 0% to 50% based on their individual score) */}
-                    <View style={[
-                        styles.emotionIndicator,
-                        { left: `${getPersonScore(chatPartner.id) / 2}%` }
-                    ]}>
-                        <View
-                            style={[
-                                styles.emotionDot,
-                                styles.leftPersonDot,
-                                {
-                                    backgroundColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id), true),
-                                    shadowColor: getPersonTrackerColor(getPersonEmotion(chatPartner.id), true),
-                                }
-                            ]}
-                        />
+            {/* Progress tracker bar (emotion tracker) - moved higher up */}
+            <View style={styles.progressBarContainer}>
+                <View style={styles.singleEmotionTracker}>
+                    <View style={styles.emotionBar}>
+                        <View style={styles.leftRedSection} />
+                        <View style={styles.leftOrangeSection} />
+                        <View style={styles.leftGreenSection} />
+                        <View style={styles.centerPurpleSection} />
+                        <View style={styles.rightGreenSection} />
+                        <View style={styles.midpointLine} />
+                        {/* Partner's dot */}
+                        <View style={[styles.emotionIndicator, { left: `${getPersonScore(chatPartner.id) / 2}%` }]}>
+                            <View style={[styles.emotionDot, styles.leftPersonDot, { backgroundColor: '#FF00FF' }]} />
+                        </View>
+                        {/* User's dot */}
+                        <View style={[styles.emotionIndicator, { left: `${100 - (getPersonScore(userId) / 2)}%` }]}>
+                            <View style={[styles.emotionDot, styles.rightPersonDot, { backgroundColor: '#000' }]} />
+                        </View>
                     </View>
-
-                    {/* Your emotion indicator (right side, 100% to 50% based on your individual score) */}
-                    <View style={[
-                        styles.emotionIndicator,
-                        { left: `${100 - (getPersonScore(currentUser?.uid || currentUser?.id || "current_user") / 2)}%` }
-                    ]}>
-                        <View
-                            style={[
-                                styles.emotionDot,
-                                styles.rightPersonDot,
-                                {
-                                    backgroundColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user"), false),
-                                    shadowColor: getPersonTrackerColor(getPersonEmotion(currentUser?.uid || currentUser?.id || "current_user"), false),
-                                }
-                            ]}
-                        />
+                    {/* Relationship health tracker */}
+                    <View style={styles.scoreDisplayContainer}>
+                        <Text style={[styles.scoreDisplayText, { color: '#fff' }]}>Connection: {getRelationshipHealth()}/100</Text>
                     </View>
-                </View>
-
-                {/* Psychological Score Display (relative to both people's positions) */}
-                <View style={styles.scoreDisplayContainer}>
-                    <Text style={[styles.scoreDisplayText, { color: moodHealth?.color || '#4CAF50' }]}>
-                        Relationship Health: {getRelativeRelationshipHealth()}/100
-                    </Text>
                 </View>
             </View>
 
-            {/* Messages */}
+            {/* Messages list */}
             <FlatList
                 ref={flatListRef}
                 data={messages}
-                renderItem={renderMessage}
+                renderItem={({ item, index }) => renderMessage({ item, index })}
                 keyExtractor={(item) => item.id}
                 style={styles.messagesList}
-                contentContainerStyle={{ paddingBottom: 20 }}
+                contentContainerStyle={{ paddingBottom: (aiExplanation && messages.length > 0 && aiExplanation.messageId === messages[messages.length - 1].id) ? 140 : 80 }} // Extra padding if AI explanation for last message
                 showsVerticalScrollIndicator={false}
+                initialScrollIndex={messages.length > 0 ? messages.length - 1 : 0}
+                getItemLayout={(data, index) => ({ length: 70, offset: 70 * index, index })} // Approximate row height for fast scroll
             />
 
-            {/* Input */}
+            {/* Input area */}
             <View style={styles.inputContainer}>
                 <View style={styles.inputRow}>
                     <TextInput
@@ -444,15 +249,15 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                         onPress={sendMessage}
                         disabled={!inputText.trim() || loading}
                     >
-                        <Text style={styles.sendButtonText}>
-                            {loading ? "..." : "Send"}
-                        </Text>
+                        <Text style={styles.sendButtonText}>{loading ? "..." : "Send"}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
         </KeyboardAvoidingView>
     );
 }
+
+
 
 const styles = StyleSheet.create({
     container: {
@@ -524,12 +329,11 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         fontFamily: 'SF Pro Text',
     },
-    singleEmotionTracker: {
-        backgroundColor: "#1E1E1E",
-        paddingVertical: 8, // Further reduced height
-        paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#333",
+    singleEmotionTracker: { //PROGRESS BAR
+
+        paddingVertical: 1,
+        width: '100%', // Ensure full width
+        alignSelf: 'stretch',
     },
     trackerLabels: {
         flexDirection: "row",
@@ -556,9 +360,9 @@ const styles = StyleSheet.create({
     },
     emotionBar: {
         flexDirection: "row",
-        height: 8, // Made thicker for better circular marker fit
+        height: 8,
         backgroundColor: "#333",
-        borderRadius: 4,
+        borderRadius: 0,
         overflow: "hidden",
         position: "relative",
         shadowColor: '#000',
@@ -566,6 +370,10 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 1,
         elevation: 1,
+        width: '100%', // Ensure full width
+        alignSelf: 'stretch', // Ensure full width
+        marginLeft: 0,
+        marginRight: 0,
     },
     // Progress bar: Red → Blue → Green → Blue → Red
     leftRedSection: {
@@ -771,81 +579,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    aiIcon: {
-        width: 20,
-        height: 20,
-        position: 'relative',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    aiCentralNode: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: '#fff',
-        position: 'absolute',
-        zIndex: 3,
-    },
-    aiConnectionTop: {
-        position: 'absolute',
-        top: 2,
-        left: 9,
-        width: 1,
-        height: 6,
-        backgroundColor: 'rgba(255,255,255,0.6)',
-        zIndex: 1,
-    },
-    aiConnectionBottom: {
-        position: 'absolute',
-        bottom: 2,
-        left: 9,
-        width: 1,
-        height: 6,
-        backgroundColor: 'rgba(255,255,255,0.6)',
-        zIndex: 1,
-    },
-    aiConnectionLeft: {
-        position: 'absolute',
-        top: 9,
-        left: 2,
-        width: 6,
-        height: 1,
-        backgroundColor: 'rgba(255,255,255,0.6)',
-        zIndex: 1,
-    },
-    aiConnectionRight: {
-        position: 'absolute',
-        top: 9,
-        right: 2,
-        width: 6,
-        height: 1,
-        backgroundColor: 'rgba(255,255,255,0.6)',
-        zIndex: 1,
-    },
-    aiOuterNode: {
-        width: 3,
-        height: 3,
-        borderRadius: 1.5,
-        backgroundColor: 'rgba(255,255,255,0.8)',
-        position: 'absolute',
-        zIndex: 2,
-    },
-    aiNodeTop: {
-        top: 1,
-        left: 8,
-    },
-    aiNodeBottom: {
-        bottom: 1,
-        left: 8,
-    },
-    aiNodeLeft: {
-        top: 8,
-        left: 1,
-    },
-    aiNodeRight: {
-        top: 8,
-        right: 1,
-    },
+
+
     aiButtonActive: {
         backgroundColor: "rgba(255,255,255,0.35)",
         borderColor: "rgba(255,255,255,0.5)",
@@ -1048,25 +783,25 @@ const styles = StyleSheet.create({
         fontSize: 32,
         color: '#8e44ad',
     },
+    largeCallButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#222',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 8,
+        marginRight: 0,
+    },
+    largeCallIcon: {
+        fontSize: 32,
+        color: '#8e44ad',
+    },
+    progressBarContainer: {
+        marginTop: 0,
+        marginBottom: 8,
+        paddingHorizontal: 0,
+        width: '100%', // Ensure full width
+        alignSelf: 'stretch',
+    },
 });
-
-// Analyze tone using unified LLM service
-const analyzeToneForMessage = async (messageText) => {
-    try {
-        // Use the unified service for tone analysis and explanation
-        const toneResult = await llmUnifiedService.analyzeTone(messageText);
-        const explanation = await llmUnifiedService.getExplainer(messageText, userId === chatPartner.id);
-        return {
-            tone: toneResult?.tone || 'neutral',
-            confidence: toneResult?.confidence || 0.8,
-            explanation: explanation || '',
-        };
-    } catch (err) {
-        // Fallback to local helper if LLM fails
-        return {
-            tone: llmUnifiedService.normalizeSentiment(messageText),
-            confidence: 0.7,
-            explanation: llmUnifiedService.getFallbackResponse(messageText, 'explanation'),
-        };
-    }
-};
