@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { auth, onAuthStateChanged, signOut } from "./firebase";
+import { auth, onAuthStateChanged } from "./firebase";
 import HomeScreen from "./HomeScreen";
 import AuthScreen from "./AuthScreen";
 import MessagesScreen from "./MessagesScreen";
@@ -46,25 +46,13 @@ export default function App() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {user ? (
             <>
-              <Stack.Screen name="Home">
-                {props => <HomeScreen {...props} user={user} />}
-              </Stack.Screen>
-              <Stack.Screen name="Messages">
-                {props => <MessagesScreen {...props} currentUser={user} />}
-              </Stack.Screen>
-              <Stack.Screen name="Chat">
-                {props => <ChatScreen {...props} currentUser={user} />}
-              </Stack.Screen>
-              <Stack.Screen name="Contacts">
-                {props => <ContactsScreen {...props} currentUser={user} />}
-              </Stack.Screen>
+              <Stack.Screen name="Home" component={HomeScreen} initialParams={{ user }} />
+              <Stack.Screen name="Messages" component={MessagesScreen} initialParams={{ currentUser: user }} />
+              <Stack.Screen name="Chat" component={ChatScreen} initialParams={{ currentUser: user }} />
+              <Stack.Screen name="Contacts" component={ContactsScreen} initialParams={{ currentUser: user }} />
               <Stack.Screen name="Calls" component={CallsScreen} />
-              <Stack.Screen name="Profile">
-                {props => <ProfileScreen {...props} user={user} />}
-              </Stack.Screen>
-              <Stack.Screen name="SereneAI">
-                {props => <SereneAIScreen {...props} currentUser={user} />}
-              </Stack.Screen>
+              <Stack.Screen name="Profile" component={ProfileScreen} initialParams={{ user }} />
+              <Stack.Screen name="SereneAI" component={SereneAIScreen} initialParams={{ currentUser: user }} />
             </>
           ) : (
             <Stack.Screen name="Auth" component={AuthScreen} />
