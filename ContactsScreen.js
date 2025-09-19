@@ -129,7 +129,7 @@ export default function ContactsScreen({ navigation, onSelectContact }) {
     return (
         <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
             <View style={styles.container}>
-                <Text style={styles.title}>Your SerenID: {currentUser?.uid.substring(0, 8)}...</Text>
+                <Text style={styles.title}>Your SerenID: {currentUser?.uid}</Text>
                 <View style={styles.addSection}>
                     <TextInput
                         style={styles.input}
