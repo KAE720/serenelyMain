@@ -19,7 +19,7 @@ import { MessageIcon, CallsIcon, ContactsIcon, SereneIcon } from './components/T
 export default function HomeScreen({ userId, onLogout, user }) {
     const [showProfile, setShowProfile] = useState(false);
 
-    const [showLLMTest, setShowLLMTest] = useState(false);
+
     const [activeTab, setActiveTab] = useState('Messages');
     const [currentScreen, setCurrentScreen] = useState('main'); // 'main' or 'chat'
     const [selectedChat, setSelectedChat] = useState(null);
@@ -44,10 +44,7 @@ export default function HomeScreen({ userId, onLogout, user }) {
                 onBack={() => setShowProfile(false)}
                 onLogout={onLogout}
 
-                onOpenLLMTest={() => {
-                    setShowProfile(false);
-                    setShowLLMTest(true);
-                }}
+
             />
         );
     }

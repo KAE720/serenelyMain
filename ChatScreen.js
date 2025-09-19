@@ -12,10 +12,11 @@ import {
     Platform,
 } from "react-native";
 
-import llmService from "./llmService";
+
 
 import { db, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from "./firebase";
 import { getAuth } from "firebase/auth";
+import llmUnifiedService from './LLMUnifiedService';
 
 export default function ChatScreen({ chatPartner, currentUser, onBack, conversationId }) {
     const [messages, setMessages] = useState([]);
@@ -47,87 +48,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
         return unsubscribe;
     }, [conversationId]);
 
-    // Initialize enhanced tone analysis and mock messages
-    useEffect(() => {
-        // Initialize the enhanced tone analysis service
-        const initializeEnhancedAnalysis = async () => {
-            try {
-                // COPILOT INTEGRATION: Initialize the new LLM service
-                await llmService.initialize();
-                const llmStatus = llmService.getStatus();
 
-                // Fallback to enhanced tone analysis service
-
-                setIsLLMReady(llmStatus.initialized || isReady);
-                console.log('AI Analysis initialized:', llmStatus.initialized ? 'LLM ready' : 'Using fallback');
-            } catch (error) {
-                console.error('Failed to initialize AI analysis:', error);
-                setIsLLMReady(false);
-            }
-        };
-
-        initializeEnhancedAnalysis();
-    }, []);
-
-    const analyzeToneForMessage = async (text) => {
-        try {
-            // COPILOT INTEGRATION: Use the new analyzeTone function
-            const copilotAnalysis = await llmService.analyzeTone(text);
-
-            // Map Copilot colors back to existing emotion names for UI compatibility
-            const colorToEmotionMap = {
-                'red': 'angry',
-                'orange': 'stressed',
-                'blue': 'neutral',
-                'green': 'excited'
-            };
-
-            const mappedTone = colorToEmotionMap[copilotAnalysis.color] || 'neutral';
-
-            // Get proper message explanation (what the message is saying)
-            const messageExplanation = await llmService.getExplainer(text, true); // true = message is from current user
-
-            return {
-                tone: mappedTone,
-                confidence: copilotAnalysis.confidence,
-                explanation: messageExplanation, // Now uses proper message meaning explanation
-                method: copilotAnalysis.isLLMEnhanced ? 'llm' : 'demo',
-                isEnhanced: copilotAnalysis.isLLMEnhanced
-            };
-        } catch (error) {
-            console.error("Enhanced tone analysis failed:", error);
-            // Fallback to existing logic with improved explanations
-
-
-            // Map to 4 core emotions for dual tracker design
-            const coreEmotions = ['angry', 'stressed', 'neutral', 'excited'];
-            let mappedTone = analysis.tone;
-
-            // Ensure we only use core emotions
-            if (!coreEmotions.includes(analysis.tone)) {
-                // Map common variations to our 4 core emotions
-                if (['positive', 'supportive', 'cheerful', 'content', 'calm', 'joyful', 'loving', 'happy'].includes(analysis.tone)) {
-                    mappedTone = 'excited'; // All positive emotions -> excited (purple)
-                } else if (['negative', 'frustrated', 'irritated', 'furious'].includes(analysis.tone)) {
-                    mappedTone = 'angry';
-                } else if (['anxious', 'worried', 'overwhelmed', 'tense', 'sad', 'down', 'melancholy', 'disappointed'].includes(analysis.tone)) {
-                    mappedTone = 'stressed'; // Map anxiety and sadness to stressed (orange)
-                } else {
-                    mappedTone = 'neutral';
-                }
-            }
-
-            // Generate a simple message explanation for fallback
-            const fallbackExplanation = generateFallbackExplanation(text);
-
-            return {
-                ...analysis,
-                tone: mappedTone,
-                explanation: fallbackExplanation,
-                isEnhanced: analysis.method === 'llm' // Track if LLM was used
-            };
-        }
-    };
 
     // Fallback explanation generator - concise message meaning
     const generateFallbackExplanation = (text) => {
@@ -191,7 +112,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                 tone: toneAnalysis.tone,
                 toneConfidence: toneAnalysis.confidence,
                 explanation: toneAnalysis.explanation,
-                isEnhanced: toneAnalysis.isEnhanced || false,
+
             });
 
         } catch (error) {
@@ -340,15 +261,23 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                     isOwnMessage ? styles.ownBubble : styles.otherBubble,
                     { backgroundColor: toneColor }
                 ]}>
-                    <Text style={styles.messageText}>{item.text}</Text>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={styles.timestampInsideBubble}>
-                            {item.timestamp && item.timestamp.seconds
-                                ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                : '...'}
-                        </Text>
+                    <Text style={styles.messageText}>
+                        {item.text}
+                    </Text>
+                    {/* Timestamp inside bubble, opposite side of AI button */}
+                    <Text style={[
+                        styles.timestamp,
+                        styles.timestampInsideBubble,
+                        isOwnMessage ? styles.timestampLeft : styles.timestampRight
+                    ]}>
+                        {item.timestamp && item.timestamp.seconds
+                            ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            : '...'}
+                    </Text>
+                    {/* AI button only, no phone icon in bubble */}
+                    <View style={styles.aiButtonContainer}>
                         <TouchableOpacity
-                            style={styles.aiButton}
+                            style={[styles.aiButton, showingExplanation && styles.aiButtonActive]}
                             onPress={async () => {
                                 if (showingExplanation) {
                                     setAiExplanation(null);
@@ -363,25 +292,25 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                             <Text style={styles.aiIconText}>AI</Text>
                         </TouchableOpacity>
                     </View>
-                    {/* AI explanation popup */}
-                    {showingExplanation && (
-                        <View style={[
-                            styles.aiExplanationPopup,
-                            isOwnMessage ? styles.aiPopupRight : styles.aiPopupLeft
-                        ]}>
-                            <Text style={styles.aiExplanationText}>
-                                <Text style={[styles.emotionWord, { color: toneColor }]}>
-                                    {item.tone.charAt(0).toUpperCase() + item.tone.slice(1)}
-                                </Text>
-                                {" - " + aiExplanation.explanation}
-                            </Text>
-                            <View style={[
-                                styles.aiPopupArrow,
-                                isOwnMessage ? styles.aiArrowRight : styles.aiArrowLeft
-                            ]} />
-                        </View>
-                    )}
                 </View>
+                {/* AI explanation popup */}
+                {showingExplanation && (
+                    <View style={[
+                        styles.aiExplanationPopup,
+                        isOwnMessage ? styles.aiPopupRight : styles.aiPopupLeft
+                    ]}>
+                        <Text style={styles.aiExplanationText}>
+                            <Text style={[styles.emotionWord, { color: toneColor }]}>
+                                {item.tone.charAt(0).toUpperCase() + item.tone.slice(1)}
+                            </Text>
+                            {" - " + aiExplanation.explanation}
+                        </Text>
+                        <View style={[
+                            styles.aiPopupArrow,
+                            isOwnMessage ? styles.aiArrowRight : styles.aiArrowLeft
+                        ]} />
+                    </View>
+                )}
             </View>
         );
     };
@@ -786,7 +715,7 @@ const styles = StyleSheet.create({
     },
     messageContainer: {
         marginVertical: 2,
-        maxWidth: "90%", // Increased from 65% for wider bubbles
+        maxWidth: "65%",
     },
     ownMessageContainer: {
         alignSelf: "flex-end",
@@ -798,66 +727,206 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     messageBubble: {
-        paddingVertical: 14,
-        paddingHorizontal: 18,
-        borderRadius: 22,
-        marginBottom: 8,
-        minWidth: 120,
-        maxWidth: '90%',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        position: 'relative',
+        padding: 8,
+        borderRadius: 16,
+        marginBottom: 2,
+        minWidth: 60,
+        maxWidth: "100%",
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
+        shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 2,
     },
     ownBubble: {
+        borderBottomRightRadius: 6,
         alignSelf: 'flex-end',
-        borderBottomRightRadius: 8,
     },
     otherBubble: {
+        borderBottomLeftRadius: 6,
         alignSelf: 'flex-start',
-        borderBottomLeftRadius: 8,
-        borderWidth: 0.5,
-        borderColor: '#eee',
     },
     messageText: {
-        fontSize: 16,
-        lineHeight: 22,
-        color: '#fff', // Always white text
+        fontSize: 14,
+        lineHeight: 18,
+        fontWeight: '500',
+        color: '#FFFFFF',
         fontFamily: 'SF Pro Text',
-        marginBottom: 6,
+        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+        textShadowOffset: { width: 0, height: 0.5 },
+        textShadowRadius: 1,
+    },
+    aiButtonContainer: {
+        alignItems: "flex-end",
+        marginTop: 2,
     },
     aiButton: {
-        alignSelf: 'flex-end',
-        marginTop: 2,
-        marginLeft: 8,
-        paddingHorizontal: 8,
+        paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: 10,
-        backgroundColor: "#e5e5e5",
-        minWidth: 32,
+        backgroundColor: "rgba(255,255,255,0.2)",
+        alignSelf: 'flex-end',
+        marginTop: 2,
+        minWidth: 28,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    aiIconText: {
+    aiIcon: {
+        width: 20,
+        height: 20,
+        position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    aiCentralNode: {
+        width: 4,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: '#fff',
+        position: 'absolute',
+        zIndex: 3,
+    },
+    aiConnectionTop: {
+        position: 'absolute',
+        top: 2,
+        left: 9,
+        width: 1,
+        height: 6,
+        backgroundColor: 'rgba(255,255,255,0.6)',
+        zIndex: 1,
+    },
+    aiConnectionBottom: {
+        position: 'absolute',
+        bottom: 2,
+        left: 9,
+        width: 1,
+        height: 6,
+        backgroundColor: 'rgba(255,255,255,0.6)',
+        zIndex: 1,
+    },
+    aiConnectionLeft: {
+        position: 'absolute',
+        top: 9,
+        left: 2,
+        width: 6,
+        height: 1,
+        backgroundColor: 'rgba(255,255,255,0.6)',
+        zIndex: 1,
+    },
+    aiConnectionRight: {
+        position: 'absolute',
+        top: 9,
+        right: 2,
+        width: 6,
+        height: 1,
+        backgroundColor: 'rgba(255,255,255,0.6)',
+        zIndex: 1,
+    },
+    aiOuterNode: {
+        width: 3,
+        height: 3,
+        borderRadius: 1.5,
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        position: 'absolute',
+        zIndex: 2,
+    },
+    aiNodeTop: {
+        top: 1,
+        left: 8,
+    },
+    aiNodeBottom: {
+        bottom: 1,
+        left: 8,
+    },
+    aiNodeLeft: {
+        top: 8,
+        left: 1,
+    },
+    aiNodeRight: {
+        top: 8,
+        right: 1,
+    },
+    aiButtonActive: {
+        backgroundColor: "rgba(255,255,255,0.35)",
+        borderColor: "rgba(255,255,255,0.5)",
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+    },
+    aiExplanationPopup: {
+        backgroundColor: '#2C2C2C',
+        borderRadius: 16,
+        padding: 14,
+        marginTop: 10,
+        maxWidth: '82%',
+        borderWidth: 0.5,
+        borderColor: '#555',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 6,
+        elevation: 8,
+        position: 'relative',
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
+    },
+    aiPopupLeft: {
+        alignSelf: 'flex-start',
+        marginLeft: 8,
+    },
+    aiPopupRight: {
+        alignSelf: 'flex-end',
+        marginRight: 8,
+    },
+    aiExplanationText: {
+        color: '#E8E8E8',
         fontSize: 13,
-        color: '#888',
+        lineHeight: 19,
+        fontWeight: '400',
+        fontFamily: 'SF Pro Text',
+    },
+    emotionWord: {
         fontWeight: 'bold',
+        fontSize: 14,
+        fontFamily: 'SF Pro Text',
+    },
+    aiPopupArrow: {
+        position: 'absolute',
+        top: -7,
+        width: 0,
+        height: 0,
+        borderLeftWidth: 7,
+        borderRightWidth: 7,
+        borderBottomWidth: 7,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderBottomColor: '#2C2C2C',
+    },
+    aiArrowLeft: {
+        left: 16,
+    },
+    aiArrowRight: {
+        right: 16,
+    },
+    timestamp: {
+        fontSize: 12,
+        color: "#666",
+        marginTop: 2,
+        fontFamily: 'SF Pro Text',
     },
     timestampInsideBubble: {
+        position: 'absolute',
+        bottom: 6,
         fontSize: 12,
-        color: '#F5F5F5', // Brighter for legibility
-        alignSelf: 'flex-end',
-        marginTop: 2,
-        marginLeft: 8,
-        textShadowColor: 'rgba(0,0,0,0.25)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 1,
-        fontWeight: '600',
-        letterSpacing: 0.2,
+        color: '#eee',
+        opacity: 0.8,
+    },
+    timestampLeft: {
+        left: 10,
+        textAlign: 'left',
+    },
+    timestampRight: {
+        right: 10,
+        textAlign: 'right',
     },
     inputContainer: {
         backgroundColor: "#1E1E1E",
@@ -894,6 +963,12 @@ const styles = StyleSheet.create({
     sendButtonText: {
         color: "#fff",
         fontWeight: "600",
+        fontFamily: 'SF Pro Text',
+    },
+    aiIconText: {
+        color: '#fff',
+        fontSize: 11,
+        fontWeight: '600',
         fontFamily: 'SF Pro Text',
     },
     aiEmotionText: {
@@ -974,3 +1049,24 @@ const styles = StyleSheet.create({
         color: '#8e44ad',
     },
 });
+
+// Analyze tone using unified LLM service
+const analyzeToneForMessage = async (messageText) => {
+    try {
+        // Use the unified service for tone analysis and explanation
+        const toneResult = await llmUnifiedService.analyzeTone(messageText);
+        const explanation = await llmUnifiedService.getExplainer(messageText, userId === chatPartner.id);
+        return {
+            tone: toneResult?.tone || 'neutral',
+            confidence: toneResult?.confidence || 0.8,
+            explanation: explanation || '',
+        };
+    } catch (err) {
+        // Fallback to local helper if LLM fails
+        return {
+            tone: llmUnifiedService.normalizeSentiment(messageText),
+            confidence: 0.7,
+            explanation: llmUnifiedService.getFallbackResponse(messageText, 'explanation'),
+        };
+    }
+};

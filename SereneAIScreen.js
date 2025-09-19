@@ -13,7 +13,7 @@ import {
     Animated,
     ScrollView,
 } from "react-native";
-import { queryLocalLLM } from "./localLLMService";
+
 
 export default function SereneAIScreen({ currentUser }) {
 
@@ -41,13 +41,13 @@ export default function SereneAIScreen({ currentUser }) {
         setInputText("");
         setLoading(true);
         try {
-            const aiResponse = await queryLocalLLM(userMessage.text, "cbt");
+
             setMessages((prev) => [
                 ...prev,
                 {
                     id: `ai-${Date.now()}`,
                     sender: "serene",
-                    text: aiResponse,
+                
                     timestamp: new Date().toISOString(),
                 },
             ]);
