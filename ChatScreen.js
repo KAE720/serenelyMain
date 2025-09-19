@@ -174,7 +174,7 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                             <Text style={styles.profileInitial}>{chatPartner.name.charAt(0).toUpperCase()}</Text>
                         </View>
                         {/* Large call button directly beside profile pic */}
-                        <TouchableOpacity style={styles.largeCallButton} onPress={() => Alert.alert('Call', `Calling ${chatPartner.name}...`)}>
+                        <TouchableOpacity style={styles.largeCallButton}>
                             <Text style={styles.largeCallIcon}>📞</Text>
                         </TouchableOpacity>
                     </View>
