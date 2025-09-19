@@ -343,86 +343,75 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
         const toneColor = getToneColor(item.tone);
         const showingExplanation = aiExplanation?.messageId === item.id;
 
-        return (
-            <View style={[
-                styles.messageContainer,
-                isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer
-            ]}>
-                <View style={[
-                    styles.messageBubble,
-                    isOwnMessage ? styles.ownBubble : styles.otherBubble,
-                    { backgroundColor: toneColor }
-                ]}>
-                    <Text style={styles.messageText}>
-                        {item.text}
-                    </Text>
+        // Fix timestamp logic: handle Firestore Timestamp, JS Date, or string
+        let messageDate = "";
+        if (item.timestamp) {
+            if (typeof item.timestamp.toDate === "function") {
+                messageDate = item.timestamp.toDate();
+            } else {
+                messageDate = new Date(item.timestamp);
+            }
+        }
+        let formattedTime = "";
+        if (messageDate && messageDate instanceof Date && !isNaN(messageDate)) {
+            formattedTime = messageDate.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
 
-                    {/* AI button */}
-                    <View style={styles.aiButtonContainer}>
-                        <TouchableOpacity
-                            style={[styles.aiButton, showingExplanation && styles.aiButtonActive]}
-                            onPress={async () => {
-                                if (showingExplanation) {
-                                    setAiExplanation(null);
-                                } else {
-                                    // Generate fresh AI explanation using LLM
-                                    try {
-                                        const freshExplanation = await llmService.getExplainer(item.text, isOwnMessage);
-                                        setAiExplanation({
-                                            messageId: item.id,
-                                            tone: item.tone,
-                                            explanation: freshExplanation,
-                                            color: toneColor,
-                                            isEnhanced: item.isEnhanced
-                                        });
-                                    } catch (error) {
-                                        console.error('Failed to get AI explanation:', error);
-                                        // Fallback to stored explanation
-                                        setAiExplanation({
-                                            messageId: item.id,
-                                            tone: item.tone,
-                                            explanation: item.explanation || getToneExplanation(item),
-                                            color: toneColor,
-                                            isEnhanced: item.isEnhanced
-                                        });
+        return (
+            <View style={[styles.messageContainer, isOwnMessage ? styles.ownMessageContainer : styles.otherMessageContainer]}>
+                <View style={[styles.messageBubble, isOwnMessage ? styles.ownBubble : styles.otherBubble, { backgroundColor: toneColor }]}>                
+                    {/* Message text above timestamp and AI button, inside bubble */}
+                    <Text style={[styles.messageText, { marginBottom: 4, textAlign: 'center' }]}>{item.text}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        {/* Timestamp on left */}
+                        <Text style={{ fontSize: 12, color: '#fff', marginRight: 8, minWidth: 40, textAlign: 'right' }}>{formattedTime || ""}</Text>
+                        {/* AI button right */}
+                        <View style={styles.aiButtonContainer}>
+                            <TouchableOpacity
+                                style={[styles.aiButton, showingExplanation && styles.aiButtonActive]}
+                                onPress={async () => {
+                                    if (showingExplanation) {
+                                        setAiExplanation(null);
+                                    } else {
+                                        try {
+                                            const freshExplanation = await llmService.getExplainer(item.text, isOwnMessage);
+                                            setAiExplanation({
+                                                messageId: item.id,
+                                                tone: item.tone,
+                                                explanation: freshExplanation,
+                                                color: toneColor,
+                                                isEnhanced: item.isEnhanced
+                                            });
+                                        } catch (error) {
+                                            setAiExplanation({
+                                                messageId: item.id,
+                                                tone: item.tone,
+                                                explanation: item.explanation || getToneExplanation(item),
+                                                color: toneColor,
+                                                isEnhanced: item.isEnhanced
+                                            });
+                                        }
                                     }
-                                }
-                            }}
-                        >
-                            {/* AI Label */}
-                            <Text style={styles.aiIconText}>AI</Text>
-                        </TouchableOpacity>
+                                }}
+                            >
+                                <Text style={styles.aiIconText}>AI</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
-
                 {/* AI Explanation Popup */}
                 {showingExplanation && (
-                    <View style={[
-                        styles.aiExplanationPopup,
-                        isOwnMessage ? styles.aiPopupRight : styles.aiPopupLeft
-                    ]}>
+                    <View style={[styles.aiExplanationPopup, isOwnMessage ? styles.aiPopupRight : styles.aiPopupLeft]}>
                         <Text style={styles.aiExplanationText}>
-                            <Text style={[styles.emotionWord, { color: toneColor }]}>
-                                {item.tone.charAt(0).toUpperCase() + item.tone.slice(1)}
-                            </Text>
+                            <Text style={[styles.emotionWord, { color: toneColor }]}>{item.tone.charAt(0).toUpperCase() + item.tone.slice(1)}</Text>
                             {" - " + aiExplanation.explanation}
                         </Text>
-                        <View style={[
-                            styles.aiPopupArrow,
-                            isOwnMessage ? styles.aiArrowRight : styles.aiArrowLeft
-                        ]} />
+                        <View style={[styles.aiPopupArrow, isOwnMessage ? styles.aiArrowRight : styles.aiArrowLeft]} />
                     </View>
                 )}
-
-                <Text style={[
-                    styles.timestamp,
-                    isOwnMessage ? styles.ownTimestamp : styles.otherTimestamp
-                ]}>
-                    {new Date(item.timestamp).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}
-                </Text>
             </View>
         );
     };
