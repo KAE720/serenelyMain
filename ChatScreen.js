@@ -340,42 +340,28 @@ export default function ChatScreen({ chatPartner, currentUser, onBack, conversat
                     isOwnMessage ? styles.ownBubble : styles.otherBubble,
                     { backgroundColor: toneColor }
                 ]}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        {/* Timestamp on opposite side of AI button */}
-                        {isOwnMessage ? (
-                            <Text style={[styles.timestamp, styles.timestampLeft]}>
-                                {item.timestamp && item.timestamp.seconds
-                                    ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                    : '...'}
-                            </Text>
-                        ) : null}
-                        <Text style={styles.messageText}>
-                            {item.text}
+                    <Text style={styles.messageText}>{item.text}</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={styles.timestampInsideBubble}>
+                            {item.timestamp && item.timestamp.seconds
+                                ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                : '...'}
                         </Text>
-                        <View style={styles.aiButtonContainer}>
-                            <TouchableOpacity
-                                style={[styles.aiButton, showingExplanation && styles.aiButtonActive]}
-                                onPress={async () => {
-                                    if (showingExplanation) {
-                                        setAiExplanation(null);
-                                    } else {
-                                        setAiExplanation({
-                                            messageId: item.id,
-                                            explanation: getToneExplanation(item)
-                                        });
-                                    }
-                                }}
-                            >
-                                <Text style={styles.aiIconText}>AI</Text>
-                            </TouchableOpacity>
-                        </View>
-                        {!isOwnMessage ? (
-                            <Text style={[styles.timestamp, styles.timestampRight]}>
-                                {item.timestamp && item.timestamp.seconds
-                                    ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                    : '...'}
-                            </Text>
-                        ) : null}
+                        <TouchableOpacity
+                            style={styles.aiButton}
+                            onPress={async () => {
+                                if (showingExplanation) {
+                                    setAiExplanation(null);
+                                } else {
+                                    setAiExplanation({
+                                        messageId: item.id,
+                                        explanation: getToneExplanation(item)
+                                    });
+                                }
+                            }}
+                        >
+                            <Text style={styles.aiIconText}>AI</Text>
+                        </TouchableOpacity>
                     </View>
                     {/* AI explanation popup */}
                     {showingExplanation && (
@@ -800,7 +786,7 @@ const styles = StyleSheet.create({
     },
     messageContainer: {
         marginVertical: 2,
-        maxWidth: "65%",
+        maxWidth: "90%", // Increased from 65% for wider bubbles
     },
     ownMessageContainer: {
         alignSelf: "flex-end",
@@ -812,206 +798,66 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     messageBubble: {
-        padding: 8,
-        borderRadius: 16,
-        marginBottom: 2,
-        minWidth: 60,
-        maxWidth: "100%",
+        paddingVertical: 14,
+        paddingHorizontal: 18,
+        borderRadius: 22,
+        marginBottom: 8,
+        minWidth: 120,
+        maxWidth: '90%',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        position: 'relative',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.08,
         shadowRadius: 2,
         elevation: 2,
     },
     ownBubble: {
-        borderBottomRightRadius: 6,
         alignSelf: 'flex-end',
+        borderBottomRightRadius: 8,
     },
     otherBubble: {
-        borderBottomLeftRadius: 6,
         alignSelf: 'flex-start',
+        borderBottomLeftRadius: 8,
+        borderWidth: 0.5,
+        borderColor: '#eee',
     },
     messageText: {
-        fontSize: 14,
-        lineHeight: 18,
-        fontWeight: '500',
-        color: '#FFFFFF',
+        fontSize: 16,
+        lineHeight: 22,
+        color: '#fff', // Always white text
         fontFamily: 'SF Pro Text',
-        textShadowColor: 'rgba(0, 0, 0, 0.3)',
-        textShadowOffset: { width: 0, height: 0.5 },
-        textShadowRadius: 1,
-    },
-    aiButtonContainer: {
-        alignItems: "flex-end",
-        marginTop: 2,
+        marginBottom: 6,
     },
     aiButton: {
-        paddingHorizontal: 6,
+        alignSelf: 'flex-end',
+        marginTop: 2,
+        marginLeft: 8,
+        paddingHorizontal: 8,
         paddingVertical: 2,
         borderRadius: 10,
-        backgroundColor: "rgba(255,255,255,0.2)",
-        alignSelf: 'flex-end',
-        marginTop: 2,
-        minWidth: 28,
+        backgroundColor: "#e5e5e5",
+        minWidth: 32,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    aiIcon: {
-        width: 20,
-        height: 20,
-        position: 'relative',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    aiCentralNode: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: '#fff',
-        position: 'absolute',
-        zIndex: 3,
-    },
-    aiConnectionTop: {
-        position: 'absolute',
-        top: 2,
-        left: 9,
-        width: 1,
-        height: 6,
-        backgroundColor: 'rgba(255,255,255,0.6)',
-        zIndex: 1,
-    },
-    aiConnectionBottom: {
-        position: 'absolute',
-        bottom: 2,
-        left: 9,
-        width: 1,
-        height: 6,
-        backgroundColor: 'rgba(255,255,255,0.6)',
-        zIndex: 1,
-    },
-    aiConnectionLeft: {
-        position: 'absolute',
-        top: 9,
-        left: 2,
-        width: 6,
-        height: 1,
-        backgroundColor: 'rgba(255,255,255,0.6)',
-        zIndex: 1,
-    },
-    aiConnectionRight: {
-        position: 'absolute',
-        top: 9,
-        right: 2,
-        width: 6,
-        height: 1,
-        backgroundColor: 'rgba(255,255,255,0.6)',
-        zIndex: 1,
-    },
-    aiOuterNode: {
-        width: 3,
-        height: 3,
-        borderRadius: 1.5,
-        backgroundColor: 'rgba(255,255,255,0.8)',
-        position: 'absolute',
-        zIndex: 2,
-    },
-    aiNodeTop: {
-        top: 1,
-        left: 8,
-    },
-    aiNodeBottom: {
-        bottom: 1,
-        left: 8,
-    },
-    aiNodeLeft: {
-        top: 8,
-        left: 1,
-    },
-    aiNodeRight: {
-        top: 8,
-        right: 1,
-    },
-    aiButtonActive: {
-        backgroundColor: "rgba(255,255,255,0.35)",
-        borderColor: "rgba(255,255,255,0.5)",
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-    },
-    aiExplanationPopup: {
-        backgroundColor: '#2C2C2C',
-        borderRadius: 16,
-        padding: 14,
-        marginTop: 10,
-        maxWidth: '82%',
-        borderWidth: 0.5,
-        borderColor: '#555',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
-        shadowRadius: 6,
-        elevation: 8,
-        position: 'relative',
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.1)',
-    },
-    aiPopupLeft: {
-        alignSelf: 'flex-start',
-        marginLeft: 8,
-    },
-    aiPopupRight: {
-        alignSelf: 'flex-end',
-        marginRight: 8,
-    },
-    aiExplanationText: {
-        color: '#E8E8E8',
+    aiIconText: {
         fontSize: 13,
-        lineHeight: 19,
-        fontWeight: '400',
-        fontFamily: 'SF Pro Text',
-    },
-    emotionWord: {
+        color: '#888',
         fontWeight: 'bold',
-        fontSize: 14,
-        fontFamily: 'SF Pro Text',
-    },
-    aiPopupArrow: {
-        position: 'absolute',
-        top: -7,
-        width: 0,
-        height: 0,
-        borderLeftWidth: 7,
-        borderRightWidth: 7,
-        borderBottomWidth: 7,
-        borderLeftColor: 'transparent',
-        borderRightColor: 'transparent',
-        borderBottomColor: '#2C2C2C',
-    },
-    aiArrowLeft: {
-        left: 16,
-    },
-    aiArrowRight: {
-        right: 16,
-    },
-    timestamp: {
-        fontSize: 12,
-        color: "#666",
-        marginTop: 2,
-        fontFamily: 'SF Pro Text',
     },
     timestampInsideBubble: {
-        position: 'absolute',
-        bottom: 6,
         fontSize: 12,
-        color: '#eee',
-        opacity: 0.8,
-    },
-    timestampLeft: {
-        left: 10,
-        textAlign: 'left',
-    },
-    timestampRight: {
-        right: 10,
-        textAlign: 'right',
+        color: '#F5F5F5', // Brighter for legibility
+        alignSelf: 'flex-end',
+        marginTop: 2,
+        marginLeft: 8,
+        textShadowColor: 'rgba(0,0,0,0.25)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 1,
+        fontWeight: '600',
+        letterSpacing: 0.2,
     },
     inputContainer: {
         backgroundColor: "#1E1E1E",
@@ -1048,12 +894,6 @@ const styles = StyleSheet.create({
     sendButtonText: {
         color: "#fff",
         fontWeight: "600",
-        fontFamily: 'SF Pro Text',
-    },
-    aiIconText: {
-        color: '#fff',
-        fontSize: 11,
-        fontWeight: '600',
         fontFamily: 'SF Pro Text',
     },
     aiEmotionText: {

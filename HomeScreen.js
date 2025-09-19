@@ -1,3 +1,4 @@
+// HomeScreen.js
 import React, { useState } from "react";
 import {
     View,
@@ -17,12 +18,16 @@ import { MessageIcon, CallsIcon, ContactsIcon, SereneIcon } from './components/T
 
 export default function HomeScreen({ userId, onLogout, user }) {
     const [showProfile, setShowProfile] = useState(false);
+
+    const [showLLMTest, setShowLLMTest] = useState(false);
     const [activeTab, setActiveTab] = useState('Messages');
     const [currentScreen, setCurrentScreen] = useState('main'); // 'main' or 'chat'
     const [selectedChat, setSelectedChat] = useState(null);
+    const [selectedContact, setSelectedContact] = useState(null);
 
-    const navigateToChat = (chatPartner, conversationId) => {
-        setSelectedChat({ ...chatPartner, conversationId });
+    // Navigation functions
+    const navigateToChat = (chatPartner) => {
+        setSelectedChat(chatPartner);
         setCurrentScreen('chat');
     };
 
@@ -31,16 +36,23 @@ export default function HomeScreen({ userId, onLogout, user }) {
         setSelectedChat(null);
     };
 
+    // If showing profile, render ProfileScreen
     if (showProfile) {
         return (
             <ProfileScreen
                 user={user}
                 onBack={() => setShowProfile(false)}
                 onLogout={onLogout}
+
+                onOpenLLMTest={() => {
+                    setShowProfile(false);
+                    setShowLLMTest(true);
+                }}
             />
         );
     }
 
+    // If showing chat, render ChatScreen
     if (currentScreen === 'chat' && selectedChat) {
         return (
             <ChatScreen
@@ -52,25 +64,38 @@ export default function HomeScreen({ userId, onLogout, user }) {
         );
     }
 
+    // Render content based on active tab
     const renderTabContent = () => {
         switch (activeTab) {
             case 'Messages':
-                return <MessagesScreen onNavigateToChat={navigateToChat} currentUser={user} />;
+                return <MessagesScreen onNavigateToChat={(chatPartner, conversationId) => {
+                    setSelectedChat({ ...chatPartner, conversationId });
+                    setCurrentScreen('chat');
+                }} currentUser={user} />;
             case 'Calls':
                 return <CallsScreen />;
             case 'Contacts':
-                return <ContactsScreen onSelectContact={navigateToChat} />;
+                return <ContactsScreen onSelectContact={(chatPartner, conversationId) => {
+                    setSelectedChat({ ...chatPartner, conversationId });
+                    setCurrentScreen('chat');
+                }} />;
             case 'AI Shrink':
                 return <SereneAIScreen currentUser={user} />;
             default:
-                return <MessagesScreen onNavigateToChat={navigateToChat} currentUser={user} />;
+                return <MessagesScreen onNavigateToChat={(chatPartner, conversationId) => {
+                    setSelectedChat({ ...chatPartner, conversationId });
+                    setCurrentScreen('chat');
+                }} currentUser={user} />;
         }
     };
 
     return (
         <View style={styles.container}>
+            {/* 🔵 Top Tab */}
             <View style={styles.topBar}>
                 <Text style={styles.topBarText}>{activeTab}</Text>
+
+                {/* Profile icon */}
                 <TouchableOpacity
                     style={styles.profileIconContainer}
                     onPress={() => setShowProfile(true)}
@@ -85,9 +110,13 @@ export default function HomeScreen({ userId, onLogout, user }) {
                     />
                 </TouchableOpacity>
             </View>
+
+            {/* Tab Content */}
             <View style={styles.content}>
                 {renderTabContent()}
             </View>
+
+            {/* Bottom Tab Navigation */}
             <View style={styles.bottomTabs}>
                 <TouchableOpacity
                     style={[styles.tab, activeTab === 'Messages' && styles.activeTab]}
@@ -133,16 +162,11 @@ export default function HomeScreen({ userId, onLogout, user }) {
 
 
 
-
-
-
-
-
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#121212" },
     topBar: {
         backgroundColor: "#7B2CBF",
-        paddingTop: 50,
+        paddingTop: 50, // offset for notch / status bar
         paddingBottom: 15,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -198,3 +222,7 @@ const styles = StyleSheet.create({
         color: '#7B2CBF',
     },
 });
+
+// Note for MVP integration: ContactsScreen and ChatScreen now provide real messaging between users.
+// If you want to keep SereneAI and other tabs, you can show ContactsScreen/ChatScreen in a modal or as a separate tab.
+// For MVP, this replaces the main screen with contacts and chat.

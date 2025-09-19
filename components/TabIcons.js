@@ -52,6 +52,7 @@ export const CallsIcon = ({ active, size = 24 }) => (
         width: size,
         height: size,
         alignItems: 'center',
+        backgroundColor: '#00FF00',
         justifyContent: 'center'
     }}>
         {/* Modern smartphone body */}
@@ -61,7 +62,7 @@ export const CallsIcon = ({ active, size = 24 }) => (
             borderWidth: 2,
             borderColor: active ? '#7B2CBF' : '#aaa',
             borderRadius: size * 0.08,
-            backgroundColor: 'transparent',
+            backgroundColor: '#00FF00',
             position: 'relative',
         }}>
             {/* Screen */}
