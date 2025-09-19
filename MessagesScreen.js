@@ -19,7 +19,7 @@ import {
     getDoc,
 } from "./firebase";
 
-export default function MessagesScreen({ navigation, onNavigateToChat, currentUser }) {
+export default function MessagesScreen({ navigation }) {
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -72,11 +72,7 @@ export default function MessagesScreen({ navigation, onNavigateToChat, currentUs
             id: conversation.partnerId,
             name: conversation.partnerName,
         };
-        if (onNavigateToChat) {
-            onNavigateToChat(chatPartner, conversation.id);
-        } else if (navigation) {
-            navigation.navigate("Chat", { chatPartner: chatPartner, conversationId: conversation.id });
-        }
+        navigation.navigate("Chat", { chatPartner: chatPartner, conversationId: conversation.id });
     };
 
     const renderConversation = ({ item }) => (

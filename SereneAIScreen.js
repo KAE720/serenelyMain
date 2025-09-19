@@ -16,6 +16,7 @@ import {
 import { queryLocalLLM } from "./localLLMService";
 
 export default function SereneAIScreen({ currentUser }) {
+
     const [messages, setMessages] = useState([
         {
             id: "ai-0",
